@@ -20,6 +20,9 @@
 		],
 		"client": [
 			"io.github.firstone.framework.client.FirstOneFrameworkClient"
+		],
+		"modmenu": [
+			"io.github.firstone.framework.client.ModMenuApiImpl"
 		]
 	},
 	"mixins": [
