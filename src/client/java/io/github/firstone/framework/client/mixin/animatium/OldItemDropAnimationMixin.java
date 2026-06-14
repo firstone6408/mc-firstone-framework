@@ -31,6 +31,9 @@ public class OldItemDropAnimationMixin {
     @Unique
     private boolean animatium$droppingItem = false;
 
+    @Unique
+    private boolean animatium$droppingLastItem = false;
+
     /**
      * ตั้ง Flag ก่อนทิ้ง Item เพื่อให้ swing() รู้ว่ากำลัง drop อยู่
      *
@@ -39,9 +42,15 @@ public class OldItemDropAnimationMixin {
      */
     @Inject(method = "drop(Z)Z", at = @At("HEAD"))
     private void beforeDrop(boolean fullStack, CallbackInfoReturnable<Boolean> cir) {
-        if (AnimatiumFeature.getConfig().oldItemDropAnimation) {
-            animatium$droppingItem = true;
+        if (!AnimatiumFeature.getConfig().oldItemDropAnimation) {
+            return;
         }
+
+        LocalPlayer player = (LocalPlayer)(Object)this;
+
+        animatium$droppingItem = true;
+        animatium$droppingLastItem =
+                player.getMainHandItem().getCount() == 1;
     }
 
     /**
@@ -67,7 +76,7 @@ public class OldItemDropAnimationMixin {
      */
     @Inject(method = "swing(Lnet/minecraft/world/InteractionHand;)V", at = @At("HEAD"), cancellable = true)
     private void onSwing(InteractionHand hand, CallbackInfo ci) {
-        if (animatium$droppingItem) {
+        if (animatium$droppingItem && !animatium$droppingLastItem) {
             ci.cancel();
         }
     }
