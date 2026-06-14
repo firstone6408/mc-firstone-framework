@@ -15,7 +15,7 @@ import java.nio.file.Path;
 /**
  * จัดการการบันทึกและโหลด Config ของแต่ละ Feature จากไฟล์ JSON
  *
- * <p>Config ทุกไฟล์จะถูกเก็บไว้ใน config/ directory ของ Minecraft
+ * <p>Config ทุกไฟล์จะถูกเก็บไว้ใน {@code config/firstone-framework/} directory ของ Minecraft
  * โดยใช้ Gson ในการแปลง Object เป็น JSON และในทางกลับกัน</p>
  *
  * <p>วิธีใช้งาน:</p>
@@ -32,6 +32,9 @@ public final class ConfigManager {
     private static final Logger LOGGER = LoggerFactory.getLogger("firstone-framework");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+    /** โฟลเดอร์ย่อยภายใน config/ ที่ใช้เก็บ Config ทั้งหมดของ mod นี้ */
+    private static final String CONFIG_FOLDER = "firstone-framework";
+
     private ConfigManager() {}
 
     /**
@@ -47,7 +50,7 @@ public final class ConfigManager {
      * @return Config ที่โหลดจากไฟล์ หรือค่า default หากโหลดไม่สำเร็จ
      */
     public static <T> T load(String filename, Class<T> type, T defaultValue) {
-        Path configPath = FabricLoader.getInstance().getConfigDir().resolve(filename);
+        Path configPath = resolveConfigPath(filename);
 
         if (Files.exists(configPath)) {
             try (Reader reader = Files.newBufferedReader(configPath)) {
@@ -74,12 +77,28 @@ public final class ConfigManager {
      * @param config   Object Config ที่ต้องการบันทึก
      */
     public static void save(String filename, Object config) {
-        Path configPath = FabricLoader.getInstance().getConfigDir().resolve(filename);
+        Path configPath = resolveConfigPath(filename);
 
         try (Writer writer = Files.newBufferedWriter(configPath)) {
             GSON.toJson(config, writer);
         } catch (IOException e) {
             LOGGER.error("Failed to save config file {}: {}", filename, e.getMessage());
         }
+    }
+
+    /**
+     * คืน Path เต็มของไฟล์ Config และสร้าง folder {@code firstone-framework/} หากยังไม่มี
+     *
+     * @param filename ชื่อไฟล์ Config เช่น "animatium.json"
+     * @return Path ของไฟล์ที่อยู่ใน {@code config/firstone-framework/}
+     */
+    private static Path resolveConfigPath(String filename) {
+        Path folder = FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FOLDER);
+        try {
+            Files.createDirectories(folder);
+        } catch (IOException e) {
+            LOGGER.error("Failed to create config directory {}: {}", folder, e.getMessage());
+        }
+        return folder.resolve(filename);
     }
 }

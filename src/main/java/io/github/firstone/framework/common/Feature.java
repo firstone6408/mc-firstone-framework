@@ -21,6 +21,29 @@ public interface Feature {
     String getId();
 
     /**
+     * คืนชื่อที่แสดงใน GUI ของ Feature นี้
+     *
+     * <p>ใช้แสดงบนปุ่มใน {@link io.github.firstone.framework.client.screen.MainConfigScreen}
+     * หาก Feature ไม่ override จะใช้ ID แทน</p>
+     *
+     * @return ชื่อสำหรับแสดงผล เช่น "Animatium" หรือ "Falling Tree"
+     */
+    default String getDisplayName() {
+        return getId();
+    }
+
+    /**
+     * คืนคำอธิบายสั้นๆ ของ Feature นี้ สำหรับแสดงเมื่อ hover บนปุ่ม
+     *
+     * <p>หาก Feature ไม่ override จะไม่มี tooltip แสดง</p>
+     *
+     * @return คำอธิบาย หรือ {@code null} หากไม่ต้องการ tooltip
+     */
+    default String getDescription() {
+        return null;
+    }
+
+    /**
      * เริ่มต้น Feature สำหรับทั้ง client และ server (common logic)
      *
      * <p>เมธอดนี้ถูกเรียกจาก {@code ModInitializer} ระหว่างการโหลด Mod

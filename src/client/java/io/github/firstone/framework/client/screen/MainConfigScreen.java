@@ -1,9 +1,11 @@
 package io.github.firstone.framework.client.screen;
 
+import io.github.firstone.framework.client.FeatureScreenRegistry;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.FeatureRegistry;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -53,10 +55,17 @@ public class MainConfigScreen extends Screen {
             Feature feature = features.get(i);
             int buttonY = startY + (i * BUTTON_SPACING);
 
-            this.addRenderableWidget(Button.builder(
-                Component.literal(feature.getId()),
+            Button.Builder builder = Button.builder(
+                Component.literal(feature.getDisplayName()),
                 btn -> onFeatureButtonClick(feature)
-            ).pos((this.width - BUTTON_WIDTH) / 2, buttonY).size(BUTTON_WIDTH, BUTTON_HEIGHT).build());
+            ).pos((this.width - BUTTON_WIDTH) / 2, buttonY).size(BUTTON_WIDTH, BUTTON_HEIGHT);
+
+            String description = feature.getDescription();
+            if (description != null) {
+                builder.tooltip(Tooltip.create(Component.literal(description)));
+            }
+
+            this.addRenderableWidget(builder.build());
         }
 
         this.addRenderableWidget(Button.builder(
@@ -73,7 +82,12 @@ public class MainConfigScreen extends Screen {
      *
      * @param feature Feature ที่ถูกเลือก
      */
-    protected void onFeatureButtonClick(Feature feature) {}
+    protected void onFeatureButtonClick(Feature feature) {
+        Screen configScreen = FeatureScreenRegistry.createScreen(feature.getId(), this);
+        if (configScreen != null) {
+            this.minecraft.setScreen(configScreen);
+        }
+    }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
