@@ -45,11 +45,11 @@ public class NoReequipAnimationMixin {
     /** Main-hand height of the previous frame, used for interpolation */
     @Shadow private float oMainHandHeight;
 
-    /** Off-hand height */
-    @Shadow private float offHandHeight;
+    /** Off-hand height (shadow currently disabled) */
+    // @Shadow private float offHandHeight;
 
-    /** Off-hand height of the previous frame */
-    @Shadow private float oOffHandHeight;
+    /** Off-hand height of the previous frame (shadow currently disabled) */
+    // @Shadow private float oOffHandHeight;
 
     /** Item the renderer was rendering before tick runs, used to detect justSwitched */
     @Unique private ItemStack animatium$prevMainHandItem = ItemStack.EMPTY;
@@ -132,7 +132,7 @@ public class NoReequipAnimationMixin {
             oMainHandHeight = 1.0f;
         }
 
-        offHandHeight = 1.0f;
-        oOffHandHeight = 1.0f;
+        // offHandHeight = 1.0f;
+        // oOffHandHeight = 1.0f;
     }
 }
