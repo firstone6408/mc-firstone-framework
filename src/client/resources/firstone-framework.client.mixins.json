@@ -5,7 +5,9 @@
 	"client": [
 		"animatium.NoReequipAnimationMixin",
 		"animatium.OldSneakAnimationMixin",
-		"animatium.OldItemDropAnimationMixin"
+		"animatium.OldItemDropAnimationMixin",
+		"animatium.AttackSoundsMixin",
+		"animatium.AnimatiumParticleFilterMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -35,4 +35,28 @@ public class AnimatiumConfig {
      * <p>Vanilla behavior: the arm swings when an item is dropped</p>
      */
     public boolean oldItemDropAnimation = true;
+
+    /**
+     * Hides the sweep attack effect, like versions before 1.9
+     *
+     * <p>When enabled: sweep attacks show no sweep particle and play no PLAYER_ATTACK_SWEEP sound</p>
+     * <p>Vanilla behavior: sweep attacks show a sweep particle animation and play a special sound</p>
+     */
+    public boolean noSweepEffect = true;
+
+    /**
+     * Hides the damage indicator particle, like versions before 1.9
+     *
+     * <p>When enabled: attacks show no particles indicating the amount of damage</p>
+     * <p>Vanilla behavior: small particles float up after a successful hit</p>
+     */
+    public boolean noDamageIndicatorParticle = true;
+
+    /**
+     * Mutes attack sounds, like versions before 1.9
+     *
+     * <p>When enabled: attacks play no CRIT, STRONG, WEAK, NODAMAGE or KNOCKBACK sounds</p>
+     * <p>Vanilla behavior: attacks play different sounds depending on the result of the attack</p>
+     */
+    public boolean noAttackSounds = true;
 }

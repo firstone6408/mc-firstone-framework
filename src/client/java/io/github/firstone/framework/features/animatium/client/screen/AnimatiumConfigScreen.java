@@ -11,8 +11,15 @@ import net.minecraft.network.chat.Component;
 /**
  * Settings screen of the Animatium feature
  *
- * <p>Shows an on/off button for each legacy animation:
- * No Re-equip Animation, Old Sneak Animation, Old Item Drop Animation</p>
+ * <p>Shows an on/off button for each legacy animation and combat feature:</p>
+ * <ul>
+ *   <li>No Re-equip Animation</li>
+ *   <li>Old Sneak Animation</li>
+ *   <li>Old Item Drop Animation</li>
+ *   <li>No Sweep Effect (Particle + Sound)</li>
+ *   <li>No Damage Indicator Particle</li>
+ *   <li>No Attack Sounds</li>
+ * </ul>
  *
  * <p>Changes are saved to the file immediately when a button is pressed</p>
  */
@@ -21,16 +28,11 @@ public class AnimatiumConfigScreen extends Screen {
     private static final int TITLE_Y = 15;
     private static final int BUTTON_WIDTH = 260;
     private static final int BUTTON_HEIGHT = 20;
-    private static final int BUTTON_SPACING = 26;
+    private static final int BUTTON_SPACING = 24;
     private static final int DONE_BUTTON_WIDTH = 100;
 
     /** Previous screen, returned to when this screen is closed */
     private final Screen parent;
-
-    /** Buttons of each option (assigned in init(); labels are updated through the click handler's own button) */
-    private Button noReequipButton;
-    private Button oldSneakButton;
-    private Button oldDropButton;
 
     /**
      * Creates the Animatium settings screen
@@ -47,9 +49,10 @@ public class AnimatiumConfigScreen extends Screen {
         AnimatiumConfig config = AnimatiumFeature.getConfig();
 
         int centerX = (this.width - BUTTON_WIDTH) / 2;
-        int startY = (this.height / 2) - (BUTTON_SPACING + BUTTON_SPACING / 2);
+        // center the 6 buttons vertically on screen (5 gaps between them)
+        int startY = (this.height / 2) - (BUTTON_SPACING * 5 / 2);
 
-        noReequipButton = this.addRenderableWidget(Button.builder(
+        this.addRenderableWidget(Button.builder(
             buildToggleLabel("No Re-equip Animation", config.noReequipAnimation),
             btn -> {
                 config.noReequipAnimation = !config.noReequipAnimation;
@@ -58,7 +61,7 @@ public class AnimatiumConfigScreen extends Screen {
             }
         ).pos(centerX, startY).size(BUTTON_WIDTH, BUTTON_HEIGHT).build());
 
-        oldSneakButton = this.addRenderableWidget(Button.builder(
+        this.addRenderableWidget(Button.builder(
             buildToggleLabel("Old Sneak Animation", config.oldSneakAnimation),
             btn -> {
                 config.oldSneakAnimation = !config.oldSneakAnimation;
@@ -67,7 +70,7 @@ public class AnimatiumConfigScreen extends Screen {
             }
         ).pos(centerX, startY + BUTTON_SPACING).size(BUTTON_WIDTH, BUTTON_HEIGHT).build());
 
-        oldDropButton = this.addRenderableWidget(Button.builder(
+        this.addRenderableWidget(Button.builder(
             buildToggleLabel("Old Item Drop Animation", config.oldItemDropAnimation),
             btn -> {
                 config.oldItemDropAnimation = !config.oldItemDropAnimation;
@@ -77,9 +80,36 @@ public class AnimatiumConfigScreen extends Screen {
         ).pos(centerX, startY + BUTTON_SPACING * 2).size(BUTTON_WIDTH, BUTTON_HEIGHT).build());
 
         this.addRenderableWidget(Button.builder(
+            buildToggleLabel("No Sweep Effect", config.noSweepEffect),
+            btn -> {
+                config.noSweepEffect = !config.noSweepEffect;
+                btn.setMessage(buildToggleLabel("No Sweep Effect", config.noSweepEffect));
+                AnimatiumFeature.saveConfig();
+            }
+        ).pos(centerX, startY + BUTTON_SPACING * 3).size(BUTTON_WIDTH, BUTTON_HEIGHT).build());
+
+        this.addRenderableWidget(Button.builder(
+            buildToggleLabel("No Damage Indicator Particle", config.noDamageIndicatorParticle),
+            btn -> {
+                config.noDamageIndicatorParticle = !config.noDamageIndicatorParticle;
+                btn.setMessage(buildToggleLabel("No Damage Indicator Particle", config.noDamageIndicatorParticle));
+                AnimatiumFeature.saveConfig();
+            }
+        ).pos(centerX, startY + BUTTON_SPACING * 4).size(BUTTON_WIDTH, BUTTON_HEIGHT).build());
+
+        this.addRenderableWidget(Button.builder(
+            buildToggleLabel("No Attack Sounds", config.noAttackSounds),
+            btn -> {
+                config.noAttackSounds = !config.noAttackSounds;
+                btn.setMessage(buildToggleLabel("No Attack Sounds", config.noAttackSounds));
+                AnimatiumFeature.saveConfig();
+            }
+        ).pos(centerX, startY + BUTTON_SPACING * 5).size(BUTTON_WIDTH, BUTTON_HEIGHT).build());
+
+        this.addRenderableWidget(Button.builder(
             Component.literal("Done"),
             btn -> this.onClose()
-        ).pos((this.width - DONE_BUTTON_WIDTH) / 2, this.height - 30).size(DONE_BUTTON_WIDTH, BUTTON_HEIGHT).build());
+        ).pos((this.width - DONE_BUTTON_WIDTH) / 2, this.height - 28).size(DONE_BUTTON_WIDTH, BUTTON_HEIGHT).build());
     }
 
     /**
