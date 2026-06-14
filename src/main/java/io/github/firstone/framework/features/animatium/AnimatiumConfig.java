@@ -30,7 +30,8 @@ public class AnimatiumConfig {
     /**
      * Enables the old item drop animation, like versions before 1.9
      *
-     * <p>When enabled: dropping an item plays no throwing gesture; the arm stays still</p>
+     * <p>When enabled: dropping an item plays no throwing gesture; the arm stays still
+     * (except when the main-hand stack has only one item left, which keeps the swing)</p>
      * <p>Vanilla behavior: the arm swings when an item is dropped</p>
      */
     public boolean oldItemDropAnimation = true;

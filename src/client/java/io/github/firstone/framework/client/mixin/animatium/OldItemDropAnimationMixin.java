@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *
  * <p>In newer versions, pressing Q to drop an item swings the arm.
  * This mixin uses a flag to know whether an item is being dropped
- * and cancels the swing animation during that time</p>
+ * and cancels the swing animation during that time, unless the main-hand stack had only one item</p>
  *
  * <p>Targets: {@link LocalPlayer#drop(boolean)} and {@link LocalPlayer#swing(InteractionHand)}</p>
  */
@@ -31,6 +31,9 @@ public class OldItemDropAnimationMixin {
     @Unique
     private boolean animatium$droppingItem = false;
 
+    @Unique
+    private boolean animatium$droppingLastItem = false;
+
     /**
      * Sets the flag before dropping an item so swing() knows a drop is in progress
      *
@@ -39,9 +42,15 @@ public class OldItemDropAnimationMixin {
      */
     @Inject(method = "drop(Z)Z", at = @At("HEAD"))
     private void beforeDrop(boolean fullStack, CallbackInfoReturnable<Boolean> cir) {
-        if (AnimatiumFeature.getConfig().oldItemDropAnimation) {
-            animatium$droppingItem = true;
+        if (!AnimatiumFeature.getConfig().oldItemDropAnimation) {
+            return;
         }
+
+        LocalPlayer player = (LocalPlayer)(Object)this;
+
+        animatium$droppingItem = true;
+        animatium$droppingLastItem =
+                player.getMainHandItem().getCount() == 1;
     }
 
     /**
@@ -60,14 +69,15 @@ public class OldItemDropAnimationMixin {
      * Cancels the swing animation while an item is being dropped
      *
      * <p>Checks the {@code animatium$droppingItem} flag and cancels the swing
-     * to prevent the throwing gesture of newer versions</p>
+     * to prevent the throwing gesture of newer versions; the swing is kept when the
+     * main-hand stack had only one item (animatium$droppingLastItem)</p>
      *
      * @param hand the hand that would swing
      * @param ci   cancellable CallbackInfo
      */
     @Inject(method = "swing(Lnet/minecraft/world/InteractionHand;)V", at = @At("HEAD"), cancellable = true)
     private void onSwing(InteractionHand hand, CallbackInfo ci) {
-        if (animatium$droppingItem) {
+        if (animatium$droppingItem && !animatium$droppingLastItem) {
             ci.cancel();
         }
     }
