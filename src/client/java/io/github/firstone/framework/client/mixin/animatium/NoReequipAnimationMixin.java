@@ -104,9 +104,7 @@ public class NoReequipAnimationMixin {
 
         // the item really was just switched
         boolean justSwitched =
-                !animatium$prevMainHandItem.isEmpty()
-                && !currentItem.isEmpty()
-                && !ItemStack.isSameItem(animatium$prevMainHandItem, currentItem)
+                !ItemStack.isSameItem(animatium$prevMainHandItem, currentItem)
                 && itemsMatch;
 
         if (switchInProgress) {
