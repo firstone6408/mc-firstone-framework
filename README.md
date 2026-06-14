@@ -102,7 +102,7 @@ public class FallingTreeConfig {
 ### Step 5: Create the config GUI screen
 
 Create `FallingTreeConfigScreen` in `src/client/java/.../client/features/falling_tree/`
-and connect it to `MainConfigScreen` through the `onFeatureButtonClick()` method
+and register it in `FirstOneFrameworkClient` with `FeatureScreenRegistry.register()` (the factory receives the parent screen) so `MainConfigScreen` can open it
 
 ---
 
@@ -122,7 +122,7 @@ FallingTreeConfig config = ConfigManager.load(
 ConfigManager.save("falling_tree.json", config);
 ```
 
-Config files are stored in the `.minecraft/config/` directory
+Config files are stored in the `.minecraft/config/firstone-framework/` directory
 
 ---
 
@@ -150,7 +150,8 @@ public class FallingTreeConfigScreen extends Screen {
 }
 ```
 
-Then link it from `MainConfigScreen.onFeatureButtonClick()`:
+Before `FeatureScreenRegistry` existed, screens were linked manually from `MainConfigScreen.onFeatureButtonClick()` like this
+(`onFeatureButtonClick()` now opens the screen registered in `FeatureScreenRegistry` instead):
 
 ```java
 private void onFeatureButtonClick(Feature feature) {

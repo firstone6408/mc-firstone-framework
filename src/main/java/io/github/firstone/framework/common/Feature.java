@@ -21,6 +21,29 @@ public interface Feature {
     String getId();
 
     /**
+     * Returns the name of this feature shown in the GUI
+     *
+     * <p>Shown on the button in {@link io.github.firstone.framework.client.screen.MainConfigScreen}.
+     * If the feature does not override it, the ID is used instead</p>
+     *
+     * @return display name, e.g. "Animatium" or "Falling Tree"
+     */
+    default String getDisplayName() {
+        return getId();
+    }
+
+    /**
+     * Returns a short description of this feature, shown when hovering the button
+     *
+     * <p>If the feature does not override it, no tooltip is shown</p>
+     *
+     * @return the description, or {@code null} for no tooltip
+     */
+    default String getDescription() {
+        return null;
+    }
+
+    /**
      * Initializes the feature for both client and server (common logic)
      *
      * <p>Called from {@code ModInitializer} while the mod is loading.
