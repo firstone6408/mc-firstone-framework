@@ -35,7 +35,7 @@ public class AnimatiumFeature implements Feature {
 
     @Override
     public String getDescription() {
-        return "Legacy animations from Minecraft pre-1.9\nIncludes: No Re-equip, Old Sneak, Old Item Drop";
+        return "Legacy animations and combat feel from Minecraft pre-1.9\nIncludes: No Re-equip, Old Sneak, Old Item Drop, No Sweep Effect, No Damage Indicator, No Attack Sounds";
     }
 
     @Override

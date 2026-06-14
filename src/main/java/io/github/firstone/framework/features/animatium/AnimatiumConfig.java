@@ -32,4 +32,28 @@ public class AnimatiumConfig {
      * <p>พฤติกรรมเดิม: มี Animation แกว่งแขนเมื่อทิ้ง Item</p>
      */
     public boolean oldItemDropAnimation = true;
+
+    /**
+     * ซ่อน Sweep Attack Effect เหมือน version เก่าก่อน 1.9
+     *
+     * <p>เมื่อเปิดใช้งาน: การโจมตีพัดจะไม่แสดง Particle กวาด และไม่มีเสียง PLAYER_ATTACK_SWEEP</p>
+     * <p>พฤติกรรมเดิม: มี Animation Particle กวาดและเสียงพิเศษเมื่อโจมตีพัด</p>
+     */
+    public boolean noSweepEffect = true;
+
+    /**
+     * ซ่อน Damage Indicator Particle เหมือน version เก่าก่อน 1.9
+     *
+     * <p>เมื่อเปิดใช้งาน: การโจมตีจะไม่แสดง Particle แสดงปริมาณ Damage</p>
+     * <p>พฤติกรรมเดิม: มี Particle เล็กๆ ลอยขึ้นเมื่อโจมตีสำเร็จ</p>
+     */
+    public boolean noDamageIndicatorParticle = true;
+
+    /**
+     * ปิดเสียง Attack Sounds เหมือน version เก่าก่อน 1.9
+     *
+     * <p>เมื่อเปิดใช้งาน: การโจมตีจะไม่มีเสียง CRIT, STRONG, WEAK, NODAMAGE, KNOCKBACK</p>
+     * <p>พฤติกรรมเดิม: มีเสียงโจมตีหลากหลายประเภทขึ้นกับผลลัพธ์การโจมตี</p>
+     */
+    public boolean noAttackSounds = true;
 }
