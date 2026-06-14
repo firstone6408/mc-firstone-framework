@@ -3,6 +3,7 @@ package io.github.firstone.framework.client;
 import io.github.firstone.framework.FirstOneFramework;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.FeatureRegistry;
+import io.github.firstone.framework.features.animatium.client.screen.AnimatiumConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 
 /**
@@ -18,6 +19,8 @@ public class FirstOneFrameworkClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         FirstOneFramework.LOGGER.info("FirstOne Framework initializing client...");
+
+        FeatureScreenRegistry.register("animatium", AnimatiumConfigScreen::new);
 
         for (Feature feature : FeatureRegistry.getAll()) {
             feature.initializeClient();
