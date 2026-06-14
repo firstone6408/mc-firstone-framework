@@ -101,7 +101,7 @@ public class FallingTreeConfig {
 
 ### Step 5: Create the config GUI screen
 
-Create `FallingTreeConfigScreen` in `src/client/java/.../client/features/falling_tree/`
+Create `FallingTreeConfigScreen` in `src/client/java/.../features/falling_tree/client/screen/`
 and register it in `FirstOneFrameworkClient` with `FeatureScreenRegistry.register()` (the factory receives the parent screen) so `MainConfigScreen` can open it
 
 ---
