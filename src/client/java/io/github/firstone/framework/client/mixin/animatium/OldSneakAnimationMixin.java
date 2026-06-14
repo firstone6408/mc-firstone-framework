@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * because Camera lerps eyeHeight from the old value to the new one a little at a time</p>
  *
  * <p>This mixin forces {@code eyeHeight} and {@code eyeHeightOld}
- * to the target height immediately (standing eye height, 0.10 lower while crouching), so there is no transition</p>
+ * to the target height immediately (the entity's current eye height, raised by 0.25 while crouching), so there is no transition</p>
  *
  * <p>Target: {@link Camera#setup} - the method that positions the camera every frame</p>
  */
@@ -51,16 +51,17 @@ public class OldSneakAnimationMixin {
             return;
         }
 
-        float targetHeight;
+        // start from the vanilla eye height for the current pose
+        float targetHeight = entity.getEyeHeight();
 
+        // only adjust while sneaking
         if (entity.getPose() == Pose.CROUCHING) {
-            // standing height, lowered only slightly
-            targetHeight = entity.getEyeHeight(Pose.STANDING) - 0.10F;
-        } else {
-            // normal standing
-            targetHeight = entity.getEyeHeight(Pose.STANDING);
+            // vanilla crouching eye height is about 1.27
+            // raise it back by 0.25 blocks so the camera only drops slightly
+            targetHeight += 0.25F;
         }
 
+        // disable interpolation so the change is instant
         this.eyeHeight = targetHeight;
         this.eyeHeightOld = targetHeight;
     }
