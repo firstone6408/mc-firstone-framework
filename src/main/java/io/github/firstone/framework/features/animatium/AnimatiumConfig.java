@@ -5,7 +5,8 @@ package io.github.firstone.framework.features.animatium;
  *
  * <p>Every value in this class is saved to a JSON file and loaded when the game starts</p>
  *
- * <p>Every option defaults to enabled (true) so legacy animations apply right away</p>
+ * <p>Every on/off option defaults to enabled (true) so legacy animations apply right away;
+ * the FPS options default to 0 (off)</p>
  */
 public class AnimatiumConfig {
 
@@ -59,4 +60,27 @@ public class AnimatiumConfig {
      * <p>Vanilla behavior: attacks play different sounds depending on the result of the attack</p>
      */
     public boolean noAttackSounds = true;
+
+    /**
+     * FPS of the walk/limb animation cycle
+     *
+     * <p>0 = off (vanilla smooth), 1–60 = limit the FPS so it moves in steps</p>
+     * <p>Example: 20 FPS = jumps every tick, like old versions</p>
+     */
+    public int legacyWalkAnimationFps = 0;
+
+    /**
+     * FPS of head/view rotation (head turning and camera rotation)
+     *
+     * <p>0 = off (vanilla smooth), 1–60 = limit the FPS so it moves in steps</p>
+     */
+    public int legacyHeadRotationFps = 0;
+
+    /**
+     * FPS of body rotation (entity body turning)
+     *
+     * <p>0 = off (vanilla smooth), 1–60 = limit the FPS so it moves in steps</p>
+     */
+    public int legacyBodyRotationFps = 0;
+
 }
