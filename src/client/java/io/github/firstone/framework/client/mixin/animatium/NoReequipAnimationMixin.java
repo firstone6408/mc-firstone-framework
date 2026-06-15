@@ -61,6 +61,42 @@ public class NoReequipAnimationMixin {
     @Unique private float animatium$riseTimer = 0.0f;
 
     /**
+     * Checks whether two ItemStacks look "the same" visually
+     *
+     * <p>Used to decide whether the re-equip animation should be triggered:
+     * if the new item looks identical except for durability, there is no need
+     * to play the animation again</p>
+     *
+     * <p><b>Ignored:</b> durability (damage value) — a worn sword
+     * should not trigger the animation because its model/texture is unchanged</p>
+     *
+     * <p><b>Compared:</b> item type, enchantments, custom name, armor trim
+     * and every other component — because these change how the item looks</p>
+     *
+     * @param a first ItemStack
+     * @param b second ItemStack
+     * @return true if both items look the same (ignoring durability)
+     */
+    @Unique
+    private static boolean animatium$isSameVisualItem(ItemStack a, ItemStack b) {
+        // different item types
+        if (!ItemStack.isSameItem(a, b)) {
+            return false;
+        }
+
+        // copy so the real stacks are not modified
+        ItemStack copyA = a.copy();
+        ItemStack copyB = b.copy();
+
+        // ignore durability
+        copyA.setDamageValue(0);
+        copyB.setDamageValue(0);
+
+        // compare enchantments, custom name, trim, etc.
+        return ItemStack.isSameItemSameComponents(copyA, copyB);
+    }
+
+    /**
      * Records the item being rendered before tick runs
      *
      * @param ci CallbackInfo of the injection
@@ -96,15 +132,16 @@ public class NoReequipAnimationMixin {
 
         ItemStack currentItem = player.getMainHandItem();
 
-        // only compare the item type, ignore durability
-        boolean itemsMatch = ItemStack.isSameItem(this.mainHandItem, currentItem);
+        // compare enchantments, custom name, etc. but ignore durability
+        boolean itemsMatch =
+                animatium$isSameVisualItem(this.mainHandItem, currentItem);
 
         // vanilla is lowering the hand
         boolean switchInProgress = !itemsMatch;
 
         // the item really was just switched
         boolean justSwitched =
-                !ItemStack.isSameItem(animatium$prevMainHandItem, currentItem)
+                !animatium$isSameVisualItem(animatium$prevMainHandItem, currentItem)
                 && itemsMatch;
 
         if (switchInProgress) {
