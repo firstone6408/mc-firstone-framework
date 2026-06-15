@@ -4,6 +4,7 @@ import io.github.firstone.framework.FirstOneFramework;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.FeatureRegistry;
 import io.github.firstone.framework.features.animatium.client.screen.AnimatiumConfigScreen;
+import io.github.firstone.framework.features.combattweaks.client.screen.CombatTweaksConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 
 /**
@@ -21,6 +22,7 @@ public class FirstOneFrameworkClient implements ClientModInitializer {
         FirstOneFramework.LOGGER.info("FirstOne Framework initializing client...");
 
         FeatureScreenRegistry.register("animatium", AnimatiumConfigScreen::new);
+        FeatureScreenRegistry.register("combat_tweaks", CombatTweaksConfigScreen::new);
 
         for (Feature feature : FeatureRegistry.getAll()) {
             feature.initializeClient();
