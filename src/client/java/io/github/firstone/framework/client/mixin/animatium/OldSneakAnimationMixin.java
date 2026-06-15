@@ -47,7 +47,7 @@ public class OldSneakAnimationMixin {
     @Inject(method = "setup", at = @At("HEAD"))
     private void afterSetup(BlockGetter level, Entity entity, boolean thirdPerson,
                             boolean inverseView, float partialTick, CallbackInfo ci) {
-        if (!AnimatiumFeature.getConfig().oldSneakAnimation) {
+        if (entity == null || !AnimatiumFeature.getConfig().oldSneakAnimation) {
             return;
         }
 
