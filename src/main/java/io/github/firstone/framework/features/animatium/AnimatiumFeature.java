@@ -14,6 +14,7 @@ import io.github.firstone.framework.common.config.ConfigManager;
  *   <li>No Sweep Effect - hides the sweep particle and the sweep sound</li>
  *   <li>No Damage Indicator - hides the damage indicator particles</li>
  *   <li>No Attack Sounds - mutes the attack sounds</li>
+ *   <li>Walk / Head / Body Rotation FPS - limits the animation frame rate (0 = off)</li>
  * </ul>
  *
  * <p>Each setting can be toggled from Mod Menu or the config screen</p>

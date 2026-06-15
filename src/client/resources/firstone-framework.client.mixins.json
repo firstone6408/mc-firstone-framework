@@ -7,7 +7,11 @@
 		"animatium.OldSneakAnimationMixin",
 		"animatium.OldItemDropAnimationMixin",
 		"animatium.AttackSoundsMixin",
-		"animatium.AnimatiumParticleFilterMixin"
+		"animatium.AnimatiumParticleFilterMixin",
+		"animatium.LegacyWalkAnimationMixin",
+		"animatium.LegacyEntityInterpolationMixin",
+		"animatium.LegacyLivingEntityInterpolationMixin",
+		"animatium.LegacyBodyRotationMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
