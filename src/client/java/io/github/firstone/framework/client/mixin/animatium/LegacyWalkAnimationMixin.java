@@ -1,6 +1,7 @@
 package io.github.firstone.framework.client.mixin.animatium;
 
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.WalkAnimationState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -8,7 +9,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
@@ -17,39 +17,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * <h2>Modes</h2>
  * <ul>
  *   <li><b>fps = 0</b>: off — vanilla values are used as usual</li>
- *   <li><b>fps 1–20</b>: Tick-Skip Mode — stores a frozen state
- *       and only updates it every {@code 20/fps} ticks
- *       to really "skip" ticks so the animation jumps instead of updating every tick</li>
+ *   <li><b>fps 1–20</b>: Tick-Skip Mode — keeps a frozen state
+ *       and updates it when the game time reaches a new {@code 20/fps}-tick step,
+ *       checked through {@link Minecraft#level} instead of injecting into {@code update()}
+ *       to avoid mapping problems in production</li>
  *   <li><b>fps 21–60</b>: Sub-Tick Quantize Mode — Quantize {@code partialTick}
- *       into {@code fps/20} steps per tick, for high render rates</li>
+ *       into {@code fps/20} steps per tick</li>
  * </ul>
- *
- * <p>Problem with the original formula ({@code floor(partialTick × stepsPerTick) / stepsPerTick}):
- * for fps ≤ 20 it always returns 0, but {@code position} and {@code speed}
- * still update every tick (20 times/second), so it looks no different from 20 fps</p>
  *
  * <p>Target: {@link WalkAnimationState}</p>
  */
 @Mixin(WalkAnimationState.class)
 public class LegacyWalkAnimationMixin {
 
-    /** Animation cycle position, accumulated every tick */
     @Shadow private float position;
-
-    /** Current animation speed */
     @Shadow private float speed;
-
-    /** Animation speed of the previous tick */
     @Shadow private float speedOld;
 
-    /** Frozen position value, only updated when the fps step comes around */
+    /** Frozen position value */
     @Unique private float animatium$frozenPosition = 0f;
 
-    /** Frozen speed value, only updated when the fps step comes around */
+    /** Frozen speed value */
     @Unique private float animatium$frozenSpeed = 0f;
 
-    /** Number of ticks since the frozen state was last updated */
-    @Unique private int animatium$tickCounter = 0;
+    /** Last game-tick step at which the frozen state was updated */
+    @Unique private long animatium$lastStep = -1L;
 
     /**
      * Quantizes partialTick into steps, for Sub-Tick Mode (fps > 20)
@@ -65,21 +57,24 @@ public class LegacyWalkAnimationMixin {
     }
 
     /**
-     * Hooks into update(), which runs every tick, to manage the frozen state
+     * Updates the frozen state when a new fps step is reached
      *
-     * <p>For fps ≤ 20: counts ticks and only updates the frozen state every {@code 20/fps} ticks,
-     * so the animation really skips ticks</p>
+     * <p>Uses {@link Minecraft#level#getGameTime()} instead of injecting into {@code update()}
+     * because the method descriptor of {@code update} may be remapped incorrectly in production</p>
      *
-     * @param ci CallbackInfo of the injection
+     * @param fps Target FPS (1–20)
      */
-    @Inject(method = "update(FFF)V", at = @At("RETURN"))
-    private void onUpdate(CallbackInfo ci) {
-        int fps = AnimatiumFeature.getConfig().legacyWalkAnimationFps;
-        if (fps <= 0 || fps > 20) return;
+    @Unique
+    private void animatium$tryUpdateFrozen(int fps) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc == null || mc.level == null) return;
 
+        long tick = mc.level.getGameTime();
         int ticksPerStep = Math.max(1, 20 / fps);
-        if (++animatium$tickCounter >= ticksPerStep) {
-            animatium$tickCounter = 0;
+        long step = tick / ticksPerStep;
+
+        if (step != animatium$lastStep) {
+            animatium$lastStep = step;
             animatium$frozenPosition = this.position;
             animatium$frozenSpeed = this.speed;
         }
@@ -99,6 +94,7 @@ public class LegacyWalkAnimationMixin {
         int fps = AnimatiumFeature.getConfig().legacyWalkAnimationFps;
         if (fps <= 0) return;
         if (fps <= 20) {
+            animatium$tryUpdateFrozen(fps);
             cir.setReturnValue(animatium$frozenPosition - animatium$frozenSpeed);
             return;
         }
