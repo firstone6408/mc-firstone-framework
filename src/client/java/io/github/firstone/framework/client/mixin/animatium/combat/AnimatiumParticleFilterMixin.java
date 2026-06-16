@@ -1,4 +1,4 @@
-package io.github.firstone.framework.client.mixin.animatium;
+package io.github.firstone.framework.client.mixin.animatium.combat;
 
 import io.github.firstone.framework.features.animatium.AnimatiumConfig;
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
