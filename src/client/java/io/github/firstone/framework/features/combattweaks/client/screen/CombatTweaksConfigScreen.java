@@ -23,6 +23,10 @@ import net.minecraft.network.chat.Component;
 public class CombatTweaksConfigScreen extends Screen {
 
     private static final int TITLE_Y = 15;
+    private static final int NOTE_Y   = 28;
+    private static final int NOTE_Y2  = 37;
+    private static final int NOTE_Y3  = 46;
+    private static final float NOTE_SCALE = 0.75f;
     private static final int BUTTON_WIDTH = 260;
     private static final int BUTTON_HEIGHT = 20;
     private static final int BUTTON_SPACING = 26;
@@ -121,10 +125,28 @@ public class CombatTweaksConfigScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         graphics.drawCenteredString(this.font, this.title, this.width / 2, TITLE_Y, 0xFFFFFF);
+        drawSmallNote(graphics, Component.literal("Singleplayer only — server settings are not affected.").withStyle(ChatFormatting.YELLOW), NOTE_Y);
+        drawSmallNote(graphics, Component.literal("To change server settings, edit on the server:").withStyle(ChatFormatting.GRAY), NOTE_Y2);
+        drawSmallNote(graphics, Component.literal("config/firstone-framework/combat_tweaks.json").withStyle(ChatFormatting.GRAY), NOTE_Y3);
     }
 
     @Override
     public void onClose() {
         this.minecraft.setScreen(parent);
+    }
+
+    /**
+     * Draws small text scaled down to {@value #NOTE_SCALE}x, centered horizontally on the screen
+     *
+     * @param g    GuiGraphics
+     * @param text component to show
+     * @param y    Y position in normal screen space
+     */
+    private void drawSmallNote(GuiGraphics g, Component text, int y) {
+        g.pose().pushPose();
+        g.pose().translate(this.width / 2.0, y, 0);
+        g.pose().scale(NOTE_SCALE, NOTE_SCALE, 1.0f);
+        g.drawCenteredString(this.font, text, 0, 0, 0xFFFFFF);
+        g.pose().popPose();
     }
 }
