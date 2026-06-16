@@ -14,16 +14,6 @@ import io.github.firstone.framework.common.config.ConfigManager;
  * </ul>
  *
  * <p>Each setting can be toggled from Mod Menu or the config screen</p>
- *
- * <p><b>Important — Multiplayer limitation:</b> The in-game config screen only affects
- * the local config file on the machine it runs on. In a dedicated server environment,
- * each side loads its own JSON independently via {@link #initialize()}.
- * Combat mechanics (damage, sweep) are enforced server-side, so <b>changes made through
- * the config screen on a client have no effect on the server</b>.
- * To change the server's behavior, edit
- * {@code config/firstone-framework/combat_tweaks.json} on the server directly and restart.
- * In singleplayer the client and server share the same process, so the config screen
- * works as expected.</p>
  */
 public class CombatTweaksFeature implements Feature {
 
