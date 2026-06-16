@@ -1,4 +1,4 @@
-package io.github.firstone.framework.client.mixin.animatium;
+package io.github.firstone.framework.client.mixin.animatium.animation;
 
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
 import net.minecraft.client.Minecraft;
