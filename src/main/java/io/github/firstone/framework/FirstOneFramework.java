@@ -2,7 +2,6 @@ package io.github.firstone.framework;
 
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.FeatureRegistry;
-import io.github.firstone.framework.features.animatium.AnimatiumFeature;
 import io.github.firstone.framework.features.combattweaks.CombatTweaksFeature;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
@@ -31,7 +30,6 @@ public class FirstOneFramework implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("FirstOne Framework initializing...");
 
-        FeatureRegistry.register(new AnimatiumFeature());
         FeatureRegistry.register(new CombatTweaksFeature());
 
         List<Feature> features = FeatureRegistry.getAll();
