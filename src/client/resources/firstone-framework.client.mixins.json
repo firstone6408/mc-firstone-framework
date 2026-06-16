@@ -11,7 +11,8 @@
 		"animatium.animation.LegacyLivingEntityInterpolationMixin",
 		"animatium.animation.LegacyBodyRotationMixin",
 		"animatium.combat.AttackSoundsMixin",
-		"animatium.combat.AnimatiumParticleFilterMixin"
+		"animatium.combat.AnimatiumParticleFilterMixin",
+		"appearance.WindowTitleMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

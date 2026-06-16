@@ -20,7 +20,7 @@ import java.util.List;
  *   <li><b>Window Title</b> — type a title, or leave it empty to use the default</li>
  * </ul>
  *
- * <p>Icon changes apply immediately; title changes are applied automatically every tick</p>
+ * <p>Icon and title changes both apply immediately</p>
  */
 public class AppearanceConfigScreen extends Screen {
 
@@ -79,6 +79,7 @@ public class AppearanceConfigScreen extends Screen {
         titleInput.setResponder(value -> {
             config.windowTitle = value;
             AppearanceFeature.saveConfig();
+            minecraft.getWindow().setTitle(value);
         });
         addRenderableWidget(titleInput);
 

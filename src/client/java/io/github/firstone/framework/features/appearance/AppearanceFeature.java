@@ -4,7 +4,6 @@ import io.github.firstone.framework.FirstOneFramework;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.config.ConfigManager;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.platform.Window;
@@ -30,10 +29,10 @@ import java.util.stream.Stream;
  * and is registered from {@link io.github.firstone.framework.client.FirstOneFrameworkClient}
  * instead of {@link io.github.firstone.framework.FirstOneFramework}</p>
  *
- * <p>Uses no mixin — uses Fabric events instead:</p>
+ * <p>Uses a Fabric event and a mixin:</p>
  * <ul>
  *   <li>{@code CLIENT_STARTED} — sets the game icon once the window is ready</li>
- *   <li>{@code END_CLIENT_TICK} — overrides the window title every tick</li>
+ *   <li>{@code WindowTitleMixin} — replaces the window title whenever Minecraft calls {@code Window.setTitle()}</li>
  * </ul>
  *
  * <p>Put icons (PNG) in {@code config/firstone-framework/appearance/icons/}
@@ -65,8 +64,8 @@ public class AppearanceFeature implements Feature {
     /**
      * Initializes the Appearance feature on the client
      *
-     * <p>Loads the config, creates the icons folder and registers the Fabric events
-     * for the icon and the window title</p>
+     * <p>Loads the config, creates the icons folder and registers the Fabric event
+     * that applies the icon (the window title is handled by {@code WindowTitleMixin})</p>
      */
     @Override
     public void initializeClient() {
@@ -79,13 +78,6 @@ public class AppearanceFeature implements Feature {
         }
 
         ClientLifecycleEvents.CLIENT_STARTED.register(AppearanceFeature::applyIcon);
-
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            String title = config.windowTitle;
-            if (!title.isEmpty()) {
-                client.getWindow().setTitle(title);
-            }
-        });
     }
 
     /**
