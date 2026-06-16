@@ -64,8 +64,7 @@ public interface Feature {
     /**
      * Initializes the feature's server-side logic
      *
-     * <p>Called right after {@link #initialize()} from {@code ModInitializer.onInitialize()},
-     * so it currently runs on both the client and the dedicated server.
+     * <p>Called after {@link #initialize()} on the dedicated server only.
      * Suitable for commands, persistent data or server-only logic</p>
      */
     default void initializeServer() {}

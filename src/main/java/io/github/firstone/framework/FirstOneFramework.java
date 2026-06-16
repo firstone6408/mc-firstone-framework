@@ -14,7 +14,7 @@ import java.util.List;
  * Main entrypoint of FirstOne Framework
  *
  * <p>Responsible for initializing the framework and calling {@link Feature#initialize()}
- * together with {@link Feature#initializeServer()} for every registered feature</p>
+ * for every registered feature; runs on both client and server</p>
  *
  * <p>Features are registered by calling {@code FeatureRegistry.register()} in
  * {@link #onInitialize()} before the initialization loop runs</p>
@@ -37,7 +37,6 @@ public class FirstOneFramework implements ModInitializer {
         List<Feature> features = FeatureRegistry.getAll();
         for (Feature feature : features) {
             feature.initialize();
-            feature.initializeServer();
             LOGGER.info("Initialized feature: {}", feature.getId());
         }
 
