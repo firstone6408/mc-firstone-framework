@@ -6,7 +6,10 @@ import io.github.firstone.framework.common.config.ConfigManager;
 /**
  * Main feature class of Animatium - legacy animations like versions before 1.9
  *
- * <p>This feature works on the client only. It includes:</p>
+ * <p>This feature works on the client only. The config is loaded in {@link #initializeClient()}
+ * because every mixin is in client.mixins.json and there is no server-side behavior</p>
+ *
+ * <p>Includes:</p>
  * <ul>
  *   <li>No Re-equip Animation - no hand dip after attacks or when the held item only changes durability</li>
  *   <li>Old Sneak Animation - the camera moves instantly when pressing Shift</li>
@@ -43,7 +46,10 @@ public class AnimatiumFeature implements Feature {
     }
 
     @Override
-    public void initialize() {
+    public void initialize() {}
+
+    @Override
+    public void initializeClient() {
         config = ConfigManager.load(CONFIG_FILE, AnimatiumConfig.class, new AnimatiumConfig());
     }
 
