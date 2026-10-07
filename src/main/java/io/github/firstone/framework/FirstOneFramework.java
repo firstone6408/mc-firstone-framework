@@ -13,10 +13,11 @@ import java.util.List;
  * Main entrypoint of FirstOne Framework
  *
  * <p>Responsible for initializing the framework and calling {@link Feature#initialize()}
- * for every registered feature; runs on both client and server</p>
+ * for every registered feature; runs in every environment (physical client and dedicated server)</p>
  *
- * <p>Features are registered by calling {@code FeatureRegistry.register()} in
- * {@link #onInitialize()} before the initialization loop runs</p>
+ * <p>Register here only features that change game logic decided by the server, by calling
+ * {@code FeatureRegistry.register()} in {@link #onInitialize()} before the initialization loop runs.
+ * Client-only features are registered in {@code FirstOneFrameworkClient} instead</p>
  */
 public class FirstOneFramework implements ModInitializer {
 

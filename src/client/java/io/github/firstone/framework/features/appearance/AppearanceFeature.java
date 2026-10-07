@@ -58,9 +58,6 @@ public class AppearanceFeature implements Feature {
         return "Customize game icon and window title (client only)";
     }
 
-    @Override
-    public void initialize() {}
-
     /**
      * Initializes the Appearance feature on the client
      *

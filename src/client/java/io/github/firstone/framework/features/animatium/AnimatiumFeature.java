@@ -46,9 +46,6 @@ public class AnimatiumFeature implements Feature {
     }
 
     @Override
-    public void initialize() {}
-
-    @Override
     public void initializeClient() {
         config = ConfigManager.load(CONFIG_FILE, AnimatiumConfig.class, new AnimatiumConfig());
     }

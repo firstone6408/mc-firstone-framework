@@ -65,7 +65,7 @@ public class FallingTreeFeature implements Feature {
     @Override
     public void initialize() {
         config = ConfigManager.load("falling_tree.json", FallingTreeConfig.class, new FallingTreeConfig());
-        // Register shared events or registries
+        // Register shared events, registries and server logic (e.g. commands)
     }
 
     @Override
@@ -74,8 +74,8 @@ public class FallingTreeFeature implements Feature {
     }
 
     @Override
-    public void initializeServer() {
-        // Register commands or server logic
+    public void initializeDedicatedServer() {
+        // Dedicated-server-only setup (not called in singleplayer)
     }
 }
 ```

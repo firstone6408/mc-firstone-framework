@@ -22,7 +22,7 @@
 			"io.github.firstone.framework.client.FirstOneFrameworkClient"
 		],
 		"server": [
-			"io.github.firstone.framework.FirstOneFrameworkServer"
+			"io.github.firstone.framework.FirstOneFrameworkDedicatedServer"
 		],
 		"modmenu": [
 			"io.github.firstone.framework.client.ModMenuApiImpl"
