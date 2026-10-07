@@ -40,3 +40,6 @@ replay_*.log
 *.jfr
 
 CLAUDE.md
+
+# local-only files (backups, notes) - never committed
+.local/
