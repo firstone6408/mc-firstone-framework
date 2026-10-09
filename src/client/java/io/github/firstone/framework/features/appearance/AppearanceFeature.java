@@ -35,6 +35,7 @@ import java.util.stream.Stream;
  * <ul>
  *   <li>{@code CLIENT_STARTED} — sets the game icon once the window is ready</li>
  *   <li>{@code WindowTitleMixin} — replaces the window title whenever Minecraft calls {@code Window.setTitle()}</li>
+ *   <li>{@code ConfirmQuitMixin} and {@link QuitConfirmation} — ask before the window's close button quits</li>
  * </ul>
  *
  * <p>Put icons (PNG) in {@code config/firstone-framework/appearance/icons/}
@@ -67,6 +68,7 @@ public class AppearanceFeature implements Feature {
         }
 
         ClientLifecycleEvents.CLIENT_STARTED.register(AppearanceFeature::applyIcon);
+        QuitConfirmation.register();
     }
 
     /**
