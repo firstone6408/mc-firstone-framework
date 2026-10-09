@@ -53,6 +53,7 @@ public class AnimatiumConfigScreen extends OptionsSubScreen {
         this.list.addBig(toggle("legacy_body_rotation", config.legacyBodyRotation, value -> config.legacyBodyRotation = value));
         this.list.addBig(toggle("legacy_sneak_pose", config.legacySneakPose, value -> config.legacySneakPose = value));
         this.list.addBig(toggle("legacy_zombie_arms", config.legacyZombieArms, value -> config.legacyZombieArms = value));
+        this.list.addBig(toggle("legacy_mob_swing", config.legacyMobSwing, value -> config.legacyMobSwing = value));
         this.list.addBig(toggle("legacy_hurt_tint", config.legacyHurtTint, value -> config.legacyHurtTint = value));
 
         addHeader("category.combat");

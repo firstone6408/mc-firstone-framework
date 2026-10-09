@@ -23,10 +23,12 @@
 	"firstone-framework.animatium.legacy_body_rotation.tooltip": "1.7.10 body turning: players and old-AI mobs turn sideways when walking backwards and can look up to 75 degrees away from their body. Other mobs use the 1.7.10 body helper. Works on any server.",
 	"firstone-framework.animatium.legacy_sneak_pose": "Legacy Sneak Pose",
 	"firstone-framework.animatium.legacy_sneak_pose.tooltip": "1.7.10 sneaking model: shown whenever shift is held (also while flying), only the legs and head move, and the model is lowered like 1.7.10.",
-	"firstone-framework.animatium.legacy_zombie_arms": "Legacy Zombie Arms",
-	"firstone-framework.animatium.legacy_zombie_arms.tooltip": "1.7.10 zombie arms: always held straight forward, with the 1.7.10 attack swing.",
+	"firstone-framework.animatium.legacy_zombie_arms": "Legacy Zombie & Skeleton Arms",
+	"firstone-framework.animatium.legacy_zombie_arms.tooltip": "1.7.10 arms: zombies and skeletons always hold their arms straight forward (skeletons point the bow forward instead of only aiming when attacking), with the 1.7.10 attack swing.",
 	"firstone-framework.animatium.legacy_mob_physics": "Legacy Mob Physics",
 	"firstone-framework.animatium.legacy_mob_physics.tooltip": "1.7.10 client physics: mobs are also moved by your client with their own velocity, so getting hit, knocked back or pushed looks jerky like 1.7.10 instead of gliding smoothly. Works on any server.",
 	"firstone-framework.animatium.legacy_hurt_tint": "Legacy Hurt Tint",
-	"firstone-framework.animatium.legacy_hurt_tint.tooltip": "1.7.10 hurt color: hurt and dying entities, armor included, get the bright 1.7.10 red (40% red at block brightness, not darkened by night). Held items and blocks stay untinted, as in 1.7.10."
+	"firstone-framework.animatium.legacy_hurt_tint.tooltip": "1.7.10 hurt color: hurt and dying entities, armor included, get the bright 1.7.10 red (40% red at block brightness, not darkened by night). Held items and blocks stay untinted, as in 1.7.10.",
+	"firstone-framework.animatium.legacy_mob_swing": "Legacy Mob Swing",
+	"firstone-framework.animatium.legacy_mob_swing.tooltip": "1.7.10 mob attacks: mobs only swing their arm when they hold an item, so an empty-handed zombie does not raise its arms when it attacks. Works on any server."
 }

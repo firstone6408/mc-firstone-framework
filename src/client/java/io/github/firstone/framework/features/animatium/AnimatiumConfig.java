@@ -58,8 +58,14 @@ public class AnimatiumConfig {
      */
     public boolean legacySneakPose = true;
 
-    /** 1.7.10 zombie arms: always held straight forward, with the 1.7.10 attack swing */
+    /**
+     * 1.7.10 zombie and skeleton arms: always held straight forward (skeletons point the bow forward, no aiming pose),
+     * with the 1.7.10 attack swing
+     */
     public boolean legacyZombieArms = true;
+
+    /** 1.7.10 mob swing: mobs only swing their arm when they hold an item (no swing for empty-handed zombies) */
+    public boolean legacyMobSwing = true;
 
     /**
      * 1.7.10 hurt tint: hurt and dying entities, armor included, get the 1.7.10 red pass (40 % red at block
