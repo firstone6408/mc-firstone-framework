@@ -32,6 +32,8 @@
 		"animatium.model.LegacyHurtTintMixin",
 		"animatium.combat.LegacyCombatParticlesMixin",
 		"animatium.combat.LegacyCombatSoundsMixin",
+		"appearance.ConfirmQuitHoverMixin",
+		"appearance.ConfirmQuitMixin",
 		"appearance.WindowTitleMixin"
 	],
 	"injectors": {

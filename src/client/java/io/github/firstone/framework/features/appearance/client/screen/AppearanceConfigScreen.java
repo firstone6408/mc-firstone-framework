@@ -18,6 +18,7 @@ import java.util.List;
  * <ul>
  *   <li><b>Game Icon</b> — cycle through the PNGs in the icons folder (or the default icon), and open that folder</li>
  *   <li><b>Window Title</b> — type a title, or leave it empty for the default</li>
+ *   <li><b>Window</b> — ask before the window's close button quits the game</li>
  * </ul>
  *
  * <p>Icon and title changes apply immediately.</p>
@@ -64,6 +65,9 @@ public class AppearanceConfigScreen extends ConfigScreen {
             config.windowTitle = value;
             this.minecraft.updateTitle();
         });
+
+        addSection("category.window");
+        addToggle("confirm_quit", config.confirmQuit, value -> config.confirmQuit = value);
     }
 
     /**
