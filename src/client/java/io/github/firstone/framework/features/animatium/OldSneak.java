@@ -31,6 +31,9 @@ public final class OldSneak {
     /** Eye offset of the current tick */
     private static float offset;
 
+    /** Player the offset belongs to; a new player (world change, respawn) starts from 0 */
+    private static LocalPlayer owner;
+
     private OldSneak() {}
 
     /**
@@ -39,6 +42,10 @@ public final class OldSneak {
      * @param player the local player
      */
     public static void tick(LocalPlayer player) {
+        if (player != owner) {
+            owner = player;
+            offset = 0.0F;
+        }
         offsetO = offset;
         if (!AnimatiumFeature.getConfig().oldSneak || player.isPassenger() || player.isSpectator() || player.isSleeping()) {
             offset = 0.0F;
@@ -81,7 +88,7 @@ public final class OldSneak {
      * @return true if the legacy eye offset should be applied
      */
     public static boolean appliesTo(Entity entity) {
-        if (!(entity instanceof LocalPlayer) || !AnimatiumFeature.getConfig().oldSneak) {
+        if (!(entity instanceof LocalPlayer) || entity != owner || !AnimatiumFeature.getConfig().oldSneak) {
             return false;
         }
         Pose pose = entity.getPose();

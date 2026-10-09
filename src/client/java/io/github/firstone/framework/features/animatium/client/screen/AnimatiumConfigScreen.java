@@ -47,6 +47,14 @@ public class AnimatiumConfigScreen extends OptionsSubScreen {
         this.list.addBig(toggle("old_item_use", config.oldItemUse, value -> config.oldItemUse = value));
         this.list.addBig(toggle("legacy_reequip", config.legacyReequip, value -> config.legacyReequip = value));
 
+        addHeader("category.entities");
+        this.list.addBig(toggle("legacy_entity_sync", config.legacyEntitySync, value -> config.legacyEntitySync = value));
+        this.list.addBig(toggle("legacy_mob_physics", config.legacyMobPhysics, value -> config.legacyMobPhysics = value));
+        this.list.addBig(toggle("legacy_body_rotation", config.legacyBodyRotation, value -> config.legacyBodyRotation = value));
+        this.list.addBig(toggle("legacy_sneak_pose", config.legacySneakPose, value -> config.legacySneakPose = value));
+        this.list.addBig(toggle("legacy_zombie_arms", config.legacyZombieArms, value -> config.legacyZombieArms = value));
+        this.list.addBig(toggle("legacy_hurt_tint", config.legacyHurtTint, value -> config.legacyHurtTint = value));
+
         addHeader("category.combat");
         this.list.addBig(toggle("no_sweep_effect", config.noSweepEffect, value -> config.noSweepEffect = value));
         this.list.addBig(toggle("no_damage_indicator", config.noDamageIndicator, value -> config.noDamageIndicator = value));

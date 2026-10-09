@@ -34,6 +34,40 @@ public class AnimatiumConfig {
      */
     public boolean oldItemUse = true;
 
+    /**
+     * 1.7.10 entity sync: other entities move in 1/32-block steps and only after moving 0.125 block or turning 5.6°,
+     * and heads turn instantly — the stepping look of 1.7.10 movement.
+     */
+    public boolean legacyEntitySync = true;
+
+    /**
+     * 1.7.10 mob physics: the client also moves server-controlled mobs with their own velocity, so knockback, sliding
+     * and pushing look jerky like 1.7.10 instead of gliding smoothly.
+     */
+    public boolean legacyMobPhysics = true;
+
+    /**
+     * 1.7.10 body rotation: players and old-AI mobs turn their body towards where they walk (sideways when walking
+     * backwards, up to 75° from the head); other mobs use the 1.7.10 body helper.
+     */
+    public boolean legacyBodyRotation = true;
+
+    /**
+     * 1.7.10 sneak pose: drawn whenever shift is held (also while flying), only the legs and head move, and the
+     * model is lowered like 1.7.10.
+     */
+    public boolean legacySneakPose = true;
+
+    /** 1.7.10 zombie arms: always held straight forward, with the 1.7.10 attack swing */
+    public boolean legacyZombieArms = true;
+
+    /**
+     * 1.7.10 hurt tint: hurt and dying entities, armor included, get the 1.7.10 red pass (40 % red at block
+     * brightness, not darkened by night) instead of the darker 1.21.1 tint
+     */
+    public boolean legacyHurtTint = true;
+
+
     /** Hides the sweep attack particle and mutes the sweep sound (added in 1.9) */
     public boolean noSweepEffect = true;
 
