@@ -3,15 +3,6 @@
 	"package": "io.github.firstone.framework.client.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"animatium.animation.NoReequipAnimationMixin",
-		"animatium.animation.OldSneakAnimationMixin",
-		"animatium.animation.OldItemDropAnimationMixin",
-		"animatium.animation.LegacyWalkAnimationMixin",
-		"animatium.animation.LegacyEntityInterpolationMixin",
-		"animatium.animation.LegacyLivingEntityInterpolationMixin",
-		"animatium.animation.LegacyBodyRotationMixin",
-		"animatium.combat.AttackSoundsMixin",
-		"animatium.combat.AnimatiumParticleFilterMixin",
 		"appearance.WindowTitleMixin"
 	],
 	"injectors": {
