@@ -2,6 +2,7 @@ package io.github.firstone.framework.common.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ public final class ConfigManager {
      * Loads a config from a JSON file
      *
      * <p>If the config file does not exist, a new file is created from the given default value.
-     * If reading the file fails with an I/O error, the error is logged and the default value is returned (and written to the file)</p>
+     * If the file cannot be read or is not valid JSON, the error is logged and the default value is returned (and written to the file)</p>
      *
      * @param <T>          config type
      * @param filename     config file name, e.g. "falling_tree.json"
@@ -58,7 +59,7 @@ public final class ConfigManager {
                 if (loaded != null) {
                     return loaded;
                 }
-            } catch (IOException e) {
+            } catch (IOException | JsonParseException e) {
                 LOGGER.error("Failed to load config file {}: {}", filename, e.getMessage());
             }
         }
