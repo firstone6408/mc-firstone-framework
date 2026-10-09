@@ -19,8 +19,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <ul>
  *   <li>{@code render} HEAD: a hurt entity gets collecting buffers, so the model, its layers and armor are copied.</li>
  *   <li>{@code render} RETURN: the red pass is drawn once over the copied geometry.</li>
- *   <li>{@code getOverlayCoords}: no longer reports "hurt", which removes the 1.21.1 overlay red (the creeper's white
- *       flash is kept).</li>
+ *   <li>{@code getOverlayCoords}: no longer reports "hurt", which removes the 1.21.1 overlay red. The creeper's white
+ *       flash is kept, except on a dying body: vanilla hides it there (the red overlay row ignores it), and its value
+ *       is frozen between two ticks, so it would flicker every frame.</li>
  * </ul>
  */
 @Mixin(LivingEntityRenderer.class)
@@ -39,6 +40,9 @@ public abstract class LegacyHurtTintMixin {
 
     @ModifyReturnValue(method = "getOverlayCoords", at = @At("RETURN"))
     private static int animatium$noVanillaHurtRed(int overlay, LivingEntity entity, float whiteness) {
-        return LegacyHurtTint.enabled() ? OverlayTexture.pack(OverlayTexture.u(whiteness), false) : overlay;
+        if (!LegacyHurtTint.enabled()) {
+            return overlay;
+        }
+        return OverlayTexture.pack(OverlayTexture.u(entity.deathTime > 0 ? 0.0F : whiteness), OverlayTexture.v(false));
     }
 }
