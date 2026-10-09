@@ -34,7 +34,7 @@
 	"firstone-framework.legacy_mechanics.title": "Legacy Mechanics - 1.7.10 Server Rules",
 	"firstone-framework.legacy_mechanics.notice": "§eSingleplayer only — a server uses its own config/firstone-framework/legacy_mechanics.json",
 	"firstone-framework.legacy_mechanics.legacy_knockback": "Legacy Knockback",
-	"firstone-framework.legacy_mechanics.legacy_knockback.tooltip": "1.7.10 knockback when hit: always pushed 0.4 up (also in the air), knockback resistance is a chance to ignore knockback, arrows push away from the shooter, and creeper/TNT explosions also knock back from the explosion.",
+	"firstone-framework.legacy_mechanics.legacy_knockback.tooltip": "1.7.10 knockback when hit: players get the full knockback (1.21 loses about half of it), always pushed 0.4 up (also in the air), knockback resistance is a chance to ignore knockback, arrows push away from the shooter, and creeper/TNT explosions also knock back.",
 	"firstone-framework.legacy_mechanics.legacy_attack_knockback": "Legacy Attack Knockback",
 	"firstone-framework.legacy_mechanics.legacy_attack_knockback.tooltip": "1.7.10 extra knockback from players and mobs: sprinting always adds knockback (no full charge needed), applied as a push with 0.1 upward motion, not reduced by knockback resistance.",
 	"firstone-framework.legacy_mechanics.legacy_crouch_hitbox": "Legacy Crouch Hitbox",

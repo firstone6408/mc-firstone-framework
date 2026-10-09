@@ -1,5 +1,8 @@
 package io.github.firstone.framework.features.legacymechanics;
 
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -57,6 +60,7 @@ public final class LegacyKnockback {
      *   <li>Direction: away from the attacker ({@link #attackerOf}; for arrows, the shooter).</li>
      *   <li>Knockback resistance is a chance to ignore the knockback entirely.</li>
      *   <li>Velocity is halved, then pushed 0.4 away and 0.4 up, with the upward velocity capped at 0.4 — also in the air.</li>
+     *   <li>A hit player gets the new velocity right away, before the server runs its movement (see {@code sendNow}).</li>
      * </ul>
      *
      * @param victim   the entity that was hit
@@ -80,6 +84,9 @@ public final class LegacyKnockback {
         double y = Math.min(STRENGTH, motion.y / 2.0 + STRENGTH);
         victim.setDeltaMovement(motion.x / 2.0 - dx / distance * STRENGTH, y, motion.z / 2.0 - dz / distance * STRENGTH);
         victim.hasImpulse = true;
+        if (victim.hurtMarked) {
+            sendNow(victim);
+        }
     }
 
     /**
@@ -94,5 +101,23 @@ public final class LegacyKnockback {
      */
     public static void attackerPush(LivingEntity target, double strength, double sinYaw, double negCosYaw) {
         target.push(-sinYaw * strength, EXTRA_UP, -negCosYaw * strength);
+        sendNow(target);
+    }
+
+    /**
+     * Sends a player's velocity to itself and to everyone tracking it right away, like 1.7.10
+     *
+     * <p>1.7.10 sent the knockback velocity ({@code velocityChanged}) from the entity tracker in the same tick, before
+     * the player's own movement was processed. 1.21.1 sends it at the start of the next tick, after the server has
+     * already run one tick of the player's physics on it (ground friction ×0.546, gravity), so a hit player only gets
+     * about half of the knockback. Only players are affected: other entities are moved by the server itself.</p>
+     *
+     * @param entity the entity whose velocity changed
+     */
+    private static void sendNow(LivingEntity entity) {
+        if (entity instanceof ServerPlayer && entity.level() instanceof ServerLevel level) {
+            level.getChunkSource().broadcastAndSend(entity, new ClientboundSetEntityMotionPacket(entity));
+            entity.hurtMarked = false;
+        }
     }
 }

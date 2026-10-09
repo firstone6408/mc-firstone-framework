@@ -11,7 +11,8 @@ public class LegacyMechanicsConfig {
     /**
      * 1.7.10 knockback when an entity is hit: always pushed up by 0.4 (also in the air), knockback resistance is a
      * chance to ignore knockback completely, the push comes from the attacker (for arrows: the shooter), and explosions
-     * caused by an entity also knock back from it.
+     * caused by an entity also knock back from it. Hit players get the full knockback right away (1.21.1 sends it one
+     * server tick late, after friction has removed about half of it).
      */
     public boolean legacyKnockback = true;
 
