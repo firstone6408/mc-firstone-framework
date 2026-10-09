@@ -58,6 +58,11 @@ java {
 	targetCompatibility = JavaVersion.VERSION_21
 }
 
+// mixins are internal implementation, not API
+javadoc {
+	exclude '**/mixin/**'
+}
+
 jar {
 	def projectName = project.name
 	inputs.property "projectName", projectName

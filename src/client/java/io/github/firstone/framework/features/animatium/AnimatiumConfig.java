@@ -1,86 +1,85 @@
 package io.github.firstone.framework.features.animatium;
 
 /**
- * Holds the settings of the Animatium feature
+ * Settings of the Animatium feature, stored in {@code animatium.json}
  *
- * <p>Every value in this class is saved to a JSON file and loaded when the game starts</p>
- *
- * <p>Every on/off option defaults to enabled (true) so legacy animations apply right away;
- * the FPS options default to 0 (off)</p>
+ * <p>Each option restores one Minecraft 1.7.10 behavior and can be toggled on its own.
+ * Every option defaults to {@code true} so the legacy behavior applies right away.</p>
  */
 public class AnimatiumConfig {
 
     /**
-     * Disables the re-equip animation, like versions before 1.9
-     *
-     * <p>When enabled: the held item no longer dips down after an attack (attack cooldown) or when the held item only changes durability;
-     * switching to a different item still lowers and raises the hand</p>
-     * <p>Vanilla behavior: the held item dips down and comes back up after attacks and whenever the held stack changes</p>
+     * 1.7.10 sneaking: the hitbox keeps its standing height (1.8 blocks) and the eyes drop only
+     * 0.08 blocks, with the 1.7.10 timing. The camera and the aim (crosshair target) use the same
+     * eye height, so what you see is what you hit.
      */
-    public boolean noReequipAnimation = true;
+    public boolean oldSneak = true;
 
     /**
-     * Enables the old sneak animation, like versions before 1.9
-     *
-     * <p>When enabled: pressing Shift moves the camera to the sneaking height instantly with no transition,
-     * and the camera only drops slightly</p>
-     * <p>Vanilla behavior: the camera lowers smoothly over a few frames when Shift is pressed</p>
+     * 1.7.10 item dropping: the arm never swings when dropping an item, and dropping the last item
+     * (or the whole stack) lowers the item and raises the empty hand.
      */
-    public boolean oldSneakAnimation = true;
+    public boolean oldItemDrop = true;
 
     /**
-     * Enables the old item drop animation, like versions before 1.9
-     *
-     * <p>When enabled: dropping an item plays no throwing gesture; the arm stays still
-     * (except when the main-hand stack has only one item left, which keeps the swing)</p>
-     * <p>Vanilla behavior: the arm swings when an item is dropped</p>
+     * 1.7.10 re-equip rules for the main hand: no dip after attacks (no attack cooldown in 1.7.10),
+     * and no re-equip animation when the held item only changes durability in the same slot.
      */
-    public boolean oldItemDropAnimation = true;
+    public boolean legacyReequip = true;
 
     /**
-     * Hides the sweep attack effect, like versions before 1.9
-     *
-     * <p>When enabled: sweep attacks show no sweep particle and play no PLAYER_ATTACK_SWEEP sound</p>
-     * <p>Vanilla behavior: sweep attacks show a sweep particle animation and play a special sound</p>
+     * 1.7.10 right-click animations: no arm swing when using an item in the air (ender pearl, egg, snowball…)
+     * or right-clicking an entity, and the hand only dips when the used stack changed. Swings the server
+     * sends back to the player (1.21.1 only) are ignored, as 1.7.10 never sent them.
      */
+    public boolean oldItemUse = true;
+
+    /**
+     * 1.7.10 entity sync: other entities move in 1/32-block steps and only after moving 0.125 block or turning 5.6°,
+     * and heads turn instantly — the stepping look of 1.7.10 movement.
+     */
+    public boolean legacyEntitySync = true;
+
+    /**
+     * 1.7.10 mob physics: the client also moves server-controlled mobs with their own velocity, so knockback, sliding
+     * and pushing look jerky like 1.7.10 instead of gliding smoothly.
+     */
+    public boolean legacyMobPhysics = true;
+
+    /**
+     * 1.7.10 body rotation: players and old-AI mobs turn their body towards where they walk (sideways when walking
+     * backwards, up to 75° from the head); other mobs use the 1.7.10 body helper.
+     */
+    public boolean legacyBodyRotation = true;
+
+    /**
+     * 1.7.10 sneak pose: drawn whenever shift is held (also while flying), only the legs and head move, and the
+     * model is lowered like 1.7.10.
+     */
+    public boolean legacySneakPose = true;
+
+    /**
+     * 1.7.10 zombie and skeleton arms: always held straight forward (skeletons point the bow forward, no aiming pose),
+     * with the 1.7.10 attack swing
+     */
+    public boolean legacyZombieArms = true;
+
+    /** 1.7.10 mob swing: mobs only swing their arm when they hold an item (no swing for empty-handed zombies) */
+    public boolean legacyMobSwing = true;
+
+    /**
+     * 1.7.10 hurt tint: hurt and dying entities, armor included, get the 1.7.10 red pass (40 % red at block
+     * brightness, not darkened by night) instead of the darker 1.21.1 tint
+     */
+    public boolean legacyHurtTint = true;
+
+
+    /** Hides the sweep attack particle and mutes the sweep sound (added in 1.9) */
     public boolean noSweepEffect = true;
 
-    /**
-     * Hides the damage indicator particle, like versions before 1.9
-     *
-     * <p>When enabled: attacks show no particles indicating the amount of damage</p>
-     * <p>Vanilla behavior: small particles float up after a successful hit</p>
-     */
-    public boolean noDamageIndicatorParticle = true;
+    /** Hides the damage indicator particles, the dark hearts shown when hitting (added in 1.9) */
+    public boolean noDamageIndicator = true;
 
-    /**
-     * Mutes attack sounds, like versions before 1.9
-     *
-     * <p>When enabled: attacks play no CRIT, STRONG, WEAK, NODAMAGE or KNOCKBACK sounds</p>
-     * <p>Vanilla behavior: attacks play different sounds depending on the result of the attack</p>
-     */
+    /** Mutes the player attack sounds: crit, knockback, nodamage, strong, weak, sweep (added in 1.9) */
     public boolean noAttackSounds = true;
-
-    /**
-     * FPS of the walk/limb animation cycle
-     *
-     * <p>0 = off (vanilla smooth), 1–60 = limit the FPS so it moves in steps</p>
-     * <p>Example: 20 FPS = jumps every tick, like old versions</p>
-     */
-    public int legacyWalkAnimationFps = 0;
-
-    /**
-     * FPS of head/view rotation (head turning and camera rotation)
-     *
-     * <p>0 = off (vanilla smooth), 1–60 = limit the FPS so it moves in steps</p>
-     */
-    public int legacyHeadRotationFps = 0;
-
-    /**
-     * FPS of body rotation (entity body turning)
-     *
-     * <p>0 = off (vanilla smooth), 1–60 = limit the FPS so it moves in steps</p>
-     */
-    public int legacyBodyRotationFps = 0;
-
 }
