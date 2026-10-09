@@ -5,7 +5,9 @@ import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.config.ConfigManager;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
+import com.mojang.blaze3d.platform.IconSet;
 import com.mojang.blaze3d.platform.Window;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWImage;
@@ -48,16 +50,6 @@ public class AppearanceFeature implements Feature {
         return "appearance";
     }
 
-    @Override
-    public String getDisplayName() {
-        return "Appearance";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Customize game icon and window title (client only)";
-    }
-
     /**
      * Initializes the Appearance feature on the client
      *
@@ -80,13 +72,17 @@ public class AppearanceFeature implements Feature {
     /**
      * Sets the game icon from the selected config
      *
-     * <p>If {@code selectedIcon} is empty or the file is not found, the icon is not changed</p>
+     * <p>If {@code selectedIcon} is empty, Minecraft's own icon is restored; if the file is not found, the icon is
+     * not changed</p>
      *
      * @param client Minecraft instance used to get the window handle
      */
     public static void applyIcon(Minecraft client) {
         String iconFile = config.selectedIcon;
-        if (iconFile.isEmpty()) return;
+        if (iconFile.isEmpty()) {
+            restoreDefaultIcon(client);
+            return;
+        }
 
         Path iconPath = getIconsDir().resolve(iconFile);
         if (!Files.exists(iconPath)) {
@@ -98,6 +94,20 @@ public class AppearanceFeature implements Feature {
             setWindowIcon(client.getWindow(), iconPath);
         } catch (IOException e) {
             FirstOneFramework.LOGGER.error("Failed to set game icon: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Sets Minecraft's own window icon again, the same way Minecraft does at startup
+     *
+     * @param client Minecraft instance
+     */
+    private static void restoreDefaultIcon(Minecraft client) {
+        try {
+            client.getWindow().setIcon(client.getVanillaPackResources(),
+                SharedConstants.getCurrentVersion().isStable() ? IconSet.RELEASE : IconSet.SNAPSHOT);
+        } catch (IOException e) {
+            FirstOneFramework.LOGGER.error("Failed to restore the default game icon: {}", e.getMessage());
         }
     }
 
@@ -182,5 +192,15 @@ public class AppearanceFeature implements Feature {
      */
     public static void saveConfig() {
         ConfigManager.save(CONFIG_FILE, config);
+    }
+
+    /**
+     * Restores the default settings and saves them to the config file
+     *
+     * <p>Called by the Reset button of the config screen.</p>
+     */
+    public static void resetConfig() {
+        config = new AppearanceConfig();
+        saveConfig();
     }
 }

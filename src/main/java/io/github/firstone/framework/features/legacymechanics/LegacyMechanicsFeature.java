@@ -25,16 +25,6 @@ public class LegacyMechanicsFeature implements Feature {
     }
 
     @Override
-    public String getDisplayName() {
-        return "Legacy Mechanics — 1.7.10 Server Rules";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Minecraft 1.7.10 server rules: knockback and crouch hitbox (server side)";
-    }
-
-    @Override
     public void initialize() {
         config = ConfigManager.load(CONFIG_FILE, LegacyMechanicsConfig.class, new LegacyMechanicsConfig());
     }
@@ -57,5 +47,15 @@ public class LegacyMechanicsFeature implements Feature {
      */
     public static void saveConfig() {
         ConfigManager.save(CONFIG_FILE, config);
+    }
+
+    /**
+     * Restores the default settings and saves them to the config file
+     *
+     * <p>Called by the Reset button of the config screen.</p>
+     */
+    public static void resetConfig() {
+        config = new LegacyMechanicsConfig();
+        saveConfig();
     }
 }

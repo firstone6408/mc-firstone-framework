@@ -36,7 +36,9 @@ src/
     ├── client/
     │   ├── FirstOneFrameworkClient.java ← Client entrypoint
     │   ├── screen/
-    │   │   └── MainConfigScreen.java   ← Main settings GUI
+    │   │   ├── ConfigScreen.java       ← Base of every config screen (layout, Reset/Done)
+    │   │   ├── ConfigList.java         ← Row types, sizes, colors, tooltip delay
+    │   │   └── MainConfigScreen.java   ← Main settings GUI (feature tiles, Client / Server)
     │   └── features/                   ← Client-side feature logic
 │           └── <feature name>/
 │               └── <Name>ConfigScreen.java
@@ -101,8 +103,16 @@ public class FallingTreeConfig {
 
 ### Step 5: Create the config GUI screen
 
-Create `FallingTreeConfigScreen` in `src/client/java/.../features/falling_tree/client/screen/`
-and register it in `FirstOneFrameworkClient` with `FeatureScreenRegistry.register()` (the factory receives the parent screen) so `MainConfigScreen` can open it
+Create `FallingTreeConfigScreen` in `src/client/java/.../features/falling_tree/client/screen/` (see
+[Creating a config GUI](#creating-a-config-gui)), add its texts to `en_us.json`, and register it in
+`FirstOneFrameworkClient` so `MainConfigScreen` shows it as a tile (icon, group and screen):
+
+```java
+FeatureScreenRegistry.register("falling_tree", Items.IRON_AXE, Side.SERVER, FallingTreeConfigScreen::new);
+```
+
+Use `Side.CLIENT` for features that only change the player's own game, and `Side.SERVER` for game rules decided
+by the server
 
 ---
 
@@ -128,38 +138,46 @@ Config files are stored in the `.minecraft/config/firstone-framework/` directory
 
 ## Creating a config GUI
 
-Each feature can have its own config screen:
+Every config screen extends `ConfigScreen`. It provides the title, a scrolling list of compact rows, the
+Reset / Done buttons and delayed tooltips, so all screens look the same. A screen only lists its rows:
 
 ```java
-public class FallingTreeConfigScreen extends Screen {
+public class FallingTreeConfigScreen extends ConfigScreen {
 
-    private final Screen parent;
-    private final FallingTreeConfig config;
-
-    public FallingTreeConfigScreen(Screen parent, FallingTreeConfig config) {
-        super(Component.literal("Falling Tree Settings"));
-        this.parent = parent;
-        this.config = config;
+    public FallingTreeConfigScreen(Screen parent) {
+        super(parent, "firstone-framework.falling_tree.", FallingTreeFeature::saveConfig, FallingTreeFeature::resetConfig);
     }
 
     @Override
-    public void onClose() {
-        ConfigManager.save("falling_tree.json", config);
-        this.minecraft.setScreen(parent);
+    protected void addOptions() {
+        FallingTreeConfig config = FallingTreeFeature.getConfig();
+
+        addSection("category.general");
+        addToggle("enabled", config.enabled, value -> config.enabled = value);
+        addToggle("drop_leaves", config.dropLeaves, value -> config.dropLeaves = value)
+            .enabledWhen(() -> config.enabled);   // grayed out while "enabled" is off
     }
 }
 ```
 
-Before `FeatureScreenRegistry` existed, screens were linked manually from `MainConfigScreen.onFeatureButtonClick()` like this
-(`onFeatureButtonClick()` now opens the screen registered in `FeatureScreenRegistry` instead):
+Available rows: `addSection`, `addToggle`, `addCycle`, `addText`, `addButton`, `addNotice` and
+`addServerNotice("falling_tree.json")` (for features whose rules run on the server). Each change is written to the
+config and saved right away. `resetConfig` is a static method of the feature that replaces the config with
+`new FallingTreeConfig()` and saves it.
 
-```java
-private void onFeatureButtonClick(Feature feature) {
-    if (feature instanceof FallingTreeFeature f) {
-        this.minecraft.setScreen(new FallingTreeConfigScreen(this, f.getConfig()));
-    }
-}
+All texts come from `src/client/resources/assets/firstone-framework/lang/en_us.json`:
+
+```json
+"firstone-framework.falling_tree.name": "Falling Tree",
+"firstone-framework.falling_tree.description": "Chop a whole tree at once · server rules",
+"firstone-framework.falling_tree.category.general": "General",
+"firstone-framework.falling_tree.enabled": "Enabled",
+"firstone-framework.falling_tree.enabled.tooltip": "Breaking the bottom log fells the whole tree."
 ```
+
+`name` is shown on the feature's tile in `MainConfigScreen` and as the screen title, `description` appears when
+the tile is hovered; `.tooltip` keys are optional. To change how every screen looks (row width, colors, tooltip delay), edit
+the constants in `ConfigList`.
 
 ---
 

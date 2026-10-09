@@ -26,16 +26,6 @@ public class AnimatiumFeature implements Feature {
         return "animatium";
     }
 
-    @Override
-    public String getDisplayName() {
-        return "Animatium — Legacy Animations";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Minecraft 1.7.10 animations and feel (client only)";
-    }
-
     /**
      * Loads {@code animatium.json}
      */
@@ -62,5 +52,15 @@ public class AnimatiumFeature implements Feature {
      */
     public static void saveConfig() {
         ConfigManager.save(CONFIG_FILE, config);
+    }
+
+    /**
+     * Restores the default settings and saves them to {@code animatium.json}
+     *
+     * <p>Called by the Reset button of the config screen.</p>
+     */
+    public static void resetConfig() {
+        config = new AnimatiumConfig();
+        saveConfig();
     }
 }
