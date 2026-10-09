@@ -3,15 +3,21 @@
 	"id": "firstone-framework",
 	"version": "${version}",
 	"name": "FirstOne Framework",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Brings back the feel of Minecraft 1.7.10 on Fabric 1.21.1: legacy animations, 1.7.10 knockback and hitboxes, pre-1.9 combat and game window tweaks. Every feature is a separate module with its own in-game settings.",
 	"authors": [
-		"Me!"
+		{
+			"name": "firstone6408",
+			"contact": {
+				"homepage": "https://github.com/firstone6408"
+			}
+		}
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/firstone6408/mc-firstone-framework",
+		"sources": "https://github.com/firstone6408/mc-firstone-framework",
+		"issues": "https://github.com/firstone6408/mc-firstone-framework/issues"
 	},
-	"license": "CC0-1.0",
+	"license": "LGPL-3.0-only",
 	"icon": "assets/firstone-framework/icon.png",
 	"environment": "*",
 	"entrypoints": {
@@ -40,5 +46,15 @@
 		"minecraft": "~1.21.1",
 		"java": ">=21",
 		"fabric-api": "*"
+	},
+	"suggests": {
+		"modmenu": "*"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.github_releases": "https://github.com/firstone6408/mc-firstone-framework/releases"
+			}
+		}
 	}
 }

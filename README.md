@@ -3,6 +3,25 @@
 A framework for developing Minecraft Fabric 1.21.1 mods with a clear structure,
 where new features can be added easily without modifying existing ones
 
+By [firstone6408](https://github.com/firstone6408) · License: [LGPL-3.0](COPYING.LESSER)
+
+---
+
+## Features
+
+Every feature is a separate module with its own config file and in-game settings
+(Mod Menu → FirstOne Framework).
+
+| Feature | Side | What it does |
+|---|---|---|
+| Animatium | Client | Minecraft 1.7.10 animations and feel: sneaking, item use and drop, re-equip, entity movement, models, hurt tint |
+| Appearance | Client | Custom game icon and window title, confirmation before the window's close button quits |
+| Combat Tweaks | Server | Pre-1.9 combat: no attack cooldown, no sweeping attack |
+| Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback and crouch hitbox |
+
+Client features work on any server. Server features are set in game for singleplayer; a server that has the mod
+uses its own files in `config/firstone-framework/`.
+
 ---
 
 ## Purpose
@@ -195,6 +214,17 @@ the constants in `ConfigList`.
 ## System requirements
 
 - Minecraft 1.21.1
-- Fabric Loader >= 0.19.3
-- Fabric API 0.116.12+1.21.1
+- Fabric Loader 0.15.11 or newer (developed with 0.19.3)
+- Fabric API (developed with 0.116.12+1.21.1)
 - Java 21
+- Optional: [Mod Menu](https://modrinth.com/mod/modmenu) to open the settings screen
+
+---
+
+## License
+
+Copyright (C) 2026 firstone6408
+
+FirstOne Framework is free software: you can redistribute it and/or modify it under the terms of the
+GNU Lesser General Public License version 3 ([COPYING.LESSER](COPYING.LESSER)), which builds on the
+GNU General Public License version 3 ([COPYING](COPYING)).
