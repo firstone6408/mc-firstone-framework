@@ -47,32 +47,12 @@ public interface Feature {
      *
      * <p>The ID must not collide with other features and should use snake_case</p>
      *
+     * <p>Also names the feature's texts in the language file: {@code firstone-framework.<id>.name} and
+     * {@code firstone-framework.<id>.description} are shown on its card in {@code MainConfigScreen}.</p>
+     *
      * @return the feature ID, e.g. "falling_tree" or "vein_miner"
      */
     String getId();
-
-    /**
-     * Returns the name of this feature shown in the GUI
-     *
-     * <p>Shown on the button in {@code MainConfigScreen}.
-     * If the feature does not override it, the ID is used instead</p>
-     *
-     * @return display name, e.g. "Animatium" or "Falling Tree"
-     */
-    default String getDisplayName() {
-        return getId();
-    }
-
-    /**
-     * Returns a short description of this feature, shown when hovering the button
-     *
-     * <p>If the feature does not override it, no tooltip is shown</p>
-     *
-     * @return the description, or {@code null} for no tooltip
-     */
-    default String getDescription() {
-        return null;
-    }
 
     /**
      * Hook of the "main" entrypoint: setup for a feature that changes game logic decided by the server

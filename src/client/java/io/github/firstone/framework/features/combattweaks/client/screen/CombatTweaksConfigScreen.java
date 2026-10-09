@@ -1,42 +1,18 @@
 package io.github.firstone.framework.features.combattweaks.client.screen;
 
+import io.github.firstone.framework.client.screen.ConfigScreen;
 import io.github.firstone.framework.features.combattweaks.CombatTweaksConfig;
 import io.github.firstone.framework.features.combattweaks.CombatTweaksFeature;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 
 /**
  * Settings screen of the Combat Tweaks feature
  *
- * <p>Shows an on/off button for each combat option:</p>
- * <ul>
- *   <li>No Attack Cooldown — every attack deals full damage without waiting</li>
- *   <li>Disable Sweeping Attack — disables AOE damage around the target</li>
- *   <li>Sweeping Edge Required — sweeping only works with the Sweeping Edge enchantment</li>
- * </ul>
- *
- * <p>Changes are saved to the file immediately when a button is pressed</p>
+ * <p>These are server rules: changes apply to singleplayer right away; a dedicated server uses its own
+ * {@code combat_tweaks.json}, which the notice at the top explains. "Sweeping Edge Required" is grayed out while
+ * "Disable Sweeping Attack" is off, because it has no effect then.</p>
  */
-public class CombatTweaksConfigScreen extends Screen {
-
-    private static final int TITLE_Y = 15;
-    private static final int NOTE_Y   = 28;
-    private static final int NOTE_Y2  = 37;
-    private static final int NOTE_Y3  = 46;
-    private static final float NOTE_SCALE = 0.75f;
-    private static final int BUTTON_WIDTH = 260;
-    private static final int BUTTON_HEIGHT = 20;
-    private static final int BUTTON_SPACING = 26;
-    private static final int DONE_BUTTON_WIDTH = 100;
-
-    /** Previous screen, returned to when this screen is closed */
-    private final Screen parent;
-
-    /** Sweeping Edge Required button, kept so its label can be updated when Disable Sweeping Attack changes */
-    private Button sweepingEdgeButton;
+public class CombatTweaksConfigScreen extends ConfigScreen {
 
     /**
      * Creates the Combat Tweaks settings screen
@@ -44,109 +20,21 @@ public class CombatTweaksConfigScreen extends Screen {
      * @param parent screen to return to when this screen is closed
      */
     public CombatTweaksConfigScreen(Screen parent) {
-        super(Component.literal("Combat Tweaks - Legacy Combat"));
-        this.parent = parent;
+        super(parent, "firstone-framework.combat_tweaks.", CombatTweaksFeature::saveConfig,
+            CombatTweaksFeature::resetConfig);
     }
 
     @Override
-    protected void init() {
+    protected void addOptions() {
         CombatTweaksConfig config = CombatTweaksFeature.getConfig();
+        addServerNotice("combat_tweaks.json");
 
-        int centerX = (this.width - BUTTON_WIDTH) / 2;
-        int startY = (this.height / 2) - (BUTTON_SPACING + BUTTON_SPACING / 2);
+        addSection("category.attack");
+        addToggle("no_attack_cooldown", config.noAttackCooldown, value -> config.noAttackCooldown = value);
 
-        this.addRenderableWidget(Button.builder(
-            buildToggleLabel("No Attack Cooldown", config.noAttackCooldown),
-            btn -> {
-                config.noAttackCooldown = !config.noAttackCooldown;
-                btn.setMessage(buildToggleLabel("No Attack Cooldown", config.noAttackCooldown));
-                CombatTweaksFeature.saveConfig();
-            }
-        ).pos(centerX, startY).size(BUTTON_WIDTH, BUTTON_HEIGHT).build());
-
-        this.addRenderableWidget(Button.builder(
-            buildToggleLabel("Disable Sweeping Attack", config.disableSweepingAttack),
-            btn -> {
-                config.disableSweepingAttack = !config.disableSweepingAttack;
-                btn.setMessage(buildToggleLabel("Disable Sweeping Attack", config.disableSweepingAttack));
-                // update the Sweeping Edge button label to show whether it has any effect
-                sweepingEdgeButton.setMessage(buildSweepingEdgeLabel(config));
-                CombatTweaksFeature.saveConfig();
-            }
-        ).pos(centerX, startY + BUTTON_SPACING).size(BUTTON_WIDTH, BUTTON_HEIGHT).build());
-
-        sweepingEdgeButton = this.addRenderableWidget(Button.builder(
-            buildSweepingEdgeLabel(config),
-            btn -> {
-                config.sweepingEdgeRequired = !config.sweepingEdgeRequired;
-                btn.setMessage(buildSweepingEdgeLabel(config));
-                CombatTweaksFeature.saveConfig();
-            }
-        ).pos(centerX, startY + BUTTON_SPACING * 2).size(BUTTON_WIDTH, BUTTON_HEIGHT).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Done"),
-            btn -> this.onClose()
-        ).pos((this.width - DONE_BUTTON_WIDTH) / 2, this.height - 30).size(DONE_BUTTON_WIDTH, BUTTON_HEIGHT).build());
-    }
-
-    /**
-     * Builds the toggle button text, showing ON/OFF in color
-     *
-     * @param label option name
-     * @param value current state (true = ON, false = OFF)
-     * @return the component shown on the button
-     */
-    private Component buildToggleLabel(String label, boolean value) {
-        Component status = value
-            ? Component.literal("ON").withStyle(ChatFormatting.GREEN)
-            : Component.literal("OFF").withStyle(ChatFormatting.RED);
-        return Component.literal(label + ": ").append(status);
-    }
-
-    /**
-     * Builds the Sweeping Edge Required button label, hinting that it only applies while Disable Sweeping Attack is on
-     *
-     * <p>If {@code disableSweepingAttack} is false, shows "N/A" in dark gray
-     * to indicate that this setting currently has no effect</p>
-     *
-     * @param config the current config
-     * @return the component shown on the button
-     */
-    private Component buildSweepingEdgeLabel(CombatTweaksConfig config) {
-        if (!config.disableSweepingAttack) {
-            return Component.literal("Sweeping Edge Required: ")
-                .append(Component.literal("N/A").withStyle(ChatFormatting.DARK_GRAY));
-        }
-        return buildToggleLabel("Sweeping Edge Required", config.sweepingEdgeRequired);
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, TITLE_Y, 0xFFFFFF);
-        drawSmallNote(graphics, Component.literal("Singleplayer only — server settings are not affected.").withStyle(ChatFormatting.YELLOW), NOTE_Y);
-        drawSmallNote(graphics, Component.literal("To change server settings, edit on the server:").withStyle(ChatFormatting.GRAY), NOTE_Y2);
-        drawSmallNote(graphics, Component.literal("config/firstone-framework/combat_tweaks.json").withStyle(ChatFormatting.GRAY), NOTE_Y3);
-    }
-
-    @Override
-    public void onClose() {
-        this.minecraft.setScreen(parent);
-    }
-
-    /**
-     * Draws small text scaled down to {@value #NOTE_SCALE}x, centered horizontally on the screen
-     *
-     * @param g    GuiGraphics
-     * @param text component to show
-     * @param y    Y position in normal screen space
-     */
-    private void drawSmallNote(GuiGraphics g, Component text, int y) {
-        g.pose().pushPose();
-        g.pose().translate(this.width / 2.0, y, 0);
-        g.pose().scale(NOTE_SCALE, NOTE_SCALE, 1.0f);
-        g.drawCenteredString(this.font, text, 0, 0, 0xFFFFFF);
-        g.pose().popPose();
+        addSection("category.sweeping");
+        addToggle("disable_sweeping_attack", config.disableSweepingAttack, value -> config.disableSweepingAttack = value);
+        addToggle("sweeping_edge_required", config.sweepingEdgeRequired, value -> config.sweepingEdgeRequired = value)
+            .enabledWhen(() -> config.disableSweepingAttack);
     }
 }
