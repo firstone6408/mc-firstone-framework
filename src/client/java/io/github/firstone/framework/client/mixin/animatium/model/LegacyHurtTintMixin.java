@@ -39,6 +39,6 @@ public abstract class LegacyHurtTintMixin {
 
     @ModifyReturnValue(method = "getOverlayCoords", at = @At("RETURN"))
     private static int animatium$noVanillaHurtRed(int overlay, LivingEntity entity, float whiteness) {
-        return LegacyHurtTint.enabled() ? OverlayTexture.pack(OverlayTexture.u(whiteness), false) : overlay;
+        return LegacyHurtTint.enabled() ? OverlayTexture.pack(OverlayTexture.u(whiteness), OverlayTexture.v(false)) : overlay;
     }
 }
