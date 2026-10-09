@@ -4,7 +4,11 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"combattweaks.NoAttackCooldownMixin",
-		"combattweaks.SweepingAttackMixin"
+		"combattweaks.SweepingAttackMixin",
+		"legacymechanics.LegacyKnockbackMixin",
+		"legacymechanics.LegacyAttackKnockbackMixin",
+		"legacymechanics.LegacyMobAttackKnockbackMixin",
+		"legacymechanics.LegacyCrouchHitboxMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -8,6 +8,7 @@ import io.github.firstone.framework.features.animatium.client.screen.AnimatiumCo
 import io.github.firstone.framework.features.appearance.AppearanceFeature;
 import io.github.firstone.framework.features.appearance.client.screen.AppearanceConfigScreen;
 import io.github.firstone.framework.features.combattweaks.client.screen.CombatTweaksConfigScreen;
+import io.github.firstone.framework.features.legacymechanics.client.screen.LegacyMechanicsConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 
 /**
@@ -30,6 +31,7 @@ public class FirstOneFrameworkClient implements ClientModInitializer {
 
         FeatureScreenRegistry.register("animatium", AnimatiumConfigScreen::new);
         FeatureScreenRegistry.register("combat_tweaks", CombatTweaksConfigScreen::new);
+        FeatureScreenRegistry.register("legacy_mechanics", LegacyMechanicsConfigScreen::new);
         FeatureScreenRegistry.register("appearance", AppearanceConfigScreen::new);
 
         for (Feature feature : FeatureRegistry.getAll()) {
