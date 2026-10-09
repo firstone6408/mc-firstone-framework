@@ -3,6 +3,18 @@
 	"package": "io.github.firstone.framework.client.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
+		"animatium.sneak.OldSneakTickMixin",
+		"animatium.sneak.OldSneakDimensionsMixin",
+		"animatium.sneak.OldSneakEyeMixin",
+		"animatium.sneak.OldSneakCameraMixin",
+		"animatium.drop.OldItemDropSwingMixin",
+		"animatium.drop.OldItemDropReequipMixin",
+		"animatium.reequip.ItemInHandRendererAccessor",
+		"animatium.reequip.LegacyReequipMixin",
+		"animatium.use.OldItemUseMixin",
+		"animatium.use.OldServerSwingMixin",
+		"animatium.combat.LegacyCombatParticlesMixin",
+		"animatium.combat.LegacyCombatSoundsMixin",
 		"appearance.WindowTitleMixin"
 	],
 	"injectors": {

@@ -1,0 +1,19 @@
+{
+	"firstone-framework.animatium.title": "Animatium - Legacy Animations (1.7.10)",
+	"firstone-framework.animatium.old_sneak": "Old Sneak",
+	"firstone-framework.animatium.old_sneak.tooltip": "1.7.10 sneaking: the hitbox keeps its full height (no walking under 1.5-block gaps) and the eyes drop only slightly, with 1.7.10 timing. The crosshair always aims where the camera looks.",
+	"firstone-framework.animatium.old_item_drop": "Old Item Drop",
+	"firstone-framework.animatium.old_item_drop.tooltip": "1.7.10 dropping: the arm never swings, and dropping the last item lowers it and raises the empty hand.",
+	"firstone-framework.animatium.legacy_reequip": "Legacy Re-equip",
+	"firstone-framework.animatium.legacy_reequip.tooltip": "1.7.10 held item: no dip after attacking, and no re-equip when only the durability of the held item changes.",
+	"firstone-framework.animatium.category.animation": "§6Animation",
+	"firstone-framework.animatium.category.combat": "§6Combat",
+	"firstone-framework.animatium.old_item_use": "Old Item Use",
+	"firstone-framework.animatium.old_item_use.tooltip": "1.7.10 right-click: no arm swing when throwing or using items (ender pearl, egg, snowball...) or right-clicking entities. The hand only dips when the item count changes.",
+	"firstone-framework.animatium.no_sweep_effect": "No Sweep Effect",
+	"firstone-framework.animatium.no_sweep_effect.tooltip": "Hides the sweep attack particle and mutes the sweep sound (added in 1.9). Works on any server.",
+	"firstone-framework.animatium.no_damage_indicator": "No Damage Indicator",
+	"firstone-framework.animatium.no_damage_indicator.tooltip": "Hides the dark heart particles shown when hitting a mob (added in 1.9). Works on any server.",
+	"firstone-framework.animatium.no_attack_sounds": "No Attack Sounds",
+	"firstone-framework.animatium.no_attack_sounds.tooltip": "Mutes the player attack sounds added in 1.9 (crit, strong, weak, knockback, no damage, sweep). Works on any server."
+}
