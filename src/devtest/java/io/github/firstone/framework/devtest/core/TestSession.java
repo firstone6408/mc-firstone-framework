@@ -2,6 +2,7 @@ package io.github.firstone.framework.devtest.core;
 
 import io.github.firstone.framework.FirstOneFramework;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.tutorial.TutorialSteps;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -14,8 +15,10 @@ import java.util.List;
  */
 public final class TestSession {
 
+
     private final List<FeatureTests> features;
     private final String nameFilter;
+    private final boolean fast;
     private final boolean updateBaselines;
     private final TickBridge bridge = new TickBridge();
     private Thread thread;
@@ -25,11 +28,13 @@ public final class TestSession {
      *
      * @param features        the features to test, in order
      * @param nameFilter      run only the tests whose name contains this text (empty: all)
+     * @param fast            skip the tests marked slow ({@link TestCase#slow})
      * @param updateBaselines replace the baseline screenshots with the new ones
      */
-    public TestSession(List<FeatureTests> features, String nameFilter, boolean updateBaselines) {
+    public TestSession(List<FeatureTests> features, String nameFilter, boolean fast, boolean updateBaselines) {
         this.features = features;
         this.nameFilter = nameFilter.trim();
+        this.fast = fast;
         this.updateBaselines = updateBaselines;
     }
 
@@ -66,6 +71,8 @@ public final class TestSession {
                 minecraft.options.pauseOnLostFocus = false;
                 minecraft.options.renderDistance().set(10);
                 minecraft.options.simulationDistance().set(10);
+                // no tutorial hints in the corner of the screen
+                minecraft.getTutorial().setStep(TutorialSteps.NONE);
                 return null;
             });
             for (FeatureTests feature : this.features) {
@@ -95,6 +102,10 @@ public final class TestSession {
                 if (!test.name().contains(this.nameFilter)) {
                     continue;
                 }
+                if (this.fast && test.slow()) {
+                    report.skip(test.name());
+                    continue;
+                }
                 report.startTest(test.name());
                 try {
                     Configs.resetAll(feature.configs());
@@ -106,11 +117,17 @@ public final class TestSession {
                     report.error(e);
                 } finally {
                     t.cleanUpAfterTest();
+                    report.endTest();
                 }
             }
         } catch (Throwable e) {
             report.error(e);
         } finally {
+            try {
+                feature.cleanUp(t);
+            } catch (Throwable e) {
+                report.error(e);
+            }
             Configs.restoreAll(feature.configs(), originals);
             TestWorld.leave(t);
         }

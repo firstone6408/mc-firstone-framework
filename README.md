@@ -89,6 +89,7 @@ src/
 └── devtest/java/io/github/firstone/framework/devtest/   ← In-game tests (development only, never in the jar)
     ├── DevTests.java                   ← List of every feature's tests
     ├── core/                           ← Test framework (world, site, checks, report, screenshots)
+    ├── mixin/                          ← The test mod's accessors to Minecraft internals
     └── features/
         └── <feature name>/
             ├── <Name>Tests.java        ← That feature's tests
@@ -248,8 +249,13 @@ mod jar (`./gradlew build`) never contains it.
 meta/scripts/run_devtest.sh                          # every feature
 meta/scripts/run_devtest.sh legacy_vehicles          # one or more features
 TESTS="Ice Boating" meta/scripts/run_devtest.sh legacy_vehicles   # only tests whose name contains the text
+SKIP=legacy_vehicles meta/scripts/run_devtest.sh                  # every feature except these
+FAST=true meta/scripts/run_devtest.sh                             # leave out the slow tests (quick check)
 UPDATE_BASELINES=true meta/scripts/run_devtest.sh legacy_vehicles # accept new screenshots as the baselines
 ```
+
+Fast mode leaves out the tests marked `TestCase.slow` (about 8 seconds or more); run everything before committing.
+The report shows how long each test took.
 
 The script runs `./gradlew devTest`, which starts the built mod jar in a production client (as players run it) with
 its own game folder, `run/devtest/`. For each feature the test mod deletes and creates its flat world
@@ -284,7 +290,11 @@ private void waterTopSpeed(TestContext t) {
 - `t.spawn(...)`, `t.ride(...)`, `t.teleport(...)`, `t.hold(key)` — act like a player
 - `t.onServer(...)`, `t.command(...)` — read or change the server
 - `t.check(name, value).near(...)` / `.between(...)` / `.isTrue()` … — checks; `t.note(...)` records a value
-- `t.screenshot(name, maxPercent)`, `t.recordSounds()`, `t.particleCount(type)`, `t.resourcePack(name)`
+- `t.screenshot(name, maxPercent)`, `t.saveScreenshot(name)`, `t.captureFrame()` + `Images.differingPercent(...)`
+- `t.recordSounds()`, `t.particleCount(type)`, `t.resourcePack(name)`, `t.openSettings(featureId)`
+- `t.pressKey(key)`, `t.holdItem(stack)`, `t.enchanted(item, enchantment, level)`
+- `WindowInfo.title(...)` / `x11Property(...)` — what the window system shows (X11 with `xprop`; noted as skipped
+  elsewhere)
 
 Before each test the site is cleared, the player is put back in creative at the start and every other entity is
 removed, so tests never depend on each other.
@@ -295,6 +305,8 @@ So that a refactor (moving or renaming classes) does not touch the tests:
 - Use only the feature's config and `FeatureScreenRegistry` (`t.openSettings(featureId)`) directly
 - When a check really needs an inner class, call it only from `<Name>Internals.java` next to the tests; after a
   refactor only that file changes
+- To read a private field of Minecraft itself (e.g. where a screen is drawn), add an accessor mixin to
+  `src/devtest/.../devtest/mixin/` (the test mod's own mixins, never in the mod jar)
 
 ---
 

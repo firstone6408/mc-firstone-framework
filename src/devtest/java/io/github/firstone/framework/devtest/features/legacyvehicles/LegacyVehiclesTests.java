@@ -78,13 +78,13 @@ public final class LegacyVehiclesTests implements FeatureTests {
             TestCase.of("Physics: 1.7.10 speed-up on water, tick by tick", this::speedUpCurve),
             // handling
             TestCase.of("Handling: top speed 0.35 on water, eyes 1.12 above the boat", this::waterTopSpeed),
-            TestCase.of("Handling: chest boats and rafts also top out at 0.35", this::otherBoatsTopSpeed),
+            TestCase.slow("Handling: chest boats and rafts also top out at 0.35", this::otherBoatsTopSpeed),
             TestCase.of("Handling: backwards", this::backwards),
             TestCase.of("Handling: the boat goes where the player looks and turns toward its motion", this::steering),
             TestCase.of("Handling: paddles stay still", this::paddles),
             TestCase.of("Handling off: 1.21.1 speed, paddles, the look does not steer", this::vanillaHandling),
             // ice
-            TestCase.of("Ice Boating: as fast as 1.21.1 on packed ice, ice and blue ice", this::iceSpeed),
+            TestCase.slow("Ice Boating: as fast as 1.21.1 on packed ice, ice and blue ice", this::iceSpeed),
             TestCase.of("Ice Boating off: the boat crawls on ice like 1.7.10 on land", this::iceBoatingOff),
             TestCase.of("Ice Boating: leaving ice into water slows down gradually to 0.35", this::iceIntoWater),
             TestCase.of("Ice Boating: leaving ice onto stone stops the boat in a few ticks", this::iceOntoStone),
@@ -94,39 +94,41 @@ public final class LegacyVehiclesTests implements FeatureTests {
             TestCase.of("Coasting with Handling off: the 1.21.1 driver's speed carries on",
                 this::coastingVanillaDriver),
             // breaking
-            TestCase.of("Breaking: a wooden boat that hits a wall fast breaks into 3 planks and 2 sticks",
+            TestCase.slow("Breaking: a wooden boat that hits a wall fast breaks into 3 planks and 2 sticks",
                 this::crashWoodenBoat),
             TestCase.of("Breaking: a chest boat drops its chest and contents too", this::crashChestBoat),
             TestCase.of("Breaking: a bamboo raft drops bamboo planks", this::crashRaft),
-            TestCase.of("Breaking: Break Chest Boats and Rafts off keeps them whole", this::chestBoatsAndRaftsSafe),
-            TestCase.of("Breaking off: no boat breaks", this::breakingOff),
+            TestCase.slow("Breaking: Break Chest Boats and Rafts off keeps them whole", this::chestBoatsAndRaftsSafe),
+            TestCase.slow("Breaking off: no boat breaks", this::breakingOff),
             TestCase.of("Breaking: works with Coasting off too", this::breakingWithoutCoasting),
             TestCase.of("Breaking: boats without a driver break above 0.2, not below", this::crashSpeedOnWater),
             TestCase.of("Breaking: on land the speed at the start of the tick counts (1.7.10)", this::crashSpeedOnLand),
-            TestCase.of("Breaking: Safe on Ice keeps boats on ice whole; off they break", this::safeOnIce),
+            TestCase.slow("Breaking: Safe on Ice keeps boats on ice whole; off they break", this::safeOnIce),
             TestCase.of("Breaking: no drops with doEntityDrops off", this::noDrops),
             TestCase.of("Breaking: snow layers under a boat are removed; not with Breaking off", this::snow),
             // pushes
             TestCase.of("Pushes: standing on a boat pushes it away and the player falls off", this::standing),
-            TestCase.of("Pushes: a boat with a mob pushes the player's idle boat", this::pushedByMobBoat),
-            TestCase.of("Pushes: the player's boat pushes a boat with a mob", this::pushingMobBoat),
+            TestCase.slow("Pushes: a boat with a mob pushes the player's idle boat", this::pushedByMobBoat),
+            TestCase.slow("Pushes: the player's boat pushes a boat with a mob", this::pushingMobBoat),
             // riding
             TestCase.of("Riding: 1.7.10 seat for one rider in a wooden boat; off: 1.21.1 seat", this::seat),
             TestCase.of("Riding: free look; off: the head turns at most 105 degrees", this::freeLook),
             TestCase.of("Riding: two riders and chest boats keep the 1.21.1 seat", this::otherSeats),
             // splash
-            TestCase.of("Splash: bobbing boats make no splash sound, a dropped boat does", this::bobbingSplash),
-            TestCase.of("Splash: no bobbing splash with Handling and Coasting off either", this::bobbingSplashVanilla),
-            TestCase.of("Splash: fast boats throw 1.7.10 splash particles; Boat Splash off: none",
+            TestCase.slow("Splash: bobbing boats make no splash sound, a dropped boat does", this::bobbingSplash),
+            TestCase.slow("Splash: no bobbing splash with Handling and Coasting off either",
+                this::bobbingSplashVanilla),
+            TestCase.slow("Splash: fast boats throw 1.7.10 splash particles; Boat Splash off: none",
                 this::splashParticles),
             // model
             TestCase.of("Model: 1.7.10 model for wooden boats only; off: none", this::modelChoice),
-            TestCase.of("Model: a pack with its own boat texture keeps the 1.21.1 model (Resource Pack Boats)",
+            TestCase.slow(
+                "Model: a pack with its own boat texture keeps the 1.21.1 model (Resource Pack Boats)",
                 this::resourcePackBoats),
             TestCase.of("Model: screenshots of the models, paddles and riding views", this::modelScreenshots),
             TestCase.of("Settings: the Legacy Vehicles and Legacy Mechanics screens open", this::configScreens),
             // everything off
-            TestCase.of("All options off: plain 1.21.1 boats", this::allOff)
+            TestCase.slow("All options off: plain 1.21.1 boats", this::allOff)
         );
     }
 

@@ -1,5 +1,6 @@
 package io.github.firstone.framework.devtest.core;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.firstone.framework.client.FeatureScreenRegistry;
 import net.minecraft.client.CameraType;
@@ -13,14 +14,21 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -351,6 +359,62 @@ public final class TestContext {
     }
 
     /**
+     * Presses and lets go of a keyboard key, through the game's keyboard handler (as a real key press)
+     *
+     * @param key the GLFW key code, e.g. {@code GLFW.GLFW_KEY_ESCAPE}
+     */
+    public void pressKey(int key) {
+        onClientThread(() -> {
+            long window = this.minecraft.getWindow().getWindow();
+            this.minecraft.keyboardHandler.keyPress(window, key, 0, GLFW.GLFW_PRESS, 0);
+            this.minecraft.keyboardHandler.keyPress(window, key, 0, GLFW.GLFW_RELEASE, 0);
+            return null;
+        });
+        tick();
+    }
+
+    /**
+     * Clicks a key once, as the game counts clicks (attack, drop and use count clicks; holding only repeats some of
+     * them)
+     *
+     * @param key the key, e.g. {@code mc().options.keyAttack}
+     */
+    public void click(KeyMapping key) {
+        onClientThread(() -> {
+            KeyMapping.click(InputConstants.getKey(key.saveString()));
+            return null;
+        });
+        tick();
+    }
+
+    /**
+     * Makes an item with an enchantment
+     *
+     * @param item        the item
+     * @param enchantment the enchantment, e.g. {@code Enchantments.SWEEPING_EDGE}
+     * @param level       the enchantment level
+     * @return the item
+     */
+    public ItemStack enchanted(Item item, ResourceKey<Enchantment> enchantment, int level) {
+        return onServer(serverLevel -> {
+            ItemStack stack = new ItemStack(item);
+            stack.enchant(serverLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(enchantment),
+                level);
+            return stack;
+        });
+    }
+
+    /**
+     * Puts an item into the player's main hand (on the server; the client gets it a tick later)
+     *
+     * @param stack the item, or {@code ItemStack.EMPTY}
+     */
+    public void holdItem(ItemStack stack) {
+        withServerPlayer(player -> player.setItemInHand(InteractionHand.MAIN_HAND, stack.copy()));
+        ticks(3);
+    }
+
+    /**
      * Sets the player's game mode
      *
      * @param mode the game mode
@@ -463,6 +527,21 @@ public final class TestContext {
         return recorder;
     }
 
+    /** Removes every particle the client shows, so the next count starts from nothing */
+    public void clearParticles() {
+        onClientThread(() -> {
+            clearParticlesNow();
+            return null;
+        });
+    }
+
+    /** Clears the particles: setting the same level again clears them ({@code ParticleEngine.setLevel}) */
+    private void clearParticlesNow() {
+        if (this.minecraft.level != null) {
+            this.minecraft.particleEngine.setLevel(this.minecraft.level);
+        }
+    }
+
     /**
      * Counts the particles of one kind the client shows now
      *
@@ -473,15 +552,26 @@ public final class TestContext {
      * @return how many there are
      */
     public int particleCount(Class<? extends Particle> type) {
-        int count = 0;
+        return particles(type).size();
+    }
+
+    /**
+     * Returns the live particles of one kind the client shows now
+     *
+     * @param type the particle class
+     * @param <P>  the particle class
+     * @return the particles (a copy of the list; read their state before the next tick)
+     */
+    public <P extends Particle> List<P> particles(Class<P> type) {
+        List<P> found = new ArrayList<>();
         for (Collection<?> particles : particleQueues()) {
             for (Object particle : particles) {
                 if (type.isInstance(particle)) {
-                    count++;
+                    found.add(type.cast(particle));
                 }
             }
         }
-        return count;
+        return found;
     }
 
     /**
@@ -526,6 +616,32 @@ public final class TestContext {
     }
 
     /**
+     * Captures the current frame as it is shown (with the HUD), without saving it
+     *
+     * @return the frame; the caller closes it
+     */
+    public NativeImage captureFrame() {
+        ticks(2);
+        return onClientThread(() -> Screenshot.takeScreenshot(this.minecraft.getMainRenderTarget()));
+    }
+
+    /**
+     * Saves a frame captured with {@link #captureFrame} in {@code results/screenshots/<feature>/}
+     *
+     * @param name  file name without extension
+     * @param frame the frame; not closed here
+     */
+    public void saveFrame(String name, NativeImage frame) {
+        NativeImage copy = new NativeImage(frame.getWidth(), frame.getHeight(), false);
+        copy.copyFrom(frame);
+        try {
+            this.screenshots.save(name, copy);
+        } catch (IOException e) {
+            throw new TestFailure("Cannot save screenshot " + name + ": " + e);
+        }
+    }
+
+    /**
      * Takes a screenshot without the HUD and only saves it in {@code results/screenshots/<feature>/}, for views that
      * depend on something the test does not control (e.g. a screen that highlights the row under the mouse)
      *
@@ -565,16 +681,26 @@ public final class TestContext {
 
     // ---- between tests --------------------------------------------------------------------------------------------
 
-    /** Before each test: player home in creative and flying, no other entities, the site cleared */
+    /**
+     * Before each test: player home in creative and flying, without items or effects, no other entities or
+     * particles, the site cleared
+     */
     void resetForTest() {
         KeyMapping.releaseAll();
+        onClientThread(() -> {
+            this.minecraft.getToasts().clear();
+            clearParticlesNow();
+            return null;
+        });
         this.minecraft.options.hideGui = false;
         this.minecraft.options.setCameraType(CameraType.FIRST_PERSON);
         withServerPlayer(player -> {
             player.stopRiding();
             player.setGameMode(GameType.CREATIVE);
             player.getInventory().clearContent();
+            player.removeAllEffects();
             player.setHealth(player.getMaxHealth());
+            player.getFoodData().setFoodLevel(20);
         });
         removeEntities();
         command("gamerule doEntityDrops true", "time set noon", "weather clear");
