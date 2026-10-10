@@ -34,7 +34,11 @@
 		"animatium.combat.LegacyCombatSoundsMixin",
 		"appearance.ConfirmQuitHoverMixin",
 		"appearance.ConfirmQuitMixin",
-		"appearance.WindowTitleMixin"
+		"appearance.WindowTitleMixin",
+		"legacyhud.HideEffectIconsMixin",
+		"legacyhud.LegacyCreativePositionMixin",
+		"legacyhud.LegacyInventoryEffectsMixin",
+		"legacyhud.LegacyInventoryPositionMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
