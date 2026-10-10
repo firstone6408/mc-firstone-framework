@@ -3,12 +3,16 @@
 	"package": "io.github.firstone.framework.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"boat.BoatAccessor",
 		"combattweaks.NoAttackCooldownMixin",
 		"combattweaks.SweepingAttackMixin",
 		"legacymechanics.LegacyKnockbackMixin",
 		"legacymechanics.LegacyAttackKnockbackMixin",
 		"legacymechanics.LegacyMobAttackKnockbackMixin",
-		"legacymechanics.LegacyCrouchHitboxMixin"
+		"legacymechanics.LegacyCrouchHitboxMixin",
+		"legacymechanics.LegacyBoatRulesMixin",
+		"legacymechanics.LegacyBoatDriverMixin",
+		"legacymechanics.LegacyBoatEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

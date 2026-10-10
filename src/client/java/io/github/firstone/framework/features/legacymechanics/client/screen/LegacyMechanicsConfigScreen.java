@@ -34,5 +34,13 @@ public class LegacyMechanicsConfigScreen extends ConfigScreen {
 
         addSection("category.players");
         addToggle("legacy_crouch_hitbox", config.legacyCrouchHitbox, value -> config.legacyCrouchHitbox = value);
+
+        addSection("category.boats");
+        addToggle("legacy_boat_breaking", config.legacyBoatBreaking, value -> config.legacyBoatBreaking = value);
+        addToggle("break_chest_boats_and_rafts", config.breakChestBoatsAndRafts,
+            value -> config.breakChestBoatsAndRafts = value).enabledWhen(() -> config.legacyBoatBreaking);
+        addToggle("boats_safe_on_ice", config.boatsSafeOnIce, value -> config.boatsSafeOnIce = value)
+            .enabledWhen(() -> config.legacyBoatBreaking);
+        addToggle("legacy_boat_coasting", config.legacyBoatCoasting, value -> config.legacyBoatCoasting = value);
     }
 }

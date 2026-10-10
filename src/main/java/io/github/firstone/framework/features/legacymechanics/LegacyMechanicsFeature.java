@@ -1,7 +1,9 @@
 package io.github.firstone.framework.features.legacymechanics;
 
 import io.github.firstone.framework.common.Feature;
+import io.github.firstone.framework.common.boat.BoatPushPayload;
 import io.github.firstone.framework.common.config.ConfigManager;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 /**
  * Legacy Mechanics — game rules decided by the server, as in Minecraft 1.7.10
@@ -27,6 +29,7 @@ public class LegacyMechanicsFeature implements Feature {
     @Override
     public void initialize() {
         config = ConfigManager.load(CONFIG_FILE, LegacyMechanicsConfig.class, new LegacyMechanicsConfig());
+        PayloadTypeRegistry.playS2C().register(BoatPushPayload.TYPE, BoatPushPayload.CODEC);
     }
 
     /**
