@@ -8,7 +8,6 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -25,12 +24,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Boat.class)
 public class LegacyBoatRulesMixin implements LegacyBoatRules.Holder {
 
-    @Shadow
-    private Boat.Status status;
-
-    @Shadow
-    private float landFriction;
-
     /** Server state of this boat */
     @Unique
     private final LegacyBoatRules.State legacyMechanics$state = new LegacyBoatRules.State();
@@ -38,21 +31,6 @@ public class LegacyBoatRulesMixin implements LegacyBoatRules.Holder {
     @Override
     public LegacyBoatRules.State legacyMechanics$boatState() {
         return this.legacyMechanics$state;
-    }
-
-    @Override
-    public boolean legacyMechanics$onSlipperyBlocks() {
-        return this.status == Boat.Status.ON_LAND && LegacyBoatPhysics.isSlippery(this.landFriction);
-    }
-
-    @Override
-    public boolean legacyMechanics$floating() {
-        return this.status == Boat.Status.IN_WATER;
-    }
-
-    @Override
-    public float legacyMechanics$slideFriction() {
-        return legacyMechanics$onSlipperyBlocks() ? this.landFriction : 0.0F;
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
@@ -68,7 +46,7 @@ public class LegacyBoatRulesMixin implements LegacyBoatRules.Holder {
         Boat boat = (Boat) (Object) this;
         if (!boat.level().isClientSide() && LegacyBoatRules.coasting()) {
             // no driver input; on slippery blocks the boat slides like in 1.21.1
-            LegacyBoatRules.handling(boat).beforeMove(boat, 0, 0, legacyMechanics$slideFriction());
+            LegacyBoatRules.handling(boat).beforeMove(boat, 0, 0, LegacyBoatPhysics.slideFriction(boat));
             ci.cancel();
         }
     }

@@ -3,7 +3,9 @@ package io.github.firstone.framework.common.boat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import io.github.firstone.framework.mixin.boat.BoatAccessor;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.Level;
@@ -22,8 +24,10 @@ import java.util.function.Predicate;
  * limit, land friction) and {@link Handling#afterMove} (drag, turning toward the motion).</p>
  *
  * <p>On slippery blocks (friction above 0.6, like ice) the caller may ask for 1.21.1 sliding instead of the 1.7.10
- * land friction: the block's friction slows the boat, the push is the 1.21.1 one and there is no speed limit, so the
- * boat goes as fast as in 1.21.1. 1.7.10 boats could not slide on ice.</p>
+ * land friction: the block's friction slows the boat, then the 1.21.1 push is added, and there is no speed limit, so
+ * the boat goes as fast as in 1.21.1. 1.7.10 boats could not slide on ice. A boat that leaves the ice faster than the
+ * 1.7.10 speed limit slows down to it like a 1.21.1 boat in water (keeping about {@value #SLIDE_OFF_DECAY} of its
+ * speed per tick) instead of stopping at once.</p>
  */
 public final class LegacyBoatPhysics {
 
@@ -54,6 +58,12 @@ public final class LegacyBoatPhysics {
     /** How far from the boat's top someone's feet may be to count as standing on it (the boat bobs) */
     private static final double STAND_TOLERANCE = 0.05;
 
+    /**
+     * Part of its speed a boat that left slippery blocks keeps per tick while faster than {@value #MAX_SPEED} (the
+     * 1.21.1 friction of water and air)
+     */
+    private static final double SLIDE_OFF_DECAY = 0.9;
+
     /** 1.21.1 push of a driver pressing forward / backward ({@code Boat.controlBoat}) */
     private static final double SLIDE_PUSH_FORWARD = 0.04;
     private static final double SLIDE_PUSH_BACKWARD = 0.005;
@@ -71,15 +81,51 @@ public final class LegacyBoatPhysics {
     }
 
     /**
+     * Tells whether a boat is a plain wooden boat, the only boat 1.7.10 had
+     *
+     * @param boat any boat
+     * @return false for chest boats and bamboo rafts
+     */
+    public static boolean isWoodenBoat(Boat boat) {
+        return boat.getType() == EntityType.BOAT && boat.getVariant() != Boat.Type.BAMBOO;
+    }
+
+    /**
+     * Tells whether a boat floated in water at its last tick
+     *
+     * @param boat the boat
+     * @return true if its status is {@code IN_WATER}
+     */
+    public static boolean isFloating(Boat boat) {
+        return ((BoatAccessor) boat).framework$getStatus() == Boat.Status.IN_WATER;
+    }
+
+    /** Tells whether a boat stood on blocks at the start of its tick (status {@code ON_LAND}) */
+    private static boolean onLand(Boat boat) {
+        return ((BoatAccessor) boat).framework$getStatus() == Boat.Status.ON_LAND;
+    }
+
+    /**
+     * Returns the friction a boat slides with when it stands on slippery blocks (ice, packed ice, blue ice, slime)
+     *
+     * @param boat the boat
+     * @return the average friction under it when it is on land and that friction is slippery, else 0
+     */
+    public static float slideFriction(Boat boat) {
+        BoatAccessor state = (BoatAccessor) boat;
+        float friction = state.framework$getLandFriction();
+        return state.framework$getStatus() == Boat.Status.ON_LAND && isSlippery(friction) ? friction : 0.0F;
+    }
+
+    /**
      * Tells whether a boat only bobs on the water: it is in water and moves up or down slowly (a boat floating with
      * the 1.7.10 motion bobs across the water's surface; a boat falling into water moves down fast)
      *
-     * @param boat    the boat
-     * @param inWater the boat's status is {@code IN_WATER}
+     * @param boat the boat
      * @return true when it is in water and its vertical speed is below {@value #BOB_SPEED}
      */
-    public static boolean isBobbing(Boat boat, boolean inWater) {
-        return inWater && Math.abs(boat.getDeltaMovement().y) < BOB_SPEED;
+    public static boolean isBobbing(Boat boat) {
+        return isFloating(boat) && Math.abs(boat.getDeltaMovement().y) < BOB_SPEED;
     }
 
     /** Motion state of one boat, kept between ticks */
@@ -93,6 +139,19 @@ public final class LegacyBoatPhysics {
 
         /** This tick uses 1.21.1 sliding on a slippery block */
         private boolean sliding;
+
+        /** The boat still has speed above {@value #MAX_SPEED} from sliding on a slippery block */
+        private boolean slidOff;
+
+        /**
+         * Returns the boat's horizontal speed at the start of the last tick, before the driver's push and the land
+         * friction (1.7.10 checks it for crashes)
+         *
+         * @return the speed in blocks per tick
+         */
+        public double startSpeed() {
+            return this.startSpeed;
+        }
 
         /**
          * First half of the 1.7.10 tick, before the boat moves: floating, the driver's push, the speed limit, the
@@ -123,6 +182,12 @@ public final class LegacyBoatPhysics {
                 y += 0.007F;
             }
 
+            if (this.sliding) {
+                // 1.21.1 slows the boat by the block's friction before the driver's push
+                x *= slideFriction;
+                z *= slideFriction;
+            }
+
             // the driver pushes the boat toward where they look; strafing turns that push by 90 degrees
             Entity driver = boat.getControllingPassenger();
             if (driver != null && forward != 0) {
@@ -136,11 +201,13 @@ public final class LegacyBoatPhysics {
             }
 
             double speed = Math.sqrt(x * x + z * z);
-            if (speed > MAX_SPEED && !this.sliding) {
-                x *= MAX_SPEED / speed;
-                z *= MAX_SPEED / speed;
-                speed = MAX_SPEED;
+            double limit = this.slidOff ? Math.max(MAX_SPEED, this.startSpeed * SLIDE_OFF_DECAY) : MAX_SPEED;
+            if (speed > limit && !this.sliding) {
+                x *= limit / speed;
+                z *= limit / speed;
+                speed = limit;
             }
+            this.slidOff = this.sliding || (this.slidOff && speed > MAX_SPEED);
 
             if (speed > this.startSpeed && this.speedFactor < MAX_SPEED) {
                 this.speedFactor = Math.min(MAX_SPEED, this.speedFactor + (MAX_SPEED - this.speedFactor) / 35.0);
@@ -150,10 +217,9 @@ public final class LegacyBoatPhysics {
             }
 
             if (this.sliding) {
-                x *= slideFriction;
-                z *= slideFriction;
                 y *= 0.5;
-            } else if (boat.onGround()) {
+            } else if (boat.onGround() && (!this.slidOff || onLand(boat))) {
+                // leaving the ice the boat still touched it at its last move: only halve on land, not over water
                 x *= 0.5;
                 y *= 0.5;
                 z *= 0.5;

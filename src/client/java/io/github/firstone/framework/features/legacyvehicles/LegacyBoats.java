@@ -1,6 +1,5 @@
 package io.github.firstone.framework.features.legacyvehicles;
 
-import io.github.firstone.framework.client.mixin.legacyvehicles.BoatAccessor;
 import io.github.firstone.framework.common.boat.BoatPushPayload;
 import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
@@ -9,7 +8,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -21,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
  * {@code client/mixin/legacyvehicles/}; the motion itself is {@link LegacyBoatPhysics}
  *
  * <p>Every boat is driven, ridden and splashes like 1.7.10; only the seat and the model are 1.7.10 for wooden boats
- * alone ({@link #isWoodenBoat}), as chest boats and bamboo rafts did not exist in 1.7.10.</p>
+ * alone ({@link LegacyBoatPhysics#isWoodenBoat}), as chest boats and bamboo rafts did not exist in 1.7.10.</p>
  *
  * <p>1.21.1 lets the driver's client move the boat and send its position to the server, so the 1.7.10 handling of
  * the boat the local player drives works on any server. Boats nobody rides are also moved by the client, as in
@@ -51,16 +49,6 @@ public final class LegacyBoats {
     private LegacyBoats() {}
 
     /**
-     * Tells whether a boat is a plain wooden boat, the only boat 1.7.10 had
-     *
-     * @param boat any boat
-     * @return false for chest boats and bamboo rafts
-     */
-    public static boolean isWoodenBoat(Boat boat) {
-        return boat.getType() == EntityType.BOAT && boat.getVariant() != Boat.Type.BAMBOO;
-    }
-
-    /**
      * Tells whether the 1.7.10 handling applies to a boat on this side
      *
      * @param boat any boat
@@ -73,14 +61,11 @@ public final class LegacyBoats {
     /**
      * Returns the friction to slide with on a slippery block (Ice Boating)
      *
-     * @param onLand       the boat stands on blocks ({@code Boat.Status.ON_LAND})
-     * @param landFriction average friction of the blocks under the boat
-     * @return {@code landFriction} when "Ice Boating" is on and the boat stands on slippery blocks, else 0
+     * @param boat the boat
+     * @return the friction under it when "Ice Boating" is on and it stands on slippery blocks, else 0
      */
-    public static float slideFriction(boolean onLand, float landFriction) {
-        return onLand && LegacyVehiclesFeature.getConfig().iceBoating && LegacyBoatPhysics.isSlippery(landFriction)
-            ? landFriction
-            : 0.0F;
+    public static float slideFriction(Boat boat) {
+        return LegacyVehiclesFeature.getConfig().iceBoating ? LegacyBoatPhysics.slideFriction(boat) : 0.0F;
     }
 
     /**
@@ -180,11 +165,7 @@ public final class LegacyBoats {
      * @return true for a floating boat that only bobs
      */
     public static boolean skipsSplash(Entity entity) {
-        if (!(entity instanceof Boat boat) || !handles(boat)) {
-            return false;
-        }
-        boolean inWater = ((BoatAccessor) boat).legacyVehicles$getStatus() == Boat.Status.IN_WATER;
-        return LegacyBoatPhysics.isBobbing(boat, inWater);
+        return entity instanceof Boat boat && handles(boat) && LegacyBoatPhysics.isBobbing(boat);
     }
 
     /**

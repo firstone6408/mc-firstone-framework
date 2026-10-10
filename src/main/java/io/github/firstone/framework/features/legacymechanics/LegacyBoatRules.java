@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.ChestBoat;
@@ -53,7 +52,6 @@ public final class LegacyBoatRules {
     /** A move older than this many ticks is not used (the boat stopped or changed driver) */
     private static final int MAX_MOVE_AGE = 2;
 
-
     private LegacyBoatRules() {}
 
     /**
@@ -87,12 +85,16 @@ public final class LegacyBoatRules {
     /**
      * Called on the server after the server moved a boat without a driver
      *
+     * <p>With "Legacy Boat Coasting" the crash speed is the speed at the start of the tick, as in 1.7.10 (before the
+     * land friction halves it); otherwise it is the motion the boat moved with.</p>
+     *
      * @param boat the boat
      * @param move the motion it moved with
      */
     public static void afterServerMove(Boat boat, Vec3 move) {
         if (breaks(boat)) {
-            if (boat.horizontalCollision && move.horizontalDistance() > CRASH_SPEED) {
+            double speed = coasting() ? handling(boat).startSpeed() : move.horizontalDistance();
+            if (boat.horizontalCollision && speed > CRASH_SPEED) {
                 state(boat).crashed = true;
             }
             removeSnow(boat);
@@ -221,15 +223,14 @@ public final class LegacyBoatRules {
      */
     public static boolean skipsSplash(Entity entity) {
         return entity instanceof Boat boat && !boat.level().isClientSide() && coasting()
-            && LegacyBoatPhysics.isBobbing(boat, ((Holder) boat).legacyMechanics$floating());
+            && LegacyBoatPhysics.isBobbing(boat);
     }
 
     /** Tells whether the breaking rules apply to this boat now */
     private static boolean breaks(Boat boat) {
         LegacyMechanicsConfig config = LegacyMechanicsFeature.getConfig();
-        boolean wooden = boat.getType() == EntityType.BOAT && boat.getVariant() != Boat.Type.BAMBOO;
-        return config.legacyBoatBreaking && (wooden || config.breakChestBoatsAndRafts)
-            && !(config.boatsSafeOnIce && ((Holder) boat).legacyMechanics$onSlipperyBlocks());
+        return config.legacyBoatBreaking && (LegacyBoatPhysics.isWoodenBoat(boat) || config.breakChestBoatsAndRafts)
+            && !(config.boatsSafeOnIce && LegacyBoatPhysics.slideFriction(boat) > 0.0F);
     }
 
     /** Tells whether moving the boat sideways by {@code move} from where it is runs into blocks */
@@ -316,26 +317,5 @@ public final class LegacyBoatRules {
          * @return the state, never null
          */
         State legacyMechanics$boatState();
-
-        /**
-         * Tells whether the boat stands on slippery blocks (ice, packed ice, blue ice, slime)
-         *
-         * @return true if the boat is on land and the friction under it is above 0.6
-         */
-        boolean legacyMechanics$onSlipperyBlocks();
-
-        /**
-         * Tells whether the boat floated in water at its last tick
-         *
-         * @return true if the boat's status is {@code IN_WATER}
-         */
-        boolean legacyMechanics$floating();
-
-        /**
-         * Returns the friction to slide with when the boat stands on slippery blocks
-         *
-         * @return the friction under the boat, or 0 when it is not on slippery blocks
-         */
-        float legacyMechanics$slideFriction();
     }
 }

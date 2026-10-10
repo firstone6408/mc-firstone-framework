@@ -4,7 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import io.github.firstone.framework.FirstOneFramework;
-import io.github.firstone.framework.client.mixin.legacyvehicles.BoatAccessor;
+import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
+import io.github.firstone.framework.mixin.boat.BoatAccessor;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.Minecraft;
@@ -107,7 +108,7 @@ public final class LegacyBoatModel {
      */
     public static boolean draws(Boat boat) {
         LegacyVehiclesConfig config = LegacyVehiclesFeature.getConfig();
-        return config.legacyBoatModel && LegacyBoats.isWoodenBoat(boat)
+        return config.legacyBoatModel && LegacyBoatPhysics.isWoodenBoat(boat)
             && !(config.resourcePackBoats && packTexture(boat.getVariant()));
     }
 
@@ -142,10 +143,10 @@ public final class LegacyBoatModel {
             .getBlockModel(boat.getVariant().getPlanks().defaultBlockState()).getParticleIcon();
         VertexConsumer consumer = buffers.getBuffer(RenderType.entityCutoutNoCull(InventoryMenu.BLOCK_ATLAS));
         for (Part part : PARTS) {
-            part.render(poseStack, consumer, planks, light);
+            part.render(poseStack, consumer, planks, light, false);
         }
         if (!boat.isUnderWater()) {
-            WATER_MASK.render(poseStack, new BothSides(buffers.getBuffer(RenderType.waterMask())), planks, light);
+            WATER_MASK.render(poseStack, buffers.getBuffer(RenderType.waterMask()), planks, light, true);
         }
         poseStack.popPose();
     }
@@ -156,11 +157,10 @@ public final class LegacyBoatModel {
      * {@value #MIN_FREEBOARD} above the water
      */
     private static double heightOffset(Boat boat) {
-        BoatAccessor floating = (BoatAccessor) boat;
-        if (floating.legacyVehicles$getStatus() != Boat.Status.IN_WATER) {
+        if (!LegacyBoatPhysics.isFloating(boat)) {
             return HEIGHT_OFFSET;
         }
-        double needed = floating.legacyVehicles$getWaterLevel() + MIN_FREEBOARD - SIDE_TOP - boat.getY();
+        double needed = ((BoatAccessor) boat).framework$getWaterLevel() + MIN_FREEBOARD - SIDE_TOP - boat.getY();
         return Math.max(HEIGHT_OFFSET, needed);
     }
 
@@ -173,73 +173,18 @@ public final class LegacyBoatModel {
     }
 
     /**
-     * Vertex consumer that draws every quad from both sides, for the water mask (its render type hides back faces)
-     *
-     * <p>Only positions matter for the water mask; each quad's four corners are kept, then sent in their order and
-     * in the reverse order.</p>
-     */
-    private static final class BothSides implements VertexConsumer {
-
-        private final VertexConsumer target;
-        private final float[] quad = new float[12];
-        private int corners;
-
-        private BothSides(VertexConsumer target) {
-            this.target = target;
-        }
-
-        @Override
-        public VertexConsumer addVertex(float x, float y, float z) {
-            this.quad[this.corners * 3] = x;
-            this.quad[this.corners * 3 + 1] = y;
-            this.quad[this.corners * 3 + 2] = z;
-            if (++this.corners == 4) {
-                this.corners = 0;
-                for (int i = 0; i < 4; i++) {
-                    this.target.addVertex(this.quad[i * 3], this.quad[i * 3 + 1], this.quad[i * 3 + 2]);
-                }
-                for (int i = 3; i >= 0; i--) {
-                    this.target.addVertex(this.quad[i * 3], this.quad[i * 3 + 1], this.quad[i * 3 + 2]);
-                }
-            }
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setColor(int red, int green, int blue, int alpha) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setUv(float u, float v) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setUv1(int u, int v) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setUv2(int u, int v) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setNormal(float x, float y, float z) {
-            return this;
-        }
-    }
-
-    /**
      * One box of the model, like a 1.7.10 {@code ModelRenderer} with one box: a pivot, rotations around X and Y,
      * and the box (corner and size) in pixels
      */
     private record Part(float pivotX, float pivotY, float pivotZ, float rotX, float rotY,
                         float x, float y, float z, float width, float height, float depth) {
 
-        /** Draws the box's six faces, each covered with 16-pixel planks tiles */
-        void render(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite planks, int light) {
+        /**
+         * Draws the box's six faces, each covered with 16-pixel planks tiles; with {@code bothSides}, every quad is
+         * also drawn facing the other way (for the water mask, whose render type hides back faces)
+         */
+        void render(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite planks, int light,
+                    boolean bothSides) {
             poseStack.pushPose();
             poseStack.scale(1.0F / 16.0F, 1.0F / 16.0F, 1.0F / 16.0F);
             poseStack.translate(this.pivotX, this.pivotY, this.pivotZ);
@@ -250,52 +195,65 @@ public final class LegacyBoatModel {
             float y1 = this.y + this.height;
             float z1 = this.z + this.depth;
             // each face: a corner, then its two edges (along u and along v), then its outward normal
-            face(pose, consumer, planks, light, this.x, this.y, this.z, 0, 0, this.depth, this.width, 0, 0, 0, -1, 0);
-            face(pose, consumer, planks, light, this.x, y1, this.z, this.width, 0, 0, 0, 0, this.depth, 0, 1, 0);
-            face(pose, consumer, planks, light, this.x, this.y, this.z, this.width, 0, 0, 0, this.height, 0, 0, 0, -1);
-            face(pose, consumer, planks, light, this.x, this.y, z1, 0, this.height, 0, this.width, 0, 0, 0, 0, 1);
-            face(pose, consumer, planks, light, this.x, this.y, this.z, 0, this.height, 0, 0, 0, this.depth, -1, 0, 0);
-            face(pose, consumer, planks, light, x1, this.y, this.z, 0, 0, this.depth, 0, this.height, 0, 1, 0, 0);
+            Face face = new Face(pose, consumer, planks, light, bothSides);
+            face.draw(this.x, this.y, this.z, 0, 0, this.depth, this.width, 0, 0, 0, -1, 0);
+            face.draw(this.x, y1, this.z, this.width, 0, 0, 0, 0, this.depth, 0, 1, 0);
+            face.draw(this.x, this.y, this.z, this.width, 0, 0, 0, this.height, 0, 0, 0, -1);
+            face.draw(this.x, this.y, z1, 0, this.height, 0, this.width, 0, 0, 0, 0, 1);
+            face.draw(this.x, this.y, this.z, 0, this.height, 0, 0, 0, this.depth, -1, 0, 0);
+            face.draw(x1, this.y, this.z, 0, 0, this.depth, 0, this.height, 0, 1, 0, 0);
             poseStack.popPose();
         }
+    }
+
+    /** Draws faces of a part with the part's pose, texture and light */
+    private record Face(PoseStack.Pose pose, VertexConsumer consumer, TextureAtlasSprite planks, int light,
+                        boolean bothSides) {
 
         /**
          * Draws one face, from corner {@code (x, y, z)} along edges {@code a} and {@code b}, split into tiles of at
          * most 16 x 16 pixels so the planks keep their size
          */
-        private static void face(PoseStack.Pose pose, VertexConsumer consumer, TextureAtlasSprite planks, int light,
-                                 float x, float y, float z, float ax, float ay, float az, float bx, float by, float bz,
-                                 float nx, float ny, float nz) {
+        void draw(float x, float y, float z, float ax, float ay, float az, float bx, float by, float bz,
+                  float nx, float ny, float nz) {
             float lengthA = Math.abs(ax + ay + az);
             float lengthB = Math.abs(bx + by + bz);
             Vector3f corner = new Vector3f(x, y, z);
             Vector3f edgeA = new Vector3f(ax, ay, az).div(lengthA);
             Vector3f edgeB = new Vector3f(bx, by, bz).div(lengthB);
             Vector3f normal = new Vector3f(nx, ny, nz);
+            float u0 = this.planks.getU(0);
+            float v0 = this.planks.getV(0);
             for (float a = 0; a < lengthA; a += 16) {
                 float a1 = Math.min(a + 16, lengthA);
                 for (float b = 0; b < lengthB; b += 16) {
                     float b1 = Math.min(b + 16, lengthB);
-                    float u1 = planks.getU((a1 - a) / 16.0F);
-                    float v1 = planks.getV((b1 - b) / 16.0F);
-                    vertex(pose, consumer, corner, edgeA, a, edgeB, b, planks.getU(0), planks.getV(0), light, normal);
-                    vertex(pose, consumer, corner, edgeA, a1, edgeB, b, u1, planks.getV(0), light, normal);
-                    vertex(pose, consumer, corner, edgeA, a1, edgeB, b1, u1, v1, light, normal);
-                    vertex(pose, consumer, corner, edgeA, a, edgeB, b1, planks.getU(0), v1, light, normal);
+                    float u1 = this.planks.getU((a1 - a) / 16.0F);
+                    float v1 = this.planks.getV((b1 - b) / 16.0F);
+                    vertex(corner, edgeA, a, edgeB, b, u0, v0, normal);
+                    vertex(corner, edgeA, a1, edgeB, b, u1, v0, normal);
+                    vertex(corner, edgeA, a1, edgeB, b1, u1, v1, normal);
+                    vertex(corner, edgeA, a, edgeB, b1, u0, v1, normal);
+                    if (this.bothSides) {
+                        vertex(corner, edgeA, a, edgeB, b1, u0, v1, normal);
+                        vertex(corner, edgeA, a1, edgeB, b1, u1, v1, normal);
+                        vertex(corner, edgeA, a1, edgeB, b, u1, v0, normal);
+                        vertex(corner, edgeA, a, edgeB, b, u0, v0, normal);
+                    }
                 }
             }
         }
 
         /** Adds the vertex {@code a} pixels along edge A and {@code b} pixels along edge B from the corner */
-        private static void vertex(PoseStack.Pose pose, VertexConsumer consumer, Vector3f corner, Vector3f edgeA,
-                                   float a, Vector3f edgeB, float b, float u, float v, int light, Vector3f normal) {
-            consumer.addVertex(pose, corner.x + edgeA.x * a + edgeB.x * b, corner.y + edgeA.y * a + edgeB.y * b,
-                    corner.z + edgeA.z * a + edgeB.z * b)
+        private void vertex(Vector3f corner, Vector3f edgeA, float a, Vector3f edgeB, float b, float u, float v,
+                            Vector3f normal) {
+            this.consumer.addVertex(this.pose, corner.x + edgeA.x * a + edgeB.x * b,
+                    corner.y + edgeA.y * a + edgeB.y * b, corner.z + edgeA.z * a + edgeB.z * b)
                 .setColor(-1)
                 .setUv(u, v)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
-                .setLight(light)
-                .setNormal(pose, normal.x, normal.y, normal.z);
+                .setLight(this.light)
+                .setNormal(this.pose, normal.x, normal.y, normal.z);
         }
     }
 }

@@ -149,7 +149,7 @@
 	"firstone-framework.legacy_vehicles.legacy_boat_handling": "Legacy Handling",
 	"firstone-framework.legacy_vehicles.legacy_boat_handling.tooltip": "Drive boats like 1.7.10: the boat goes where you look when you press forward (no turning with left/right), speeds up slowly to its top speed, turns toward where it moves and floats higher. No paddling sounds. Works on any server. Your boat is also pushed when other boats, players or mobs bump into it, like 1.7.10.",
 	"firstone-framework.legacy_vehicles.ice_boating": "Ice Boating",
-	"firstone-framework.legacy_vehicles.ice_boating.tooltip": "With Legacy Handling, boats slide on ice, packed ice and blue ice as fast as in 1.21.1, still steered like 1.7.10 (1.7.10 boats could not slide on ice).",
+	"firstone-framework.legacy_vehicles.ice_boating.tooltip": "With Legacy Handling, boats slide on ice, packed ice and blue ice as fast as in 1.21.1 and slow down gradually after leaving it, still steered like 1.7.10 (1.7.10 boats could not slide on ice).",
 	"firstone-framework.legacy_vehicles.legacy_boat_riding": "Legacy Riding",
 	"firstone-framework.legacy_vehicles.legacy_boat_riding.tooltip": "In boats, look all around freely (the boat does not turn you), and in a wooden boat sit a little lower and behind the middle when alone, like 1.7.10. Two passengers, chest boats and rafts keep the normal seats.",
 	"firstone-framework.legacy_vehicles.boat_splash": "Water Splash",

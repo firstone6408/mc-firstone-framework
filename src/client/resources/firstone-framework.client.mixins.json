@@ -44,7 +44,6 @@
 		"legacyhud.LegacyCreativePositionMixin",
 		"legacyhud.LegacyInventoryEffectsMixin",
 		"legacyhud.LegacyInventoryPositionMixin",
-		"legacyvehicles.BoatAccessor",
 		"legacyvehicles.HideBoatPaddlesMixin",
 		"legacyvehicles.HideRaftPaddlesMixin",
 		"legacyvehicles.LegacyBoatHandlingMixin",

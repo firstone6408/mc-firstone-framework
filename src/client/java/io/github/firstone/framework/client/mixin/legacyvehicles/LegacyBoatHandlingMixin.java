@@ -52,12 +52,6 @@ public abstract class LegacyBoatHandlingMixin {
     private float deltaRotation;
 
     @Shadow
-    private Boat.Status status;
-
-    @Shadow
-    private float landFriction;
-
-    @Shadow
     private int lerpSteps;
 
     @Shadow
@@ -110,8 +104,7 @@ public abstract class LegacyBoatHandlingMixin {
     private void legacyVehicles$simulate(Boat boat, Vec3 motion, Operation<Void> original) {
         if (this.legacyVehicles$simulating) {
             // where 1.21.1 stops a boat it does not move, move it with the 1.7.10 motion, without a driver
-            LegacyBoats.simulate(boat, this.legacyVehicles$handling,
-                LegacyBoats.slideFriction(this.status == Boat.Status.ON_LAND, this.landFriction));
+            LegacyBoats.simulate(boat, this.legacyVehicles$handling, LegacyBoats.slideFriction(boat));
         } else {
             original.call(boat, motion);
         }
@@ -124,7 +117,7 @@ public abstract class LegacyBoatHandlingMixin {
             LegacyBoats.pushDriven(boat);
             this.legacyVehicles$handling.beforeMove(boat, (this.inputUp ? 1 : 0) - (this.inputDown ? 1 : 0),
                 (this.inputLeft ? 1 : 0) - (this.inputRight ? 1 : 0),
-                LegacyBoats.slideFriction(this.status == Boat.Status.ON_LAND, this.landFriction));
+                LegacyBoats.slideFriction(boat));
             ci.cancel();
         }
     }

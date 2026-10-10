@@ -6,17 +6,25 @@ import io.github.firstone.framework.features.legacymechanics.LegacyBoatRules;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Lets the server push boats that carry passengers when they touch other entities
- * ({@link LegacyBoatRules#pushesOccupied})
+ * Boat rules of the server that live in {@code Entity}: pushes between boats and other entities, and the splash of
+ * a bobbing boat
  *
- * <p>{@code Entity.push(Entity)} pushes both entities apart, but skips each one that carries passengers
- * ({@code isVehicle}); for boats that check is left out. The push of a boat a player drives is sent to that player's
- * client instead ({@link LegacyBoatRules#sendPushToDriver}).</p>
+ * <ul>
+ *   <li><b>Push</b> — {@code Entity.push(Entity)} pushes both entities apart, but skips each one that carries
+ *       passengers ({@code isVehicle}); for boats that check is left out ({@link LegacyBoatRules#pushesOccupied}).
+ *       The push of a boat a player drives is sent to that player's client instead
+ *       ({@link LegacyBoatRules#sendPushToDriver}).</li>
+ *   <li><b>Splash</b> — the water splash sound of a floating boat bobbing back into the water is left out
+ *       ({@link LegacyBoatRules#skipsSplash}); the client leaves out its particles ({@code LegacyBoatSplashMixin} of
+ *       Legacy Vehicles).</li>
+ * </ul>
  */
 @Mixin(Entity.class)
-public class LegacyBoatPushMixin {
+public class LegacyBoatEntityMixin {
 
     @WrapOperation(method = "push(Lnet/minecraft/world/entity/Entity;)V", at = @At(value = "INVOKE",
         target = "Lnet/minecraft/world/entity/Entity;isVehicle()Z"))
@@ -29,6 +37,13 @@ public class LegacyBoatPushMixin {
     private void legacyMechanics$pushOrSend(Entity entity, double x, double y, double z, Operation<Void> original) {
         if (!LegacyBoatRules.sendPushToDriver(entity, x, z)) {
             original.call(entity, x, y, z);
+        }
+    }
+
+    @Inject(method = "doWaterSplashEffect", at = @At("HEAD"), cancellable = true)
+    private void legacyMechanics$noBobbingSplash(CallbackInfo ci) {
+        if (LegacyBoatRules.skipsSplash((Entity) (Object) this)) {
+            ci.cancel();
         }
     }
 }

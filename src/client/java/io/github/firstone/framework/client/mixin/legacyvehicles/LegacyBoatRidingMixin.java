@@ -3,6 +3,7 @@ package io.github.firstone.framework.client.mixin.legacyvehicles;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
 import io.github.firstone.framework.features.legacyvehicles.LegacyBoats;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -55,7 +56,8 @@ public abstract class LegacyBoatRidingMixin {
     @ModifyReturnValue(method = "getPassengerAttachmentPoint", at = @At("RETURN"))
     private Vec3 legacyVehicles$seat(Vec3 attachment, Entity passenger, EntityDimensions dimensions, float scale) {
         Boat boat = (Boat) (Object) this;
-        return boat.getPassengers().size() == 1 && LegacyBoats.isWoodenBoat(boat) && LegacyBoats.rides(boat, passenger)
+        return boat.getPassengers().size() == 1 && LegacyBoatPhysics.isWoodenBoat(boat)
+            && LegacyBoats.rides(boat, passenger)
             ? LegacyBoats.seat(boat, passenger)
             : attachment;
     }
