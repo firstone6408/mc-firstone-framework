@@ -1,6 +1,7 @@
 package io.github.firstone.framework.devtest.core;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import io.github.firstone.framework.client.FeatureScreenRegistry;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -370,7 +371,7 @@ public final class TestContext {
     }
 
     /**
-     * Opens a screen (e.g. a config screen) and lets it draw a few frames
+     * Opens a screen and lets it draw a few frames
      *
      * @param screen makes the screen
      */
@@ -380,6 +381,25 @@ public final class TestContext {
             return null;
         });
         ticks(5);
+    }
+
+    /**
+     * Opens a feature's settings screen the way the main settings screen does ({@code FeatureScreenRegistry}) and
+     * lets it draw a few frames
+     *
+     * @param featureId the feature id, e.g. {@code legacy_vehicles}
+     * @return true if the feature has a settings screen and it is open now
+     */
+    public boolean openSettings(String featureId) {
+        Screen screen = onClientThread(() -> {
+            Screen created = FeatureScreenRegistry.createScreen(featureId, null);
+            if (created != null) {
+                this.minecraft.setScreen(created);
+            }
+            return created;
+        });
+        ticks(5);
+        return screen != null && this.minecraft.screen == screen;
     }
 
     /** Closes the open screen, like pressing Escape */
