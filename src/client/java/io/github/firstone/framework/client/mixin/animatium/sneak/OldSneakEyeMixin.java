@@ -1,7 +1,7 @@
 package io.github.firstone.framework.client.mixin.animatium.sneak;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import io.github.firstone.framework.features.animatium.OldSneak;
+import io.github.firstone.framework.features.animatium.sneak.OldSneak;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;

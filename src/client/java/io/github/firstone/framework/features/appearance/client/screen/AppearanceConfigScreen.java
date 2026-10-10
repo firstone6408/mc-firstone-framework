@@ -3,6 +3,7 @@ package io.github.firstone.framework.features.appearance.client.screen;
 import io.github.firstone.framework.client.screen.ConfigScreen;
 import io.github.firstone.framework.features.appearance.AppearanceConfig;
 import io.github.firstone.framework.features.appearance.AppearanceFeature;
+import io.github.firstone.framework.features.appearance.window.WindowIcon;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -36,7 +37,7 @@ public class AppearanceConfigScreen extends ConfigScreen {
     public AppearanceConfigScreen(Screen parent) {
         super(parent, "firstone-framework.appearance.", AppearanceFeature::saveConfig, () -> {
             AppearanceFeature.resetConfig();
-            AppearanceFeature.applyIcon(Minecraft.getInstance());
+            WindowIcon.applyIcon(Minecraft.getInstance());
             Minecraft.getInstance().updateTitle();
         });
     }
@@ -48,7 +49,7 @@ public class AppearanceConfigScreen extends ConfigScreen {
         // "" is the default icon; it comes first, then every PNG of the icons folder
         List<String> icons = new ArrayList<>();
         icons.add("");
-        icons.addAll(AppearanceFeature.getAvailableIcons());
+        icons.addAll(WindowIcon.getAvailableIcons());
 
         // a selected file that no longer exists shows as Default, which is what the window has then
         String current = icons.contains(config.selectedIcon) ? config.selectedIcon : "";
@@ -56,9 +57,9 @@ public class AppearanceConfigScreen extends ConfigScreen {
         addSection("category.icon");
         addCycle("icon", icons, current, this::iconText, value -> {
             config.selectedIcon = value;
-            AppearanceFeature.applyIcon(this.minecraft);
+            WindowIcon.applyIcon(this.minecraft);
         });
-        addButton("icons_folder", () -> Util.getPlatform().openPath(AppearanceFeature.getIconsDir()));
+        addButton("icons_folder", () -> Util.getPlatform().openPath(WindowIcon.getIconsDir()));
 
         addSection("category.title");
         addText("window_title", config.windowTitle, MAX_TITLE_LENGTH, value -> {

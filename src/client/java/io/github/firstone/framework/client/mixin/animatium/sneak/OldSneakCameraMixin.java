@@ -1,7 +1,7 @@
 package io.github.firstone.framework.client.mixin.animatium.sneak;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import io.github.firstone.framework.features.animatium.OldSneak;
+import io.github.firstone.framework.features.animatium.sneak.OldSneak;
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
