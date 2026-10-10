@@ -13,6 +13,8 @@ import io.github.firstone.framework.common.config.ConfigManager;
  * <ul>
  *   <li>{@code HideEffectIconsMixin} — no status effect icons in the top-right corner (1.7.10 showed effects
  *       only in the inventory)</li>
+ *   <li>{@code LegacyInventoryPositionMixin}, {@code LegacyCreativePositionMixin}, {@code LegacyInventoryEffectsMixin}
+ *       — effect list on the left of the inventory window ({@link LegacyInventoryEffects})</li>
  * </ul>
  */
 public class LegacyHudFeature implements Feature {

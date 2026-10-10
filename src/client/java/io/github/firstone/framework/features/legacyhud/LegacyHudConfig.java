@@ -16,4 +16,12 @@ public class LegacyHudConfig {
      * The effects themselves and the inventory list are not changed.</p>
      */
     public boolean hideEffectIcons = true;
+
+    /**
+     * List the effects on the left of the inventory window, like 1.7.10 ({@code LegacyInventoryEffects})
+     *
+     * <p>When the inventory or the creative inventory opens while the player has effects, the window moves right
+     * and the effects are listed on its left. While the recipe book is open, the 1.21.1 layout is kept.</p>
+     */
+    public boolean legacyInventoryEffects = true;
 }

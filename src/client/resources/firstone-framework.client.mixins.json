@@ -35,7 +35,10 @@
 		"appearance.ConfirmQuitHoverMixin",
 		"appearance.ConfirmQuitMixin",
 		"appearance.WindowTitleMixin",
-		"legacyhud.HideEffectIconsMixin"
+		"legacyhud.HideEffectIconsMixin",
+		"legacyhud.LegacyCreativePositionMixin",
+		"legacyhud.LegacyInventoryEffectsMixin",
+		"legacyhud.LegacyInventoryPositionMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

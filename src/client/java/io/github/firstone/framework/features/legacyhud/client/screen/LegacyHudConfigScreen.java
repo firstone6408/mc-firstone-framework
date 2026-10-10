@@ -9,7 +9,8 @@ import net.minecraft.client.gui.screens.Screen;
  * Settings screen of the Legacy HUD feature
  *
  * <ul>
- *   <li><b>Status Effects</b> — hide the effect icons in the top-right corner</li>
+ *   <li><b>Status Effects</b> — hide the effect icons in the top-right corner, list the effects on the left of
+ *       the inventory</li>
  * </ul>
  *
  * <p>Changes apply immediately.</p>
@@ -31,5 +32,7 @@ public class LegacyHudConfigScreen extends ConfigScreen {
 
         addSection("category.effects");
         addToggle("hide_effect_icons", config.hideEffectIcons, value -> config.hideEffectIcons = value);
+        addToggle("legacy_inventory_effects", config.legacyInventoryEffects,
+            value -> config.legacyInventoryEffects = value);
     }
 }

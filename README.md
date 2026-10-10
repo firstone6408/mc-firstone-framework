@@ -16,7 +16,7 @@ Every feature is a separate module with its own config file and in-game settings
 |---|---|---|
 | Animatium | Client | Minecraft 1.7.10 animations and feel: sneaking, item use and drop, re-equip, entity movement, models, hurt tint |
 | Appearance | Client | Custom game icon and window title, confirmation before the window's close button quits |
-| Legacy HUD | Client | Minecraft 1.7.10 HUD: no status effect icons in the top-right corner |
+| Legacy HUD | Client | Minecraft 1.7.10 HUD: no status effect icons in the top-right corner, effect list on the left of the inventory |
 | Combat Tweaks | Server | Pre-1.9 combat: no attack cooldown, no sweeping attack |
 | Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback and crouch hitbox |
 
