@@ -38,6 +38,7 @@ import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -102,6 +103,8 @@ public final class AnimatiumTests implements FeatureTests {
             TestCase.of("Sneak Pose: the 1.7.10 model while sneaking, also when flying; off: 1.21.1", this::sneakPose),
             TestCase.of("Zombie Arms: zombies and skeletons hold their arms straight forward", this::zombieArms),
             TestCase.of("Hurt Tint: hurt mobs get the 1.7.10 red; off: the 1.21.1 tint", this::hurtTint),
+            TestCase.of("Hurt Tint: a skull worn and a sword held by a hurt mob keep their colors",
+                this::hurtTintExcludes),
             // 1.9 combat effects
             TestCase.of("Combat: no sweep particle, damage indicators or attack sounds; off: all of them",
                 this::combatEffects)
@@ -723,8 +726,66 @@ public final class AnimatiumTests implements FeatureTests {
         } finally {
             t.mc().options.hideGui = false;
         }
-        t.note("known bug", "LegacyHurtExcludeMixin is not in the mixin config: held items, skulls, capes and "
-            + "stuck arrows are tinted too (left as it is for now)");
+    }
+
+    /** Share of green kept by the bright gray pixels of {@code before} (the skull and the sword) in {@code after} */
+    private static double whiteKept(NativeImage before, NativeImage after) {
+        long greenBefore = 0;
+        long greenAfter = 0;
+        long pixels = 0;
+        for (int y = 0; y < before.getHeight(); y++) {
+            for (int x = 0; x < before.getWidth(); x++) {
+                int pixel = before.getPixelRGBA(x, y);
+                int red = pixel & 0xFF;
+                int green = pixel >> 8 & 0xFF;
+                int blue = pixel >> 16 & 0xFF;
+                if (red > 160 && green > 160 && blue > 160 && Math.abs(red - green) < 30 && Math.abs(red - blue) < 30) {
+                    greenBefore += pixel >> 8 & 0xFF;
+                    greenAfter += after.getPixelRGBA(x, y) >> 8 & 0xFF;
+                    pixels++;
+                }
+            }
+        }
+        return pixels < 50 ? Double.NaN : (double) greenAfter / greenBefore;
+    }
+
+    private void hurtTintExcludes(TestContext t) {
+        // 1.7.10 drew held items, blocks on heads, capes and arrows outside its red pass
+        t.command("difficulty easy");
+        t.mc().options.hideGui = true;
+        t.teleport(4.5, 3.5, 4.5, 0.0F, 55.0F);
+        Spawned<Zombie> zombie = t.spawn(EntityType.ZOMBIE, 4.5, 0.0, 6.5, 180.0F, entity -> {
+            entity.setNoAi(true);
+            entity.setPersistenceRequired();
+            // a skull on its head (also keeps it from burning in the sun) and a sword in its hand: both are drawn
+            // like entity models, so only the exclusion keeps them out of the red pass
+            entity.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.SKELETON_SKULL));
+            entity.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+            AttributeInstance health = entity.getAttribute(Attributes.MAX_HEALTH);
+            if (health != null) {
+                health.setBaseValue(100.0);
+            }
+            entity.setHealth(100.0F);
+        });
+        t.ticks(20);
+        try (NativeImage before = t.captureFrame()) {
+            zombie.server(entity -> {
+                entity.hurt(entity.damageSources().generic(), 1.0F);
+                return null;
+            });
+            Zombie client = zombie.client();
+            t.require(client != null, "The zombie is gone");
+            t.waitUntil("the zombie turns red", () -> client.hurtTime > 0, 20);
+            try (NativeImage hurt = t.captureFrame()) {
+                t.saveFrame("hurt_tint_skull_and_sword", hurt);
+                t.check("the skull and the sword keep their green while the zombie is red (share)",
+                    whiteKept(before, hurt)).atLeast(0.95);
+            }
+        } finally {
+            t.mc().options.hideGui = false;
+            t.removeEntities();
+            t.command("difficulty peaceful");
+        }
     }
 
     // ---- 1.9 combat effects ---------------------------------------------------------------------------------------
