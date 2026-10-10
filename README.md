@@ -17,11 +17,33 @@ Every feature is a separate module with its own config file and in-game settings
 | Animatium | Client | Minecraft 1.7.10 animations and feel: sneaking, item use and drop, re-equip, entity movement, models, hurt tint |
 | Appearance | Client | Custom game icon and window title, confirmation before the window's close button quits |
 | Legacy HUD | Client | Minecraft 1.7.10 HUD: no status effect icons in the top-right corner, effect list on the left of the inventory |
+| Cosmetics | Client | Your own death effect, item break effect and music disc songs, from files in `config/firstone-framework/cosmetics/` |
 | Combat Tweaks | Server | Pre-1.9 combat: no attack cooldown, no sweeping attack |
 | Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback and crouch hitbox |
 
 Client features work on any server. Server features are set in game for singleplayer; a server that has the mod
 uses its own files in `config/firstone-framework/`.
+
+### Cosmetics files
+
+Put your files in `config/firstone-framework/cosmetics/`, then press **Reload** in the Cosmetics settings (or F3+T).
+An effect without files keeps the game's own effect. No image or sound ships with the mod.
+
+```
+config/firstone-framework/cosmetics/
+├── death/
+│   ├── particle/   0.png, 1.png, …   frames, played in number order (PNG, square, up to 256 px)
+│   └── sound.ogg                     played when the body disappears
+├── item_break/
+│   ├── particle/   0.png, 1.png, …   frames for a breaking tool, weapon or armor piece
+│   └── sound.ogg
+└── music_discs/    any .ogg songs; choose one for each disc in the Music Discs screen
+```
+
+Sounds must be OGG Vorbis. With **3D Sound** on (default) they are mixed down to mono while they load, so you
+hear where they come from. The death sound can start early (before the body disappears) and the start of the item
+break sound can be skipped, so a sound's loudest part lands on the moment. A disc's song stops when the disc's own
+time is over, as in the game.
 
 ---
 
