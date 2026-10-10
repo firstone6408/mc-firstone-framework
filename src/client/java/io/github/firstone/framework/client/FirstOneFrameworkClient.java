@@ -13,6 +13,8 @@ import io.github.firstone.framework.features.cosmetics.CosmeticsFeature;
 import io.github.firstone.framework.features.cosmetics.client.screen.CosmeticsConfigScreen;
 import io.github.firstone.framework.features.legacyhud.LegacyHudFeature;
 import io.github.firstone.framework.features.legacyhud.client.screen.LegacyHudConfigScreen;
+import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesFeature;
+import io.github.firstone.framework.features.legacyvehicles.client.screen.LegacyVehiclesConfigScreen;
 import io.github.firstone.framework.features.legacymechanics.client.screen.LegacyMechanicsConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.world.item.Items;
@@ -36,11 +38,13 @@ public class FirstOneFrameworkClient implements ClientModInitializer {
         FeatureRegistry.register(new AppearanceFeature());
         FeatureRegistry.register(new LegacyHudFeature());
         FeatureRegistry.register(new CosmeticsFeature());
+        FeatureRegistry.register(new LegacyVehiclesFeature());
 
         FeatureScreenRegistry.register("animatium", Items.ARMOR_STAND, Side.CLIENT, AnimatiumConfigScreen::new);
         FeatureScreenRegistry.register("appearance", Items.PAINTING, Side.CLIENT, AppearanceConfigScreen::new);
         FeatureScreenRegistry.register("legacy_hud", Items.MAP, Side.CLIENT, LegacyHudConfigScreen::new);
         FeatureScreenRegistry.register("cosmetics", Items.AMETHYST_SHARD, Side.CLIENT, CosmeticsConfigScreen::new);
+        FeatureScreenRegistry.register("legacy_vehicles", Items.OAK_BOAT, Side.CLIENT, LegacyVehiclesConfigScreen::new);
         FeatureScreenRegistry.register("combat_tweaks", Items.IRON_SWORD, Side.SERVER, CombatTweaksConfigScreen::new);
         FeatureScreenRegistry.register("legacy_mechanics", Items.CLOCK, Side.SERVER, LegacyMechanicsConfigScreen::new);
 

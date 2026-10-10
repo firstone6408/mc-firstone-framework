@@ -17,9 +17,10 @@ Every feature is a separate module with its own config file and in-game settings
 | Animatium | Client | Minecraft 1.7.10 animations and feel: sneaking, item use and drop, re-equip, entity movement, models, hurt tint |
 | Appearance | Client | Custom game icon and window title, confirmation before the window's close button quits |
 | Legacy HUD | Client | Minecraft 1.7.10 HUD: no status effect icons in the top-right corner, effect list on the left of the inventory |
+| Legacy Vehicles | Client | Minecraft 1.7.10 boats: handling (with optional 1.21 ice sliding), free look and seat, flat model, water splash; paddles can be hidden |
 | Cosmetics | Client | Your own death effect, item break effect and music disc songs, from files in `config/firstone-framework/cosmetics/` |
 | Combat Tweaks | Server | Pre-1.9 combat: no attack cooldown, no sweeping attack |
-| Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback and crouch hitbox |
+| Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback, crouch hitbox, boat breaking and coasting |
 
 Client features work on any server. Server features are set in game for singleplayer; a server that has the mod
 uses its own files in `config/firstone-framework/`.

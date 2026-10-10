@@ -8,7 +8,11 @@
 		"legacymechanics.LegacyKnockbackMixin",
 		"legacymechanics.LegacyAttackKnockbackMixin",
 		"legacymechanics.LegacyMobAttackKnockbackMixin",
-		"legacymechanics.LegacyCrouchHitboxMixin"
+		"legacymechanics.LegacyCrouchHitboxMixin",
+		"legacymechanics.LegacyBoatRulesMixin",
+		"legacymechanics.LegacyBoatDriverMixin",
+		"legacymechanics.LegacyBoatPushMixin",
+		"legacymechanics.LegacyBoatSplashMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

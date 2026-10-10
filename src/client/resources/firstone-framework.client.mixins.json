@@ -43,7 +43,14 @@
 		"legacyhud.HideEffectIconsMixin",
 		"legacyhud.LegacyCreativePositionMixin",
 		"legacyhud.LegacyInventoryEffectsMixin",
-		"legacyhud.LegacyInventoryPositionMixin"
+		"legacyhud.LegacyInventoryPositionMixin",
+		"legacyvehicles.BoatAccessor",
+		"legacyvehicles.HideBoatPaddlesMixin",
+		"legacyvehicles.HideRaftPaddlesMixin",
+		"legacyvehicles.LegacyBoatHandlingMixin",
+		"legacyvehicles.LegacyBoatModelMixin",
+		"legacyvehicles.LegacyBoatRidingMixin",
+		"legacyvehicles.LegacyBoatSplashMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
