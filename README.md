@@ -85,6 +85,13 @@ src/
     │   └── features/                   ← Client-side feature logic
 │           └── <feature name>/
 │               └── <Name>ConfigScreen.java
+│
+└── devtest/java/io/github/firstone/framework/devtest/   ← In-game tests (development only, never in the jar)
+    ├── DevTests.java                   ← List of every feature's tests
+    ├── core/                           ← Test framework (world, site, checks, report, screenshots)
+    └── features/
+        └── <feature name>/
+            └── <Name>Tests.java        ← That feature's tests
 ```
 
 ---
@@ -157,6 +164,11 @@ FeatureScreenRegistry.register("falling_tree", Items.IRON_AXE, Side.SERVER, Fall
 Use `Side.CLIENT` for features that only change the player's own game, and `Side.SERVER` for game rules decided
 by the server
 
+### Step 6: Write the dev tests
+
+Create `FallingTreeTests` in `src/devtest/java/.../devtest/features/falling_tree/` and add it to `DevTests` (see
+[Testing](#testing)). Test every option on and off, alone and together with the options it works with.
+
 ---
 
 ## Creating a config
@@ -224,6 +236,60 @@ the constants in `ConfigList`.
 
 ---
 
+## Testing
+
+Features are tested in the game itself, by a separate test mod in `src/devtest`. It is for development only: the
+mod jar (`./gradlew build`) never contains it.
+
+### Running the tests
+
+```bash
+meta/scripts/run_devtest.sh                          # every feature
+meta/scripts/run_devtest.sh legacy_vehicles          # one or more features
+TESTS="Ice Boating" meta/scripts/run_devtest.sh legacy_vehicles   # only tests whose name contains the text
+UPDATE_BASELINES=true meta/scripts/run_devtest.sh legacy_vehicles # accept new screenshots as the baselines
+```
+
+The script runs `./gradlew devTest`, which starts the built mod jar in a production client (as players run it) with
+its own game folder, `run/devtest/`. For each feature the test mod deletes and creates its flat world
+(`devtest_<feature>`), runs its tests and closes the game when done. Do not touch the game while it runs.
+
+Results are in `run/devtest/results/`:
+
+- `<feature>.md` — every check of every test, with the measured and the expected value
+- `summary.txt` — `PASS` or `FAIL`; the task fails when a check fails
+- `screenshots/<feature>/` — screenshots of the run
+
+The first run of a screenshot saves it as the baseline (`run/devtest/baselines/`, kept on this computer); later
+runs compare against it.
+
+### Writing tests
+
+A feature's tests implement `FeatureTests`: its id, the configs the tests change (reset to their defaults before
+every test) and a list of `TestCase`s. A test is a method that reads like a script; it runs in step with the game's
+ticks, so it may read and change the client directly:
+
+```java
+private void waterTopSpeed(TestContext t) {
+    t.site().pool(0, 0, 12, 90);                                   // build on the cleared test site
+    Spawned<Boat> boat = Boats.boat(t, Boat.Type.OAK, 6.5, Boats.ON_WATER, 3.5);
+    t.ride(boat);
+    t.check("top speed", Boats.drive(t, boat, t.mc().options.keyUp, 100)).near(0.35, 0.001);
+}
+```
+
+- `t.tick()`, `t.ticks(n)`, `t.waitUntil(...)` — let the game run
+- `t.site()` — build (`fill`, `floor`, `pool`, `wall`); positions are relative to the site origin
+- `t.spawn(...)`, `t.ride(...)`, `t.teleport(...)`, `t.hold(key)` — act like a player
+- `t.onServer(...)`, `t.command(...)` — read or change the server
+- `t.check(name, value).near(...)` / `.between(...)` / `.isTrue()` … — checks; `t.note(...)` records a value
+- `t.screenshot(name, maxPercent)`, `t.recordSounds()`, `t.particleCount(type)`, `t.resourcePack(name)`
+
+Before each test the site is cleared, the player is put back in creative at the start and every other entity is
+removed, so tests never depend on each other.
+
+---
+
 ## Development guidelines
 
 - **JavaDoc on every public class and method**, written in English
@@ -232,6 +298,7 @@ the constants in `ConfigList`.
 - **Separate client/server**; never use client-only classes in the main source set
 - **Features must be independent**; adding a new feature must not modify existing ones
 - **Separate configs**; each feature has its own config file
+- **Dev tests for every feature**; run them before committing (`meta/scripts/run_devtest.sh <feature>`)
 
 ---
 
