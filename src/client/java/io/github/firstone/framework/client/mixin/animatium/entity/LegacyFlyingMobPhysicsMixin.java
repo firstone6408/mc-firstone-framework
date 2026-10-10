@@ -1,7 +1,7 @@
 package io.github.firstone.framework.client.mixin.animatium.entity;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import io.github.firstone.framework.features.animatium.LegacyMobPhysics;
+import io.github.firstone.framework.features.animatium.entity.LegacyMobPhysics;
 import net.minecraft.world.entity.FlyingMob;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

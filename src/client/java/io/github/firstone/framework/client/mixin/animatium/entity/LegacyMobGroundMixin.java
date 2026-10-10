@@ -1,7 +1,7 @@
 package io.github.firstone.framework.client.mixin.animatium.entity;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import io.github.firstone.framework.features.animatium.LegacyMobPhysics;
+import io.github.firstone.framework.features.animatium.entity.LegacyMobPhysics;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;

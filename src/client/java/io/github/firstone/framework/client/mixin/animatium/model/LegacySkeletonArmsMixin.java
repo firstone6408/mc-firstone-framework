@@ -1,6 +1,6 @@
 package io.github.firstone.framework.client.mixin.animatium.model;
 
-import io.github.firstone.framework.features.animatium.LegacyZombieArms;
+import io.github.firstone.framework.features.animatium.model.LegacyZombieArms;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.SkeletonModel;
 import net.minecraft.world.entity.Mob;

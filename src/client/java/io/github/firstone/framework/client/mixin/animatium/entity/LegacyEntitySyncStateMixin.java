@@ -1,6 +1,6 @@
 package io.github.firstone.framework.client.mixin.animatium.entity;
 
-import io.github.firstone.framework.features.animatium.LegacyEntitySync;
+import io.github.firstone.framework.features.animatium.entity.LegacyEntitySync;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

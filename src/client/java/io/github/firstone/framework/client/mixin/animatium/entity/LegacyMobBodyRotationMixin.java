@@ -1,7 +1,7 @@
 package io.github.firstone.framework.client.mixin.animatium.entity;
 
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
-import io.github.firstone.framework.features.animatium.LegacyBodyRotation;
+import io.github.firstone.framework.features.animatium.entity.LegacyBodyRotation;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.animal.armadillo.Armadillo;

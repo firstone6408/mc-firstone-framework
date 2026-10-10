@@ -3,7 +3,7 @@ package io.github.firstone.framework.client.mixin.animatium.entity;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
-import io.github.firstone.framework.features.animatium.LegacyEntitySync;
+import io.github.firstone.framework.features.animatium.entity.LegacyEntitySync;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;

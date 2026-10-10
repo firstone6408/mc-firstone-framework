@@ -1,6 +1,6 @@
 package io.github.firstone.framework.client.mixin.animatium.model;
 
-import io.github.firstone.framework.features.animatium.LegacyHurtTint;
+import io.github.firstone.framework.features.animatium.model.LegacyHurtTint;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

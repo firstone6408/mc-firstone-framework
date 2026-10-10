@@ -3,7 +3,7 @@ package io.github.firstone.framework.client.mixin.animatium.model;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.firstone.framework.features.animatium.LegacyHurtTint;
+import io.github.firstone.framework.features.animatium.model.LegacyHurtTint;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;

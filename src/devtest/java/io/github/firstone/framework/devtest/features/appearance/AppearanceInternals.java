@@ -1,7 +1,7 @@
 package io.github.firstone.framework.devtest.features.appearance;
 
-import io.github.firstone.framework.features.appearance.AppearanceFeature;
-import io.github.firstone.framework.features.appearance.QuitConfirmation;
+import io.github.firstone.framework.features.appearance.quit.QuitConfirmation;
+import io.github.firstone.framework.features.appearance.window.WindowIcon;
 import net.minecraft.client.Minecraft;
 
 import java.nio.file.Path;
@@ -37,20 +37,20 @@ final class AppearanceInternals {
     }
 
     /**
-     * Applies the icon chosen in the config ({@code AppearanceFeature.applyIcon}); call on the client thread
+     * Applies the icon chosen in the config ({@code WindowIcon.applyIcon}); call on the client thread
      *
      * @param minecraft the game
      */
     static void applyIcon(Minecraft minecraft) {
-        AppearanceFeature.applyIcon(minecraft);
+        WindowIcon.applyIcon(minecraft);
     }
 
     /**
-     * Returns the folder the icons are chosen from ({@code AppearanceFeature.getIconsDir})
+     * Returns the folder the icons are chosen from ({@code WindowIcon.getIconsDir})
      *
      * @return the icons folder
      */
     static Path iconsDir() {
-        return AppearanceFeature.getIconsDir();
+        return WindowIcon.getIconsDir();
     }
 }

@@ -13,13 +13,16 @@ import io.github.firstone.framework.common.config.ConfigManager;
  * into mono 3D sounds and trimmed while they load ({@link CosmeticAudio}).</p>
  *
  * <ul>
- *   <li>Death effect — custom particles and sound when a dead body disappears ({@link CosmeticEffects})</li>
- *   <li>Item break — custom particles and sound when a tool, weapon or armor piece breaks</li>
- *   <li>Music discs — a song file chosen for each disc</li>
+ *   <li>Death effect — custom particles and sound when a dead body disappears ({@code death.DeathEffect})</li>
+ *   <li>Item break — custom particles and sound when a tool, weapon or armor piece breaks
+ *       ({@code itembreak.ItemBreakEffect})</li>
+ *   <li>Music discs — a song file chosen for each disc ({@code musicdiscs.MusicDiscs})</li>
  * </ul>
  *
- * <p>The mixins live in {@code client/mixin/cosmetics/} and read the settings through {@link #getConfig()}
- * every time they run, so changes apply immediately. Changed files apply after a resource reload.</p>
+ * <p>Each effect has its own folder, here and in {@code client/mixin/cosmetics/}: {@code death/},
+ * {@code itembreak/} and {@code musicdiscs/}; what they share stays here ({@link CosmeticEffects}, files, pack,
+ * audio, particle). The mixins read the settings through {@link #getConfig()} every time they run, so changes apply
+ * immediately. Changed files apply after a resource reload.</p>
  */
 public class CosmeticsFeature implements Feature {
 

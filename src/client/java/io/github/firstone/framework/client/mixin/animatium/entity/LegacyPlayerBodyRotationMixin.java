@@ -1,7 +1,7 @@
 package io.github.firstone.framework.client.mixin.animatium.entity;
 
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
-import io.github.firstone.framework.features.animatium.LegacyBodyRotation;
+import io.github.firstone.framework.features.animatium.entity.LegacyBodyRotation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
