@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 /**
@@ -29,6 +30,7 @@ final class TestReport {
     private final Path directory;
     private final List<Feature> features = new ArrayList<>();
     private final List<String> sessionErrors = new ArrayList<>();
+    private int skipped;
 
     TestReport(Path directory) {
         this.directory = directory;
@@ -54,8 +56,31 @@ final class TestReport {
     }
 
     void startTest(String name) {
-        currentFeature().tests().add(new Test(name, new ArrayList<>()));
+        currentFeature().tests().add(new Test(name, new ArrayList<>(), new long[] {System.nanoTime(), 0L}));
         log("-- " + name);
+    }
+
+    /**
+     * Records a test left out in fast mode
+     *
+     * @param name the test's name
+     */
+    void skip(String name) {
+        startTest(name);
+        currentTest().rows().add(new Row("SKIP", "slow test", "left out in fast mode", ""));
+        this.skipped++;
+        endTest();
+    }
+
+    /** Records how long the current test took */
+    void endTest() {
+        long[] time = currentTest().time();
+        time[1] = System.nanoTime() - time[0];
+        log("   " + seconds(time[1]));
+    }
+
+    private static String seconds(long nanos) {
+        return String.format(Locale.ROOT, "%.1f s", nanos / 1.0E9);
     }
 
     void check(String name, String actual, String expected, boolean passed) {
@@ -102,6 +127,7 @@ final class TestReport {
                 for (Test test : feature.tests()) {
                     boolean testPassed = test.rows().stream().noneMatch(row -> row.status().equals("FAIL"));
                     text.append("## ").append(testPassed ? "PASS" : "FAIL").append(" — ").append(test.name())
+                        .append(" (").append(seconds(test.time()[1])).append(")")
                         .append("\n\n| | Check | Measured | Expected |\n|---|---|---|---|\n");
                     for (Row row : test.rows()) {
                         text.append("| ").append(row.status()).append(" | ").append(row.name()).append(" | ")
@@ -118,7 +144,8 @@ final class TestReport {
             }
             failed += this.sessionErrors.size();
             String summary = (failed == 0 && passed > 0 ? "PASS" : "FAIL") + "\n"
-                + "checks passed: " + passed + ", failed: " + failed + "\n"
+                + "checks passed: " + passed + ", failed: " + failed
+                + (this.skipped > 0 ? ", slow tests skipped (fast mode): " + this.skipped : "") + "\n"
                 + "features: " + this.features.stream().map(feature -> feature.id()).toList() + "\n"
                 + String.join("\n", this.sessionErrors);
             Files.writeString(this.directory.resolve("summary.txt"), summary);
@@ -136,7 +163,7 @@ final class TestReport {
     private Test currentTest() {
         List<Test> tests = currentFeature().tests();
         if (tests.isEmpty()) {
-            tests.add(new Test("(setup)", new ArrayList<>()));
+            tests.add(new Test("(setup)", new ArrayList<>(), new long[] {System.nanoTime(), 0L}));
         }
         return tests.get(tests.size() - 1);
     }
@@ -153,7 +180,8 @@ final class TestReport {
 
     private record Feature(String id, List<Test> tests) {}
 
-    private record Test(String name, List<Row> rows) {}
+    /** A test: its name, its rows, and {start, duration} in nanoseconds */
+    private record Test(String name, List<Row> rows, long[] time) {}
 
     private record Row(String status, String name, String actual, String expected) {}
 }

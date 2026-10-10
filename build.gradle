@@ -114,7 +114,7 @@ def remapDevtestJar = tasks.register("remapDevtestJar", net.fabricmc.loom.task.R
 
 tasks.register("devTest", net.fabricmc.loom.task.prod.ClientProductionRunTask) {
 	group = "verification"
-	description = "Runs the in-game dev tests in a production client (-Pfeatures=<id,id|all> -Ptests=<text>)"
+	description = "Runs the in-game dev tests in a production client (-Pfeatures, -Ptests, -Pskip, -Pfast)"
 	mods.from(configurations.devtestRuntimeMods, tasks.named("remapJar"), remapDevtestJar)
 	runDir = file("run/devtest")
 	def features = providers.gradleProperty("features").orElse("all")
@@ -122,6 +122,8 @@ tasks.register("devTest", net.fabricmc.loom.task.prod.ClientProductionRunTask) {
 	jvmArgs.add(features.map { "-Dfirstone.devtest.features=$it" })
 	jvmArgs.add(updateBaselines.map { "-Dfirstone.devtest.updateBaselines=$it" })
 	jvmArgs.add(providers.gradleProperty("tests").orElse("").map { "-Dfirstone.devtest.tests=$it" })
+	jvmArgs.add(providers.gradleProperty("skip").orElse("").map { "-Dfirstone.devtest.skip=$it" })
+	jvmArgs.add(providers.gradleProperty("fast").orElse("false").map { "-Dfirstone.devtest.fast=$it" })
 	programArgs.addAll("--username", "DevTest")
 
 	// a test run must never be skipped as up to date

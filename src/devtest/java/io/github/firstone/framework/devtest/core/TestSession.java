@@ -15,8 +15,10 @@ import java.util.List;
  */
 public final class TestSession {
 
+
     private final List<FeatureTests> features;
     private final String nameFilter;
+    private final boolean fast;
     private final boolean updateBaselines;
     private final TickBridge bridge = new TickBridge();
     private Thread thread;
@@ -26,11 +28,13 @@ public final class TestSession {
      *
      * @param features        the features to test, in order
      * @param nameFilter      run only the tests whose name contains this text (empty: all)
+     * @param fast            skip the tests marked slow ({@link TestCase#slow})
      * @param updateBaselines replace the baseline screenshots with the new ones
      */
-    public TestSession(List<FeatureTests> features, String nameFilter, boolean updateBaselines) {
+    public TestSession(List<FeatureTests> features, String nameFilter, boolean fast, boolean updateBaselines) {
         this.features = features;
         this.nameFilter = nameFilter.trim();
+        this.fast = fast;
         this.updateBaselines = updateBaselines;
     }
 
@@ -98,6 +102,10 @@ public final class TestSession {
                 if (!test.name().contains(this.nameFilter)) {
                     continue;
                 }
+                if (this.fast && test.slow()) {
+                    report.skip(test.name());
+                    continue;
+                }
                 report.startTest(test.name());
                 try {
                     Configs.resetAll(feature.configs());
@@ -109,6 +117,7 @@ public final class TestSession {
                     report.error(e);
                 } finally {
                     t.cleanUpAfterTest();
+                    report.endTest();
                 }
             }
         } catch (Throwable e) {

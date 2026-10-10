@@ -249,8 +249,13 @@ mod jar (`./gradlew build`) never contains it.
 meta/scripts/run_devtest.sh                          # every feature
 meta/scripts/run_devtest.sh legacy_vehicles          # one or more features
 TESTS="Ice Boating" meta/scripts/run_devtest.sh legacy_vehicles   # only tests whose name contains the text
+SKIP=legacy_vehicles meta/scripts/run_devtest.sh                  # every feature except these
+FAST=true meta/scripts/run_devtest.sh                             # leave out the slow tests (quick check)
 UPDATE_BASELINES=true meta/scripts/run_devtest.sh legacy_vehicles # accept new screenshots as the baselines
 ```
+
+Fast mode leaves out the tests marked `TestCase.slow` (about 8 seconds or more); run everything before committing.
+The report shows how long each test took.
 
 The script runs `./gradlew devTest`, which starts the built mod jar in a production client (as players run it) with
 its own game folder, `run/devtest/`. For each feature the test mod deletes and creates its flat world

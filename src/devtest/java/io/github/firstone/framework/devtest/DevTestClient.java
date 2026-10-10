@@ -18,6 +18,12 @@ public final class DevTestClient implements ClientModInitializer {
     /** System property: run only the tests whose name contains this text (empty: all) */
     public static final String TESTS_PROPERTY = "firstone.devtest.tests";
 
+    /** System property: feature ids to leave out, separated by commas */
+    public static final String SKIP_PROPERTY = "firstone.devtest.skip";
+
+    /** System property: {@code true} leaves out the slow tests ({@code TestCase.slow}) */
+    public static final String FAST_PROPERTY = "firstone.devtest.fast";
+
     /** System property: {@code true} replaces the baseline screenshots with the new ones */
     public static final String UPDATE_BASELINES_PROPERTY = "firstone.devtest.updateBaselines";
 
@@ -30,7 +36,9 @@ public final class DevTestClient implements ClientModInitializer {
         if (features == null || features.isBlank()) {
             return;
         }
-        TestSession session = new TestSession(DevTests.select(features), System.getProperty(TESTS_PROPERTY, ""),
+        TestSession session = new TestSession(
+            DevTests.select(features, System.getProperty(SKIP_PROPERTY, "")),
+            System.getProperty(TESTS_PROPERTY, ""), Boolean.getBoolean(FAST_PROPERTY),
             Boolean.getBoolean(UPDATE_BASELINES_PROPERTY));
         ClientTickEvents.END_CLIENT_TICK.register(session::onClientTick);
     }

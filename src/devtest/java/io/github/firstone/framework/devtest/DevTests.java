@@ -36,22 +36,34 @@ public final class DevTests {
     /**
      * Returns the tests of the asked features
      *
-     * @param ids {@code all}, or feature ids separated by commas (e.g. {@code legacy_vehicles})
+     * @param ids  {@code all}, or feature ids separated by commas (e.g. {@code legacy_vehicles})
+     * @param skip feature ids to leave out, separated by commas (may be empty)
      * @return the features' tests, in the order of {@link #ALL}
      * @throws IllegalArgumentException if an id has no tests
      */
-    public static List<FeatureTests> select(String ids) {
+    public static List<FeatureTests> select(String ids, String skip) {
         List<FeatureTests> all = ALL.stream().map(tests -> tests.get()).toList();
-        if (ids.trim().equalsIgnoreCase("all")) {
-            return all;
+        List<String> skipped = new ArrayList<>();
+        for (String id : skip.split(",")) {
+            if (!id.isBlank()) {
+                skipped.add(find(all, id.trim()).id());
+            }
         }
         List<FeatureTests> selected = new ArrayList<>();
-        for (String id : ids.split(",")) {
-            FeatureTests tests = all.stream().filter(t -> t.id().equals(id.trim())).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No dev tests for feature '" + id.trim()
-                    + "'; known: " + all.stream().map(known -> known.id()).toList()));
-            selected.add(tests);
+        if (ids.trim().equalsIgnoreCase("all")) {
+            selected.addAll(all);
+        } else {
+            for (String id : ids.split(",")) {
+                selected.add(find(all, id.trim()));
+            }
         }
+        selected.removeIf(tests -> skipped.contains(tests.id()));
         return selected;
+    }
+
+    private static FeatureTests find(List<FeatureTests> all, String id) {
+        return all.stream().filter(tests -> tests.id().equals(id)).findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No dev tests for feature '" + id + "'; known: "
+                + all.stream().map(known -> known.id()).toList()));
     }
 }
