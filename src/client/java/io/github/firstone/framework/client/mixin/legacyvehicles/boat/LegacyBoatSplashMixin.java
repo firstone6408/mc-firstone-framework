@@ -1,6 +1,6 @@
-package io.github.firstone.framework.client.mixin.legacyvehicles;
+package io.github.firstone.framework.client.mixin.legacyvehicles.boat;
 
-import io.github.firstone.framework.features.legacyvehicles.LegacyBoats;
+import io.github.firstone.framework.features.legacyvehicles.boat.LegacyBoats;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

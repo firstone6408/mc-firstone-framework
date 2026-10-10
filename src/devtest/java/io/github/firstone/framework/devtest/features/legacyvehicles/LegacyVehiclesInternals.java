@@ -1,7 +1,7 @@
 package io.github.firstone.framework.devtest.features.legacyvehicles;
 
 import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
-import io.github.firstone.framework.features.legacyvehicles.LegacyBoatModel;
+import io.github.firstone.framework.features.legacyvehicles.boat.LegacyBoatModel;
 import net.minecraft.world.entity.vehicle.Boat;
 
 /**

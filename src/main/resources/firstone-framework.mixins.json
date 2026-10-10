@@ -6,13 +6,13 @@
 		"boat.BoatAccessor",
 		"combattweaks.NoAttackCooldownMixin",
 		"combattweaks.SweepingAttackMixin",
-		"legacymechanics.LegacyKnockbackMixin",
-		"legacymechanics.LegacyAttackKnockbackMixin",
-		"legacymechanics.LegacyMobAttackKnockbackMixin",
-		"legacymechanics.LegacyCrouchHitboxMixin",
-		"legacymechanics.LegacyBoatRulesMixin",
-		"legacymechanics.LegacyBoatDriverMixin",
-		"legacymechanics.LegacyBoatEntityMixin"
+		"legacymechanics.knockback.LegacyKnockbackMixin",
+		"legacymechanics.knockback.LegacyAttackKnockbackMixin",
+		"legacymechanics.knockback.LegacyMobAttackKnockbackMixin",
+		"legacymechanics.player.LegacyCrouchHitboxMixin",
+		"legacymechanics.boat.LegacyBoatRulesMixin",
+		"legacymechanics.boat.LegacyBoatDriverMixin",
+		"legacymechanics.boat.LegacyBoatEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

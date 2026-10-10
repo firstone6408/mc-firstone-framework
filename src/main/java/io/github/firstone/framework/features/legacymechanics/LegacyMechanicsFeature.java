@@ -12,6 +12,10 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
  * crouching players), so every player on the server gets it, with or without the mod. It is independent of the
  * client-only Animatium feature. Registered in {@code FirstOneFramework}; runs on the dedicated server and on the
  * integrated server of singleplayer.</p>
+ *
+ * <p>Each part has its own folder, here and in {@code mixin/legacymechanics/}: {@code knockback/} (knockback of hits
+ * and attacks), {@code player/} (the hitbox of crouching players, mixin only) and {@code boat/} (boat breaking and
+ * coasting).</p>
  */
 public class LegacyMechanicsFeature implements Feature {
 

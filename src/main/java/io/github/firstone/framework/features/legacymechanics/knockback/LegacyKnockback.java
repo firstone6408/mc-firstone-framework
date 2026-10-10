@@ -1,4 +1,4 @@
-package io.github.firstone.framework.features.legacymechanics;
+package io.github.firstone.framework.features.legacymechanics.knockback;
 
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -59,8 +59,10 @@ public final class LegacyKnockback {
      *   <li>No attacker entity → no knockback.</li>
      *   <li>Direction: away from the attacker ({@link #attackerOf}; for arrows, the shooter).</li>
      *   <li>Knockback resistance is a chance to ignore the knockback entirely.</li>
-     *   <li>Velocity is halved, then pushed 0.4 away and 0.4 up, with the upward velocity capped at 0.4 — also in the air.</li>
-     *   <li>A hit player gets the new velocity right away, before the server runs its movement (see {@code sendNow}).</li>
+     *   <li>Velocity is halved, then pushed 0.4 away and 0.4 up, with the upward velocity capped at 0.4 — also in
+     *       the air.</li>
+     *   <li>A hit player gets the new velocity right away, before the server runs its movement (see
+     *       {@code sendNow}).</li>
      * </ul>
      *
      * @param victim   the entity that was hit
@@ -82,7 +84,8 @@ public final class LegacyKnockback {
         double distance = Math.sqrt(dx * dx + dz * dz);
         Vec3 motion = victim.getDeltaMovement();
         double y = Math.min(STRENGTH, motion.y / 2.0 + STRENGTH);
-        victim.setDeltaMovement(motion.x / 2.0 - dx / distance * STRENGTH, y, motion.z / 2.0 - dz / distance * STRENGTH);
+        victim.setDeltaMovement(motion.x / 2.0 - dx / distance * STRENGTH, y,
+            motion.z / 2.0 - dz / distance * STRENGTH);
         victim.hasImpulse = true;
         if (victim.hurtMarked) {
             sendNow(victim);
@@ -92,7 +95,8 @@ public final class LegacyKnockback {
     /**
      * Applies the attacker's extra knockback like 1.7.10 {@code attackTargetEntityWithCurrentItem}
      *
-     * <p>{@code addVelocity(-sin(yaw)·k·0.5, 0.1, cos(yaw)·k·0.5)}: a plain push, not reduced by knockback resistance.</p>
+     * <p>{@code addVelocity(-sin(yaw)·k·0.5, 0.1, cos(yaw)·k·0.5)}: a plain push, not reduced by knockback
+     * resistance.</p>
      *
      * @param target   the entity that was hit
      * @param strength {@code k · 0.5}, as passed by 1.21.1

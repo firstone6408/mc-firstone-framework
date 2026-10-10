@@ -1,7 +1,9 @@
-package io.github.firstone.framework.features.legacymechanics;
+package io.github.firstone.framework.features.legacymechanics.boat;
 
 import io.github.firstone.framework.common.boat.BoatPushPayload;
 import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
+import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsConfig;
+import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;

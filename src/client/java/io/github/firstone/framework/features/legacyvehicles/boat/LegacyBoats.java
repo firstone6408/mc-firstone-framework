@@ -1,8 +1,9 @@
-package io.github.firstone.framework.features.legacyvehicles;
+package io.github.firstone.framework.features.legacyvehicles.boat;
 
 import io.github.firstone.framework.common.boat.BoatPushPayload;
 import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
+import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesFeature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
@@ -16,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * 1.7.10 boats ({@code EntityBoat}) on the client: which boats are changed, riding and splash, used by the mixins of
- * {@code client/mixin/legacyvehicles/}; the motion itself is {@link LegacyBoatPhysics}
+ * {@code client/mixin/legacyvehicles/boat/}; the motion itself is {@link LegacyBoatPhysics}
  *
  * <p>Every boat is driven, ridden and splashes like 1.7.10; only the seat and the model are 1.7.10 for wooden boats
  * alone ({@link LegacyBoatPhysics#isWoodenBoat}), as chest boats and bamboo rafts did not exist in 1.7.10.</p>

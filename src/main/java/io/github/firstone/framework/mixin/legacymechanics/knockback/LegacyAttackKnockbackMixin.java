@@ -1,8 +1,8 @@
-package io.github.firstone.framework.mixin.legacymechanics;
+package io.github.firstone.framework.mixin.legacymechanics.knockback;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import io.github.firstone.framework.features.legacymechanics.LegacyKnockback;
+import io.github.firstone.framework.features.legacymechanics.knockback.LegacyKnockback;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -37,8 +37,8 @@ public class LegacyAttackKnockbackMixin {
         method = "attack",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;knockback(DDD)V", ordinal = 0)
     )
-    private void legacymechanics$legacyAttackKnockback(LivingEntity target, double strength, double sinYaw, double negCosYaw,
-                                                      Operation<Void> original) {
+    private void legacymechanics$legacyAttackKnockback(LivingEntity target, double strength, double sinYaw,
+                                                      double negCosYaw, Operation<Void> original) {
         if (LegacyMechanicsFeature.getConfig().legacyAttackKnockback) {
             LegacyKnockback.attackerPush(target, strength, sinYaw, negCosYaw);
         } else {

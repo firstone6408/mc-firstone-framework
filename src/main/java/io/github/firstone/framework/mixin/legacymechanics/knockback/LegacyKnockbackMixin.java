@@ -1,10 +1,10 @@
-package io.github.firstone.framework.mixin.legacymechanics;
+package io.github.firstone.framework.mixin.legacymechanics.knockback;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import io.github.firstone.framework.features.legacymechanics.LegacyKnockback;
+import io.github.firstone.framework.features.legacymechanics.knockback.LegacyKnockback;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
@@ -39,7 +39,8 @@ public class LegacyKnockbackMixin {
         method = "hurt",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSource;is(Lnet/minecraft/tags/TagKey;)Z", ordinal = 7)
     )
-    private boolean legacymechanics$explosionKnockback(DamageSource source, TagKey<DamageType> tag, Operation<Boolean> original) {
+    private boolean legacymechanics$explosionKnockback(DamageSource source, TagKey<DamageType> tag,
+                                                       Operation<Boolean> original) {
         boolean result = original.call(source, tag);
         if (result && tag == DamageTypeTags.NO_KNOCKBACK && LegacyMechanicsFeature.getConfig().legacyKnockback
             && source.is(DamageTypeTags.IS_EXPLOSION) && LegacyKnockback.attackerOf(source) != null) {

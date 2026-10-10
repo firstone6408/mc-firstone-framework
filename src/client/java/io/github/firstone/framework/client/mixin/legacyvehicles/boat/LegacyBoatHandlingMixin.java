@@ -1,9 +1,9 @@
-package io.github.firstone.framework.client.mixin.legacyvehicles;
+package io.github.firstone.framework.client.mixin.legacyvehicles.boat;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
-import io.github.firstone.framework.features.legacyvehicles.LegacyBoats;
+import io.github.firstone.framework.features.legacyvehicles.boat.LegacyBoats;
 import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesFeature;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.phys.Vec3;
