@@ -91,7 +91,8 @@ src/
     ├── core/                           ← Test framework (world, site, checks, report, screenshots)
     └── features/
         └── <feature name>/
-            └── <Name>Tests.java        ← That feature's tests
+            ├── <Name>Tests.java        ← That feature's tests
+            └── <Name>Internals.java    ← The only calls into the feature's inner classes (if any)
 ```
 
 ---
@@ -287,6 +288,13 @@ private void waterTopSpeed(TestContext t) {
 
 Before each test the site is cleared, the player is put back in creative at the start and every other entity is
 removed, so tests never depend on each other.
+
+So that a refactor (moving or renaming classes) does not touch the tests:
+
+- Test behavior from outside first: what the player sees (speeds, positions, drops, sounds, screenshots)
+- Use only the feature's config and `FeatureScreenRegistry` (`t.openSettings(featureId)`) directly
+- When a check really needs an inner class, call it only from `<Name>Internals.java` next to the tests; after a
+  refactor only that file changes
 
 ---
 

@@ -1,6 +1,5 @@
 package io.github.firstone.framework.devtest.features.legacyvehicles;
 
-import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
 import io.github.firstone.framework.devtest.core.FeatureTests;
 import io.github.firstone.framework.devtest.core.Spawned;
 import io.github.firstone.framework.devtest.core.TestCase;
@@ -8,11 +7,8 @@ import io.github.firstone.framework.devtest.core.TestContext;
 import io.github.firstone.framework.devtest.core.TestSite;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsConfig;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
-import io.github.firstone.framework.features.legacymechanics.client.screen.LegacyMechanicsConfigScreen;
-import io.github.firstone.framework.features.legacyvehicles.LegacyBoatModel;
 import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesConfig;
 import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesFeature;
-import io.github.firstone.framework.features.legacyvehicles.client.screen.LegacyVehiclesConfigScreen;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.particle.SplashParticle;
@@ -38,6 +34,9 @@ import java.util.Locale;
  * 1.7.10 ones where 1.7.10 had the behavior (top speed 0.35, eyes 1.12 above the boat, crash speed 0.2), the 1.21.1
  * ones where the option keeps 1.21.1 (ice speed, the 1.21.1 handling), and otherwise the values measured when the
  * behavior was checked in game.</p>
+ *
+ * <p>Only the feature configs are used directly; checks that need an inner class go through
+ * {@link LegacyVehiclesInternals}.</p>
  *
  * <p>Site layout: a water pool at x 0..12 (most tests), ice lanes from x 20, a wide pool for steering from x
  * 40.</p>
@@ -160,7 +159,7 @@ public final class LegacyVehiclesTests implements FeatureTests {
             boatEntity.setDeltaMovement(Vec3.ZERO);
             pigEntity.setDeltaMovement(Vec3.ZERO);
             pigEntity.setPos(boatEntity.getX() + offset, boatEntity.getBoundingBox().maxY, boatEntity.getZ());
-            LegacyBoatPhysics.pushStanders(boatEntity, true, entity -> true);
+            LegacyVehiclesInternals.pushStanders(boatEntity);
             return new double[] {boatEntity.getDeltaMovement().x, pigEntity.getDeltaMovement().x};
         });
     }
@@ -813,7 +812,7 @@ public final class LegacyVehiclesTests implements FeatureTests {
 
     private static boolean draws(Spawned<? extends Boat> boat) {
         Boat client = boat.client();
-        return client != null && LegacyBoatModel.draws(client);
+        return client != null && LegacyVehiclesInternals.drawsLegacyModel(client);
     }
 
     private void modelChoice(TestContext t) {
@@ -864,12 +863,10 @@ public final class LegacyVehiclesTests implements FeatureTests {
     }
 
     private void configScreens(TestContext t) {
-        t.openScreen(() -> new LegacyVehiclesConfigScreen(null));
-        t.check("Legacy Vehicles screen open", t.mc().screen instanceof LegacyVehiclesConfigScreen).isTrue();
+        t.check("Legacy Vehicles screen open", t.openSettings("legacy_vehicles")).isTrue();
         t.saveScreenshot("settings_legacy_vehicles");
         t.closeScreen();
-        t.openScreen(() -> new LegacyMechanicsConfigScreen(null));
-        t.check("Legacy Mechanics screen open", t.mc().screen instanceof LegacyMechanicsConfigScreen).isTrue();
+        t.check("Legacy Mechanics screen open", t.openSettings("legacy_mechanics")).isTrue();
         t.saveScreenshot("settings_legacy_mechanics");
         t.closeScreen();
         t.check("screens closed", t.mc().screen == null).isTrue();
