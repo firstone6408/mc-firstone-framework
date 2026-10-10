@@ -3,7 +3,11 @@
 	"package": "io.github.firstone.framework.devtest.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"ContainerScreenAccessor"
+		"ContainerScreenAccessor",
+		"HandRendererAccessor",
+		"SoundBufferAccessor",
+		"SoundEngineAccessor",
+		"SoundManagerAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

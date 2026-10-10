@@ -24,6 +24,32 @@ public final class Images {
     }
 
     /**
+     * Returns the average of one color channel inside a rectangle
+     *
+     * @param image   the image
+     * @param x       left of the rectangle, in image pixels
+     * @param y       top of the rectangle
+     * @param width   width of the rectangle
+     * @param height  height of the rectangle
+     * @param channel 0 red, 1 green, 2 blue
+     * @return the average, from 0 to 255
+     */
+    public static double meanChannel(NativeImage image, int x, int y, int width, int height, int channel) {
+        int right = Math.min(image.getWidth(), x + width);
+        int bottom = Math.min(image.getHeight(), y + height);
+        long sum = 0;
+        long total = 0;
+        for (int py = Math.max(0, y); py < bottom; py++) {
+            for (int px = Math.max(0, x); px < right; px++) {
+                // NativeImage stores pixels as ABGR: red is the lowest byte
+                sum += image.getPixelRGBA(px, py) >> (channel * 8) & 0xFF;
+                total++;
+            }
+        }
+        return total == 0 ? 0.0 : (double) sum / total;
+    }
+
+    /**
      * Returns the share of pixels that differ inside a rectangle of two images of the same size
      *
      * @param a      one image

@@ -17,6 +17,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.projectile.Arrow;
@@ -73,7 +74,9 @@ public final class LegacyMechanicsTests implements FeatureTests {
             TestCase.of("Attack knockback: a Knockback sword pushes the same way", this::knockbackSword),
             TestCase.of("Attack knockback: mobs with attack knockback push the same way", this::mobAttack),
             TestCase.of("Crouch hitbox: crouching keeps the 1.8 box and 1.62 eyes on the server; off: 1.5 and 1.27",
-                this::crouchHitbox)
+                this::crouchHitbox),
+            TestCase.of("Crouch hitbox: mobs look at a crouching player's face as when standing; off: lower",
+                this::mobsLookAtFace)
         );
     }
 
@@ -393,6 +396,47 @@ public final class LegacyMechanicsTests implements FeatureTests {
         t.release(t.mc().options.keyShift);
         t.ticks(5);
         return result;
+    }
+
+    /** A pig looks at the server's player with its look control (as its AI does); returns the pig's head pitch */
+    private static double lookPitch(TestContext t, Spawned<Pig> pig) {
+        return t.onServer(level -> {
+            Pig entity = (Pig) level.getEntity(pig.id());
+            ServerPlayer player = level.getServer().getPlayerList().getPlayer(t.player().getUUID());
+            t.require(entity != null && player != null, "The pig or the player is gone");
+            for (int i = 0; i < 3; i++) {
+                entity.getLookControl().setLookAt(player, 360.0F, 360.0F);
+                entity.getLookControl().tick();
+            }
+            return (double) entity.getXRot();
+        });
+    }
+
+    /** Returns the pig's head pitch looking at the player {standing, crouching} */
+    private static double[] pitches(TestContext t, Spawned<Pig> pig) {
+        double standing = lookPitch(t, pig);
+        t.hold(t.mc().options.keyShift);
+        t.ticks(10);
+        double crouching = lookPitch(t, pig);
+        t.release(t.mc().options.keyShift);
+        t.ticks(10);
+        return new double[] {standing, crouching};
+    }
+
+    private void mobsLookAtFace(TestContext t) {
+        t.gameMode(GameType.SURVIVAL);
+        t.teleport(4.5, 0.0, 4.5, 0.0F, 0.0F);
+        t.ticks(10);
+        Spawned<Pig> pig = t.spawn(EntityType.PIG, 4.5, 0.0, 7.5, 180.0F, entity -> entity.setNoAi(true));
+        t.ticks(5);
+        double[] on = pitches(t, pig);
+        t.note("on: pig head pitch {standing, crouching}", on[0] + ", " + on[1]);
+        t.check("on: the pig looks at the same height when the player crouches (degrees)", on[1] - on[0])
+            .near(0.0, 0.01);
+        config().legacyCrouchHitbox = false;
+        double[] off = pitches(t, pig);
+        t.note("off: pig head pitch {standing, crouching}", off[0] + ", " + off[1]);
+        t.check("off: the pig looks lower when the player crouches (degrees)", off[1] - off[0]).atLeast(1.0);
     }
 
     private void crouchHitbox(TestContext t) {

@@ -123,6 +123,11 @@ public final class TestSession {
         } catch (Throwable e) {
             report.error(e);
         } finally {
+            try {
+                feature.cleanUp(t);
+            } catch (Throwable e) {
+                report.error(e);
+            }
             Configs.restoreAll(feature.configs(), originals);
             TestWorld.leave(t);
         }

@@ -1,8 +1,10 @@
 package io.github.firstone.framework.devtest;
 
 import io.github.firstone.framework.devtest.core.FeatureTests;
+import io.github.firstone.framework.devtest.features.animatium.AnimatiumTests;
 import io.github.firstone.framework.devtest.features.appearance.AppearanceTests;
 import io.github.firstone.framework.devtest.features.combattweaks.CombatTweaksTests;
+import io.github.firstone.framework.devtest.features.cosmetics.CosmeticsTests;
 import io.github.firstone.framework.devtest.features.legacyhud.LegacyHudTests;
 import io.github.firstone.framework.devtest.features.legacymechanics.LegacyMechanicsTests;
 import io.github.firstone.framework.devtest.features.legacyvehicles.LegacyVehiclesTests;
@@ -27,6 +29,8 @@ public final class DevTests {
         LegacyMechanicsTests::new,
         CombatTweaksTests::new,
         LegacyHudTests::new,
+        CosmeticsTests::new,
+        AnimatiumTests::new,
         LegacyVehiclesTests::new,
         AppearanceTests::new
     );

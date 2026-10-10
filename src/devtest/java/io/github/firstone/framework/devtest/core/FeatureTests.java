@@ -31,4 +31,13 @@ public interface FeatureTests {
      * @return the tests
      */
     List<TestCase> tests();
+
+    /**
+     * Called once after the feature's tests (also when one failed), e.g. to delete files the tests made
+     *
+     * @param t the test context
+     * @throws Exception any error is reported
+     */
+    default void cleanUp(TestContext t) throws Exception {
+    }
 }
