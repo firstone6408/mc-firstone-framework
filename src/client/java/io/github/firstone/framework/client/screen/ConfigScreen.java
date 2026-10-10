@@ -1,6 +1,7 @@
 package io.github.firstone.framework.client.screen;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -10,12 +11,15 @@ import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
+import net.minecraft.util.Mth;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleFunction;
 import java.util.function.Function;
 
 /**
@@ -208,6 +212,28 @@ public abstract class ConfigScreen extends Screen {
     }
 
     /**
+     * Adds a slider for a number between {@code min} and {@code max}, moving in steps of {@code step}
+     *
+     * <p>The config is written and saved only when the value moves to another step.</p>
+     *
+     * @param name      option key (label {@code <name>}, tooltip {@code <name>.tooltip})
+     * @param min       smallest value
+     * @param max       largest value
+     * @param step      distance between two values (e.g. 1 for whole numbers, 0.05 for 5 %)
+     * @param value     current value (clamped to {@code min..max})
+     * @param valueText text shown on the slider for a value, e.g. {@code v -> Component.literal(v + "x")}
+     * @param setter    writes the new value into the config
+     * @return the row
+     */
+    protected ConfigList.OptionRow addSlider(String name, double min, double max, double step, double value,
+                                             DoubleFunction<Component> valueText, DoubleConsumer setter) {
+        return addOption(name, new Slider(min, max, step, value, valueText, newValue -> {
+            setter.accept(newValue);
+            save();
+        }));
+    }
+
+    /**
      * Adds a row with a button that runs an action (for example opening a folder)
      *
      * @param name   option key (label {@code <name>}, button text {@code <name>.button}, tooltip {@code <name>.tooltip})
@@ -262,8 +288,59 @@ public abstract class ConfigScreen extends Screen {
     /** Writes a new value into the config and saves the file */
     private <T> void changed(Consumer<T> setter, T value) {
         setter.accept(value);
+        save();
+    }
+
+    /** Saves the feature config, if this screen has one */
+    private void save() {
         if (this.saveConfig != null) {
             this.saveConfig.run();
+        }
+    }
+
+    /** Slider that snaps to steps and reports a value only when it moves to another step */
+    private static final class Slider extends AbstractSliderButton {
+
+        private final double min;
+        private final double max;
+        private final double step;
+        private final DoubleFunction<Component> valueText;
+        private final DoubleConsumer onChange;
+
+        /** Last reported value, so dragging inside one step does not save again */
+        private double current;
+
+        private Slider(double min, double max, double step, double value, DoubleFunction<Component> valueText,
+                       DoubleConsumer onChange) {
+            super(0, 0, ConfigList.WIDE_CONTROL_WIDTH, ConfigList.CONTROL_HEIGHT, Component.empty(),
+                (Mth.clamp(value, min, max) - min) / (max - min));
+            this.min = min;
+            this.max = max;
+            this.step = step;
+            this.valueText = valueText;
+            this.onChange = onChange;
+            this.current = snap();
+            updateMessage();
+        }
+
+        /** Returns the slider position as a value, rounded to the nearest step */
+        private double snap() {
+            double raw = this.min + this.value * (this.max - this.min);
+            return Mth.clamp(this.min + Math.round((raw - this.min) / this.step) * this.step, this.min, this.max);
+        }
+
+        @Override
+        protected void updateMessage() {
+            setMessage(this.valueText.apply(snap()));
+        }
+
+        @Override
+        protected void applyValue() {
+            double snapped = snap();
+            if (snapped != this.current) {
+                this.current = snapped;
+                this.onChange.accept(snapped);
+            }
         }
     }
 
