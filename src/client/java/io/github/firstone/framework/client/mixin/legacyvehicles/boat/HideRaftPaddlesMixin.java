@@ -1,4 +1,4 @@
-package io.github.firstone.framework.client.mixin.legacyvehicles;
+package io.github.firstone.framework.client.mixin.legacyvehicles.boat;
 
 import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesFeature;
 import net.minecraft.client.model.RaftModel;

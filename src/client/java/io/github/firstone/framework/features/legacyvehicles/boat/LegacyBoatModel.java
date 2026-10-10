@@ -1,10 +1,12 @@
-package io.github.firstone.framework.features.legacyvehicles;
+package io.github.firstone.framework.features.legacyvehicles.boat;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import io.github.firstone.framework.FirstOneFramework;
 import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
+import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesConfig;
+import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesFeature;
 import io.github.firstone.framework.mixin.boat.BoatAccessor;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;

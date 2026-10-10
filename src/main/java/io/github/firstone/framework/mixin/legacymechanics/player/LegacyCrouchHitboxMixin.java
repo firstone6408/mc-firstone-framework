@@ -1,4 +1,4 @@
-package io.github.firstone.framework.mixin.legacymechanics;
+package io.github.firstone.framework.mixin.legacymechanics.player;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;

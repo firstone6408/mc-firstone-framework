@@ -1,7 +1,7 @@
-package io.github.firstone.framework.client.mixin.legacyvehicles;
+package io.github.firstone.framework.client.mixin.legacyvehicles.boat;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.firstone.framework.features.legacyvehicles.LegacyBoatModel;
+import io.github.firstone.framework.features.legacyvehicles.boat.LegacyBoatModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;

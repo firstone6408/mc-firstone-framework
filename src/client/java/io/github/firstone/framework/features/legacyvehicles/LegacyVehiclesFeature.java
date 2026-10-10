@@ -3,14 +3,17 @@ package io.github.firstone.framework.features.legacyvehicles;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.boat.BoatPushPayload;
 import io.github.firstone.framework.common.config.ConfigManager;
+import io.github.firstone.framework.features.legacyvehicles.boat.LegacyBoatModel;
+import io.github.firstone.framework.features.legacyvehicles.boat.LegacyBoats;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
 /**
  * Legacy Vehicles — makes vehicles drive, seat and look like Minecraft 1.7.10 (client only)
  *
  * <p>Client-only feature: registered in {@code FirstOneFrameworkClient}, all setup happens in
- * {@link #initializeClient()}. Its mixins live in {@code client/mixin/legacyvehicles/} and read the settings
- * through {@link #getConfig()} every time they run, so changes apply immediately.</p>
+ * {@link #initializeClient()}. Each vehicle has its own folder ({@code boat/}), here and in
+ * {@code client/mixin/legacyvehicles/}; the mixins read the settings through {@link #getConfig()} every time they run,
+ * so changes apply immediately.</p>
  *
  * <ul>
  *   <li>{@link LegacyBoats} — which boats are changed, 1.7.10 handling, riding and splash</li>
