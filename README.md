@@ -37,10 +37,13 @@ config/firstone-framework/cosmetics/
 ├── item_break/
 │   ├── particle/   0.png, 1.png, …   frames for a breaking tool, weapon or armor piece
 │   └── sound.ogg
-└── music_discs/    cat.ogg, pigstep.ogg, …   file name = disc name; stops when the disc's time is over
+└── music_discs/    any .ogg songs; choose one for each disc in the Music Discs screen
 ```
 
-Sounds must be OGG Vorbis; use mono files so they fade with distance (stereo plays at the same volume everywhere).
+Sounds must be OGG Vorbis. With **3D Sound** on (default) they are mixed down to mono while they load, so you
+hear where they come from. The death sound can start early (before the body disappears) and the start of the item
+break sound can be skipped, so a sound's loudest part lands on the moment. A disc's song stops when the disc's own
+time is over, as in the game.
 
 ---
 

@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -38,7 +39,7 @@ import java.util.function.Consumer;
  *   <li>frames → {@code textures/particle/cosmetics/<effect>/<n>.png}, stitched into the particle atlas
  *       (sprite {@code firstone-framework:cosmetics/<effect>/<n>})</li>
  *   <li>sounds → {@code sounds/cosmetics/…ogg}, with a generated {@code sounds.json} that defines the sound events
- *       {@code cosmetics.death}, {@code cosmetics.item_break} and {@code cosmetics.music_disc.<disc>}</li>
+ *       {@code cosmetics.death}, {@code cosmetics.item_break} and {@code cosmetics.song.<id>} (one per song file)</li>
  * </ul>
  *
  * <p>Only this namespace is used, so no game texture or sound is replaced and other resource packs are not
@@ -67,8 +68,10 @@ public final class CosmeticsPack implements PackResources {
         JsonObject sounds = new JsonObject();
         addEffect(CosmeticsFiles.DEATH, "firstone-framework.cosmetics.subtitle.death", sounds);
         addEffect(CosmeticsFiles.ITEM_BREAK, "subtitles.entity.item.break", sounds);
-        CosmeticsFiles.musicDiscs().forEach((disc, file) ->
-            addSound("music_disc." + disc, "music_disc/" + disc, file, true, null, sounds));
+        for (Path song : CosmeticsFiles.songs()) {
+            String id = songId(song.getFileName().toString());
+            addSound("song." + id, "song/" + id, song, true, null, sounds);
+        }
         if (!sounds.isEmpty()) {
             byte[] json = sounds.toString().getBytes(StandardCharsets.UTF_8);
             this.resources.put(id("sounds.json"), () -> new ByteArrayInputStream(json));
@@ -78,11 +81,38 @@ public final class CosmeticsPack implements PackResources {
     /**
      * Returns the id of the sound event of a Cosmetics sound
      *
-     * @param name {@code death}, {@code item_break} or {@code music_disc.<disc>}
+     * @param name {@code death}, {@code item_break} or {@code song.<id>}
      * @return {@code firstone-framework:cosmetics.<name>}
      */
     public static ResourceLocation soundEvent(String name) {
         return id("cosmetics." + name);
+    }
+
+    /**
+     * Returns the sound event of a song file (it exists only if the file was there at the last resource reload)
+     *
+     * @param fileName file name in {@code music_discs/}, e.g. {@code "My Song.ogg"}
+     * @return {@code firstone-framework:cosmetics.song.<id>}, see {@link #songId}
+     */
+    public static ResourceLocation songEvent(String fileName) {
+        return soundEvent("song." + songId(fileName));
+    }
+
+    /**
+     * Returns the id of a song file, made only from its name, so it never changes while the file keeps its name
+     *
+     * <p>The name in lower case with every character a resource id cannot hold replaced by {@code _}, followed by
+     * a hash of the exact name, so two names that look alike after the replacement still get different ids.</p>
+     *
+     * @param fileName file name, e.g. {@code "My Song.ogg"}
+     * @return e.g. {@code "my_song_1f2e3d4c"}
+     */
+    private static String songId(String fileName) {
+        String name = fileName.toLowerCase(Locale.ROOT);
+        if (name.endsWith(".ogg")) {
+            name = name.substring(0, name.length() - ".ogg".length());
+        }
+        return name.replaceAll("[^a-z0-9_.-]", "_") + "_" + Integer.toHexString(fileName.hashCode());
     }
 
     /**

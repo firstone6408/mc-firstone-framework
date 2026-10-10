@@ -35,6 +35,7 @@
 		"appearance.ConfirmQuitHoverMixin",
 		"appearance.ConfirmQuitMixin",
 		"appearance.WindowTitleMixin",
+		"cosmetics.CosmeticAudioMixin",
 		"cosmetics.CosmeticEffectsMixin",
 		"cosmetics.CosmeticMusicDiscMixin",
 		"cosmetics.CosmeticSelfDeathMixin",

@@ -12,8 +12,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -28,7 +26,7 @@ import java.util.stream.Stream;
  * ├── item_break/
  * │   ├── particle/   0.png, 1.png, …
  * │   └── sound.ogg
- * └── music_discs/    cat.ogg, pigstep.ogg, …   file name = disc name
+ * └── music_discs/    any .ogg songs, chosen for each disc in the Music Discs screen
  * </pre>
  *
  * <p>Used by {@link CosmeticsPack} (what the game loads) and by the config screen (what is in the folders).
@@ -48,11 +46,11 @@ public final class CosmeticsFiles {
     /** Largest frame width or height in pixels; bigger images could make the particle texture fail to build */
     public static final int MAX_FRAME_SIZE = 256;
 
+    /** Most song files used */
+    public static final int MAX_SONGS = 1000;
+
     /** Frame file name: a number and ".png" (e.g. {@code 0.png}, {@code 12.png}) */
     private static final Pattern FRAME_NAME = Pattern.compile("\\d{1,4}\\.png");
-
-    /** Disc name allowed in a resource location (lower case letters, digits, {@code _ - .}) */
-    private static final Pattern DISC_NAME = Pattern.compile("[a-z0-9_.-]+");
 
     /** First 8 bytes of every PNG file */
     private static final byte[] PNG_SIGNATURE = {(byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
@@ -120,30 +118,26 @@ public final class CosmeticsFiles {
     }
 
     /**
-     * Returns the song files of {@code music_discs/}, by disc name
+     * Returns the song files of {@code music_discs/}: every {@code .ogg} file, whatever its name, sorted by name
      *
-     * @return disc name (file name without {@code .ogg}, lower case, e.g. {@code "cat"}) → file, sorted by name
+     * @return the song files (at most {@link #MAX_SONGS}), or an empty list if there are none
      */
-    public static Map<String, Path> musicDiscs() {
+    public static List<Path> songs() {
         Path folder = root().resolve("music_discs");
-        Map<String, Path> discs = new TreeMap<>();
         if (!Files.isDirectory(folder)) {
-            return discs;
+            return List.of();
         }
         try (Stream<Path> files = Files.list(folder)) {
-            files.filter(Files::isRegularFile).forEach(file -> {
-                String name = file.getFileName().toString().toLowerCase(Locale.ROOT);
-                if (name.endsWith(".ogg")) {
-                    String disc = name.substring(0, name.length() - ".ogg".length());
-                    if (DISC_NAME.matcher(disc).matches()) {
-                        discs.put(disc, file);
-                    }
-                }
-            });
+            return files
+                .filter(file -> file.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".ogg"))
+                .filter(Files::isRegularFile)
+                .sorted(Comparator.comparing(file -> file.getFileName().toString()))
+                .limit(MAX_SONGS)
+                .toList();
         } catch (IOException e) {
-            FirstOneFramework.LOGGER.error("Failed to list the music discs of {}: {}", folder, e.getMessage());
+            FirstOneFramework.LOGGER.error("Failed to list the songs of {}: {}", folder, e.getMessage());
+            return List.of();
         }
-        return discs;
     }
 
     /** Returns the number in a frame file name ({@code "12.png"} → 12) */

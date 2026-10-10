@@ -6,14 +6,17 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Holder;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.JukeboxSong;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -39,10 +42,20 @@ public final class CosmeticEffects {
     /** Largest size / duration / speed multiplier (slider maximum) */
     public static final float MAX_SCALE = 4.0F;
 
-    private static final SoundEvent DEATH_SOUND =
-        SoundEvent.createVariableRangeEvent(CosmeticsPack.soundEvent(CosmeticsFiles.DEATH));
-    private static final SoundEvent ITEM_BREAK_SOUND =
-        SoundEvent.createVariableRangeEvent(CosmeticsPack.soundEvent(CosmeticsFiles.ITEM_BREAK));
+    /** Latest death sound start, in seconds before the body disappears (19 of the 20 ticks of the death) */
+    public static final float MAX_SOUND_LEAD = 0.95F;
+
+    /** Longest skip at the start of the item break sound, in seconds */
+    public static final float MAX_SOUND_SKIP = 10.0F;
+
+    /** Ticks between the death and the body disappearing (the game's {@code tickDeath}) */
+    private static final int DEATH_TICKS = 20;
+
+    private static final ResourceLocation DEATH_SOUND = CosmeticsPack.soundEvent(CosmeticsFiles.DEATH);
+    private static final ResourceLocation ITEM_BREAK_SOUND = CosmeticsPack.soundEvent(CosmeticsFiles.ITEM_BREAK);
+
+    /** Volume and attenuation of a jukebox song ({@code SimpleSoundInstance.forJukeboxSong}) */
+    private static final float JUKEBOX_VOLUME = 4.0F;
 
     /**
      * Last entity that got the death effect, so the local player does not get it twice (the death is seen both by
@@ -55,14 +68,15 @@ public final class CosmeticEffects {
     /**
      * Plays the death effect when a dead body disappears (the game's {@code poof})
      *
-     * <p>Plays the death sound if there is one, then the particles if there are frames.</p>
+     * <p>Plays the death sound if there is one (unless it already started early, see {@link #tickDeath}), then the
+     * particles if there are frames.</p>
      *
      * @param entity the entity whose body disappears
      * @return true if the game's {@code poof} must not be shown (custom particles shown, or already handled)
      */
     public static boolean playDeath(LivingEntity entity) {
-        CosmeticsConfig config = CosmeticsFeature.getConfig();
-        if (!config.deathEffect || !appliesTo(entity, config.deathEffectPlayers, config.deathEffectMobs)) {
+        CosmeticsConfig.Death config = CosmeticsFeature.getConfig().death;
+        if (!config.enabled || !appliesTo(entity, config.players, config.mobs)) {
             return false;
         }
         if (lastDeath.get() == entity) {
@@ -70,17 +84,17 @@ public final class CosmeticEffects {
         }
         lastDeath = new WeakReference<>(entity);
 
-        if (!entity.isSilent()) {
-            playSound(entity, DEATH_SOUND, config.deathSoundVolume);
+        if (leadTicks(config) == 0) {
+            playDeathSound(entity, config);
         }
         List<TextureAtlasSprite> frames = frames(CosmeticsFiles.DEATH);
         if (frames.isEmpty() || !(entity.level() instanceof ClientLevel level)) {
             return false;
         }
-        int count = Mth.clamp(config.deathParticleCount, 1, MAX_DEATH_PARTICLES);
-        float size = Mth.clamp(config.deathParticleSize, MIN_SCALE, MAX_SCALE);
-        float duration = Mth.clamp(config.deathParticleDuration, MIN_SCALE, MAX_SCALE);
-        float speed = Mth.clamp(config.deathParticleSpeed, 0.0F, MAX_SCALE);
+        int count = Mth.clamp(config.particleCount, 1, MAX_DEATH_PARTICLES);
+        float size = Mth.clamp(config.particleSize, MIN_SCALE, MAX_SCALE);
+        float duration = Mth.clamp(config.particleDuration, MIN_SCALE, MAX_SCALE);
+        float speed = Mth.clamp(config.particleSpeed, 0.0F, MAX_SCALE);
         RandomSource random = entity.getRandom();
         // same spawn area and motion as LivingEntity.makePoofParticles
         for (int i = 0; i < count; i++) {
@@ -93,15 +107,33 @@ public final class CosmeticEffects {
     }
 
     /**
+     * Starts the death sound early: called every tick of a dying entity, after its death timer moved
+     *
+     * <p>The body disappears when the timer reaches 20 ticks (1 second after the death), so a sound that should
+     * start {@code soundLead} seconds before is started at tick {@code 20 - soundLead × 20}.</p>
+     *
+     * @param entity the dying entity
+     */
+    public static void tickDeath(LivingEntity entity) {
+        CosmeticsConfig.Death config = CosmeticsFeature.getConfig().death;
+        int lead = leadTicks(config);
+        if (lead > 0 && entity.deathTime == DEATH_TICKS - lead && config.enabled
+            && appliesTo(entity, config.players, config.mobs)) {
+            playDeathSound(entity, config);
+        }
+    }
+
+    /**
      * Plays the item break sound instead of the game's one
      *
      * @param entity the entity whose item breaks (only called when it is not silent)
      * @return true if the custom sound replaced the game's sound
      */
     public static boolean playItemBreakSound(LivingEntity entity) {
-        CosmeticsConfig config = CosmeticsFeature.getConfig();
-        return config.itemBreak && appliesTo(entity, config.itemBreakPlayers, config.itemBreakMobs)
-            && playSound(entity, ITEM_BREAK_SOUND, config.itemBreakSoundVolume);
+        CosmeticsConfig.ItemBreak config = CosmeticsFeature.getConfig().itemBreak;
+        int skipMs = Math.round(Mth.clamp(config.soundSkip, 0.0F, MAX_SOUND_SKIP) * 1000);
+        return config.enabled && appliesTo(entity, config.players, config.mobs)
+            && playSound(entity, ITEM_BREAK_SOUND, config.soundVolume, config.sound3d, skipMs);
     }
 
     /**
@@ -111,17 +143,17 @@ public final class CosmeticEffects {
      * @return true if the custom particles replaced the game's particles
      */
     public static boolean playItemBreakParticles(LivingEntity entity) {
-        CosmeticsConfig config = CosmeticsFeature.getConfig();
-        if (!config.itemBreak || !appliesTo(entity, config.itemBreakPlayers, config.itemBreakMobs)) {
+        CosmeticsConfig.ItemBreak config = CosmeticsFeature.getConfig().itemBreak;
+        if (!config.enabled || !appliesTo(entity, config.players, config.mobs)) {
             return false;
         }
         List<TextureAtlasSprite> frames = frames(CosmeticsFiles.ITEM_BREAK);
         if (frames.isEmpty() || !(entity.level() instanceof ClientLevel level)) {
             return false;
         }
-        int count = Mth.clamp(config.itemBreakParticleCount, 1, MAX_ITEM_BREAK_PARTICLES);
-        float size = Mth.clamp(config.itemBreakParticleSize, MIN_SCALE, MAX_SCALE);
-        float duration = Mth.clamp(config.itemBreakParticleDuration, MIN_SCALE, MAX_SCALE);
+        int count = Mth.clamp(config.particleCount, 1, MAX_ITEM_BREAK_PARTICLES);
+        float size = Mth.clamp(config.particleSize, MIN_SCALE, MAX_SCALE);
+        float duration = Mth.clamp(config.particleDuration, MIN_SCALE, MAX_SCALE);
         RandomSource random = entity.getRandom();
         float pitch = -entity.getXRot() * Mth.DEG_TO_RAD;
         float yaw = -entity.getYRot() * Mth.DEG_TO_RAD;
@@ -138,21 +170,41 @@ public final class CosmeticEffects {
     }
 
     /**
-     * Returns the sound a jukebox plays for a disc: the custom song if there is a file for it
+     * Returns the song a jukebox plays for a disc: the song file chosen for it, if the game has loaded that file
      *
-     * @param song     the disc's song (its id, e.g. {@code minecraft:cat}, names the file {@code cat.ogg})
-     * @param original the game's sound for the disc
-     * @return the custom song, or {@code original}
+     * <p>Played like the game's jukebox song ({@code SimpleSoundInstance.forJukeboxSong}): records volume slider,
+     * heard up to 64 blocks away.</p>
+     *
+     * @param song the disc's song (its id, e.g. {@code minecraft:cat}, is the key of the chosen file)
+     * @param pos  center of the jukebox
+     * @return the chosen song, or null to play the game's song
      */
-    public static SoundEvent musicDisc(Holder<JukeboxSong> song, SoundEvent original) {
-        if (!CosmeticsFeature.getConfig().musicDiscs) {
-            return original;
+    @Nullable
+    public static SimpleSoundInstance musicDisc(Holder<JukeboxSong> song, Vec3 pos) {
+        CosmeticsConfig.MusicDiscs config = CosmeticsFeature.getConfig().musicDiscs;
+        if (!config.enabled) {
+            return null;
         }
-        return song.unwrapKey()
-            .map(key -> CosmeticsPack.soundEvent("music_disc." + key.location().getPath()))
-            .filter(id -> Minecraft.getInstance().getSoundManager().getSoundEvent(id) != null)
-            .map(SoundEvent::createVariableRangeEvent)
-            .orElse(original);
+        String file = song.unwrapKey().map(key -> config.songs.get(key.location().toString())).orElse(null);
+        ResourceLocation event = file != null ? CosmeticsPack.songEvent(file) : null;
+        if (event == null || Minecraft.getInstance().getSoundManager().getSoundEvent(event) == null) {
+            // no song chosen, or the file was not there at the last resource reload
+            return null;
+        }
+        return CosmeticAudio.instance(event, SoundSource.RECORDS, JUKEBOX_VOLUME, pos.x, pos.y, pos.z,
+            config.sound3d, 0);
+    }
+
+    /** Returns how many ticks before the body disappears the death sound starts (0 = when it disappears) */
+    private static int leadTicks(CosmeticsConfig.Death config) {
+        return Math.round(Mth.clamp(config.soundLead, 0.0F, MAX_SOUND_LEAD) * DEATH_TICKS);
+    }
+
+    /** Plays the death sound of a not silent entity */
+    private static void playDeathSound(LivingEntity entity, CosmeticsConfig.Death config) {
+        if (!entity.isSilent()) {
+            playSound(entity, DEATH_SOUND, config.soundVolume, config.sound3d, 0);
+        }
     }
 
     /**
@@ -168,12 +220,14 @@ public final class CosmeticEffects {
      *
      * @return true if the sound exists (it is played even at volume 0, which mutes the game's sound)
      */
-    private static boolean playSound(LivingEntity entity, SoundEvent sound, float volume) {
-        if (Minecraft.getInstance().getSoundManager().getSoundEvent(sound.getLocation()) == null) {
+    private static boolean playSound(LivingEntity entity, ResourceLocation event, float volume, boolean mono,
+                                     int skipMs) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.getSoundManager().getSoundEvent(event) == null) {
             return false;
         }
-        entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), sound, entity.getSoundSource(),
-            Mth.clamp(volume, 0.0F, 1.0F), 1.0F, false);
+        minecraft.getSoundManager().play(CosmeticAudio.instance(event, entity.getSoundSource(),
+            Mth.clamp(volume, 0.0F, 1.0F), entity.getX(), entity.getY(), entity.getZ(), mono, skipMs));
         return true;
     }
 

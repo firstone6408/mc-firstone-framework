@@ -9,12 +9,13 @@ import io.github.firstone.framework.common.config.ConfigManager;
  * <p>Client-only feature: registered in {@code FirstOneFrameworkClient}, all setup happens in
  * {@link #initializeClient()}. Images and sounds are files the player puts in
  * {@code config/firstone-framework/cosmetics/} ({@link CosmeticsFiles}); the game reads them through a built-in
- * resource pack ({@link CosmeticsPack}), so nothing is copied and no file ships with the mod.</p>
+ * resource pack ({@link CosmeticsPack}), so nothing is copied and no file ships with the mod. Sounds can be turned
+ * into mono 3D sounds and trimmed while they load ({@link CosmeticAudio}).</p>
  *
  * <ul>
  *   <li>Death effect — custom particles and sound when a dead body disappears ({@link CosmeticEffects})</li>
  *   <li>Item break — custom particles and sound when a tool, weapon or armor piece breaks</li>
- *   <li>Music discs — a custom song for each disc that has a file</li>
+ *   <li>Music discs — a song file chosen for each disc</li>
  * </ul>
  *
  * <p>The mixins live in {@code client/mixin/cosmetics/} and read the settings through {@link #getConfig()}
@@ -38,7 +39,7 @@ public class CosmeticsFeature implements Feature {
      */
     @Override
     public void initializeClient() {
-        config = ConfigManager.load(CONFIG_FILE, CosmeticsConfig.class, new CosmeticsConfig());
+        config = ConfigManager.load(CONFIG_FILE, CosmeticsConfig.class, new CosmeticsConfig()).fillMissing();
         CosmeticsFiles.createFolders();
     }
 

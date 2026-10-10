@@ -18,6 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *
  * <ul>
  *   <li>{@code makePoofParticles} — runs on the client when a dead body disappears (entity event 60)</li>
+ *   <li>{@code tickDeath} — each tick of a dying entity; starts the death sound early when asked (the local player
+ *       and the ender dragon have their own {@code tickDeath}: see {@code CosmeticSelfDeathMixin})</li>
  *   <li>{@code breakItem} — runs on the client when an item of the entity breaks (entity events 47–52 and 65);
  *       its sound and its item crack particles are replaced separately</li>
  * </ul>
@@ -30,6 +32,11 @@ public class CosmeticEffectsMixin {
         if (CosmeticEffects.playDeath((LivingEntity) (Object) this)) {
             ci.cancel();
         }
+    }
+
+    @Inject(method = "tickDeath", at = @At("TAIL"))
+    private void cosmetics$deathTick(CallbackInfo ci) {
+        CosmeticEffects.tickDeath((LivingEntity) (Object) this);
     }
 
     @WrapOperation(method = "breakItem", at = @At(value = "INVOKE",

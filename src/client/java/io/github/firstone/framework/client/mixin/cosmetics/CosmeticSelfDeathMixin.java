@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *
  * <p>The client removes its own player when the death timer reaches 20 ({@code LocalPlayer.tickDeath}), usually
  * before the server's "body disappears" message arrives, so the game shows no {@code poof} for yourself. The custom
- * effect is played at that moment instead; nothing is shown when the effect has no files.</p>
+ * effect is played at that moment instead; nothing is shown when the effect has no files. Each tick of the death
+ * timer may also start the death sound early ({@link CosmeticEffects#tickDeath}).</p>
  */
 @Mixin(LocalPlayer.class)
 public class CosmeticSelfDeathMixin {
@@ -21,5 +22,10 @@ public class CosmeticSelfDeathMixin {
         target = "Lnet/minecraft/client/player/LocalPlayer;remove(Lnet/minecraft/world/entity/Entity$RemovalReason;)V"))
     private void cosmetics$selfDeath(CallbackInfo ci) {
         CosmeticEffects.playDeath((LocalPlayer) (Object) this);
+    }
+
+    @Inject(method = "tickDeath", at = @At("TAIL"))
+    private void cosmetics$selfDeathTick(CallbackInfo ci) {
+        CosmeticEffects.tickDeath((LocalPlayer) (Object) this);
     }
 }
