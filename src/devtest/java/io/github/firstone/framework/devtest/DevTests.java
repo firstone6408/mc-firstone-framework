@@ -1,6 +1,10 @@
 package io.github.firstone.framework.devtest;
 
 import io.github.firstone.framework.devtest.core.FeatureTests;
+import io.github.firstone.framework.devtest.features.appearance.AppearanceTests;
+import io.github.firstone.framework.devtest.features.combattweaks.CombatTweaksTests;
+import io.github.firstone.framework.devtest.features.legacyhud.LegacyHudTests;
+import io.github.firstone.framework.devtest.features.legacymechanics.LegacyMechanicsTests;
 import io.github.firstone.framework.devtest.features.legacyvehicles.LegacyVehiclesTests;
 
 import java.util.ArrayList;
@@ -15,9 +19,16 @@ import java.util.function.Supplier;
  */
 public final class DevTests {
 
-    /** Every feature's tests, in the order they run with {@code all} */
+    /**
+     * Every feature's tests, in the order they run with {@code all} (Appearance last: a failed quit confirmation test
+     * would close the game)
+     */
     private static final List<Supplier<FeatureTests>> ALL = List.of(
-        LegacyVehiclesTests::new
+        LegacyMechanicsTests::new,
+        CombatTweaksTests::new,
+        LegacyHudTests::new,
+        LegacyVehiclesTests::new,
+        AppearanceTests::new
     );
 
     private DevTests() {}

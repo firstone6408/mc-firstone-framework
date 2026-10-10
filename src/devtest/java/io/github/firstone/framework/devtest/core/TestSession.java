@@ -2,6 +2,7 @@ package io.github.firstone.framework.devtest.core;
 
 import io.github.firstone.framework.FirstOneFramework;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.tutorial.TutorialSteps;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -66,6 +67,8 @@ public final class TestSession {
                 minecraft.options.pauseOnLostFocus = false;
                 minecraft.options.renderDistance().set(10);
                 minecraft.options.simulationDistance().set(10);
+                // no tutorial hints in the corner of the screen
+                minecraft.getTutorial().setStep(TutorialSteps.NONE);
                 return null;
             });
             for (FeatureTests feature : this.features) {

@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "io.github.firstone.framework.devtest.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ContainerScreenAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

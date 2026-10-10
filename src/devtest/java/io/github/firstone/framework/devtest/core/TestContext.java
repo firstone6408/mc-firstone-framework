@@ -13,14 +13,21 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -351,6 +358,48 @@ public final class TestContext {
     }
 
     /**
+     * Presses and lets go of a keyboard key, through the game's keyboard handler (as a real key press)
+     *
+     * @param key the GLFW key code, e.g. {@code GLFW.GLFW_KEY_ESCAPE}
+     */
+    public void pressKey(int key) {
+        onClientThread(() -> {
+            long window = this.minecraft.getWindow().getWindow();
+            this.minecraft.keyboardHandler.keyPress(window, key, 0, GLFW.GLFW_PRESS, 0);
+            this.minecraft.keyboardHandler.keyPress(window, key, 0, GLFW.GLFW_RELEASE, 0);
+            return null;
+        });
+        tick();
+    }
+
+    /**
+     * Makes an item with an enchantment
+     *
+     * @param item        the item
+     * @param enchantment the enchantment, e.g. {@code Enchantments.SWEEPING_EDGE}
+     * @param level       the enchantment level
+     * @return the item
+     */
+    public ItemStack enchanted(Item item, ResourceKey<Enchantment> enchantment, int level) {
+        return onServer(serverLevel -> {
+            ItemStack stack = new ItemStack(item);
+            stack.enchant(serverLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(enchantment),
+                level);
+            return stack;
+        });
+    }
+
+    /**
+     * Puts an item into the player's main hand (on the server; the client gets it a tick later)
+     *
+     * @param stack the item, or {@code ItemStack.EMPTY}
+     */
+    public void holdItem(ItemStack stack) {
+        withServerPlayer(player -> player.setItemInHand(InteractionHand.MAIN_HAND, stack.copy()));
+        ticks(3);
+    }
+
+    /**
      * Sets the player's game mode
      *
      * @param mode the game mode
@@ -526,6 +575,32 @@ public final class TestContext {
     }
 
     /**
+     * Captures the current frame as it is shown (with the HUD), without saving it
+     *
+     * @return the frame; the caller closes it
+     */
+    public NativeImage captureFrame() {
+        ticks(2);
+        return onClientThread(() -> Screenshot.takeScreenshot(this.minecraft.getMainRenderTarget()));
+    }
+
+    /**
+     * Saves a frame captured with {@link #captureFrame} in {@code results/screenshots/<feature>/}
+     *
+     * @param name  file name without extension
+     * @param frame the frame; not closed here
+     */
+    public void saveFrame(String name, NativeImage frame) {
+        NativeImage copy = new NativeImage(frame.getWidth(), frame.getHeight(), false);
+        copy.copyFrom(frame);
+        try {
+            this.screenshots.save(name, copy);
+        } catch (IOException e) {
+            throw new TestFailure("Cannot save screenshot " + name + ": " + e);
+        }
+    }
+
+    /**
      * Takes a screenshot without the HUD and only saves it in {@code results/screenshots/<feature>/}, for views that
      * depend on something the test does not control (e.g. a screen that highlights the row under the mouse)
      *
@@ -565,16 +640,25 @@ public final class TestContext {
 
     // ---- between tests --------------------------------------------------------------------------------------------
 
-    /** Before each test: player home in creative and flying, no other entities, the site cleared */
+    /**
+     * Before each test: player home in creative and flying, without items or effects, no other entities, the site
+     * cleared
+     */
     void resetForTest() {
         KeyMapping.releaseAll();
+        onClientThread(() -> {
+            this.minecraft.getToasts().clear();
+            return null;
+        });
         this.minecraft.options.hideGui = false;
         this.minecraft.options.setCameraType(CameraType.FIRST_PERSON);
         withServerPlayer(player -> {
             player.stopRiding();
             player.setGameMode(GameType.CREATIVE);
             player.getInventory().clearContent();
+            player.removeAllEffects();
             player.setHealth(player.getMaxHealth());
+            player.getFoodData().setFoodLevel(20);
         });
         removeEntities();
         command("gamerule doEntityDrops true", "time set noon", "weather clear");

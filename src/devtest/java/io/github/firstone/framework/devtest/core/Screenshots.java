@@ -17,9 +17,6 @@ import java.nio.file.StandardCopyOption;
  */
 final class Screenshots {
 
-    /** A pixel differs when one of its color channels differs by more than this (water and particles move) */
-    private static final int CHANNEL_TOLERANCE = 40;
-
     private final Path results;
     private final Path baselines;
     private final boolean update;
@@ -50,7 +47,7 @@ final class Screenshots {
                 return -1.0;
             }
             try (InputStream input = Files.newInputStream(baseline); NativeImage expected = NativeImage.read(input)) {
-                return differingPercent(image, expected);
+                return Images.differingPercent(image, expected);
             }
         }
     }
@@ -69,25 +66,5 @@ final class Screenshots {
             image.writeToFile(this.results.resolve(name + ".png"));
             return 0.0;
         }
-    }
-
-    private static double differingPercent(NativeImage actual, NativeImage expected) {
-        if (actual.getWidth() != expected.getWidth() || actual.getHeight() != expected.getHeight()) {
-            return 100.0;
-        }
-        long differing = 0;
-        for (int y = 0; y < actual.getHeight(); y++) {
-            for (int x = 0; x < actual.getWidth(); x++) {
-                int a = actual.getPixelRGBA(x, y);
-                int b = expected.getPixelRGBA(x, y);
-                for (int shift = 0; shift < 24; shift += 8) {
-                    if (Math.abs((a >> shift & 0xFF) - (b >> shift & 0xFF)) > CHANNEL_TOLERANCE) {
-                        differing++;
-                        break;
-                    }
-                }
-            }
-        }
-        return differing * 100.0 / ((long) actual.getWidth() * actual.getHeight());
     }
 }

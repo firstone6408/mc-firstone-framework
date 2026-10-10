@@ -89,6 +89,7 @@ src/
 └── devtest/java/io/github/firstone/framework/devtest/   ← In-game tests (development only, never in the jar)
     ├── DevTests.java                   ← List of every feature's tests
     ├── core/                           ← Test framework (world, site, checks, report, screenshots)
+    ├── mixin/                          ← The test mod's accessors to Minecraft internals
     └── features/
         └── <feature name>/
             ├── <Name>Tests.java        ← That feature's tests
@@ -284,7 +285,11 @@ private void waterTopSpeed(TestContext t) {
 - `t.spawn(...)`, `t.ride(...)`, `t.teleport(...)`, `t.hold(key)` — act like a player
 - `t.onServer(...)`, `t.command(...)` — read or change the server
 - `t.check(name, value).near(...)` / `.between(...)` / `.isTrue()` … — checks; `t.note(...)` records a value
-- `t.screenshot(name, maxPercent)`, `t.recordSounds()`, `t.particleCount(type)`, `t.resourcePack(name)`
+- `t.screenshot(name, maxPercent)`, `t.saveScreenshot(name)`, `t.captureFrame()` + `Images.differingPercent(...)`
+- `t.recordSounds()`, `t.particleCount(type)`, `t.resourcePack(name)`, `t.openSettings(featureId)`
+- `t.pressKey(key)`, `t.holdItem(stack)`, `t.enchanted(item, enchantment, level)`
+- `WindowInfo.title(...)` / `x11Property(...)` — what the window system shows (X11 with `xprop`; noted as skipped
+  elsewhere)
 
 Before each test the site is cleared, the player is put back in creative at the start and every other entity is
 removed, so tests never depend on each other.
@@ -295,6 +300,8 @@ So that a refactor (moving or renaming classes) does not touch the tests:
 - Use only the feature's config and `FeatureScreenRegistry` (`t.openSettings(featureId)`) directly
 - When a check really needs an inner class, call it only from `<Name>Internals.java` next to the tests; after a
   refactor only that file changes
+- To read a private field of Minecraft itself (e.g. where a screen is drawn), add an accessor mixin to
+  `src/devtest/.../devtest/mixin/` (the test mod's own mixins, never in the mod jar)
 
 ---
 
