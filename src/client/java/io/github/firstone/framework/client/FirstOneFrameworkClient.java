@@ -9,6 +9,8 @@ import io.github.firstone.framework.features.animatium.client.screen.AnimatiumCo
 import io.github.firstone.framework.features.appearance.AppearanceFeature;
 import io.github.firstone.framework.features.appearance.client.screen.AppearanceConfigScreen;
 import io.github.firstone.framework.features.combattweaks.client.screen.CombatTweaksConfigScreen;
+import io.github.firstone.framework.features.legacyhud.LegacyHudFeature;
+import io.github.firstone.framework.features.legacyhud.client.screen.LegacyHudConfigScreen;
 import io.github.firstone.framework.features.legacymechanics.client.screen.LegacyMechanicsConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.world.item.Items;
@@ -30,9 +32,11 @@ public class FirstOneFrameworkClient implements ClientModInitializer {
         // client-only features are registered here (not through FirstOneFramework)
         FeatureRegistry.register(new AnimatiumFeature());
         FeatureRegistry.register(new AppearanceFeature());
+        FeatureRegistry.register(new LegacyHudFeature());
 
         FeatureScreenRegistry.register("animatium", Items.ARMOR_STAND, Side.CLIENT, AnimatiumConfigScreen::new);
         FeatureScreenRegistry.register("appearance", Items.PAINTING, Side.CLIENT, AppearanceConfigScreen::new);
+        FeatureScreenRegistry.register("legacy_hud", Items.MAP, Side.CLIENT, LegacyHudConfigScreen::new);
         FeatureScreenRegistry.register("combat_tweaks", Items.IRON_SWORD, Side.SERVER, CombatTweaksConfigScreen::new);
         FeatureScreenRegistry.register("legacy_mechanics", Items.CLOCK, Side.SERVER, LegacyMechanicsConfigScreen::new);
 
