@@ -42,6 +42,13 @@ public class AnimatiumConfig {
     public boolean legacyFirstPersonItems = true;
 
     /**
+     * 1.7.10 third-person items: players, zombies and skeletons hold items, tools, bows and blocks where 1.7.10 drew
+     * them, and a player blocking with a sword raises the arm like 1.7.10. Items 1.7.10 did not have and newer mobs
+     * keep their 1.21.1 look.
+     */
+    public boolean legacyThirdPersonItems = true;
+
+    /**
      * Keeps the 1.21.1 look for items whose model a resource pack or another mod changes, so the pack's look is not
      * lost to the 1.7.10 placement
      */

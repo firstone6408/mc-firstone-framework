@@ -11,6 +11,9 @@
 		"legacymechanics.knockback.LegacyMobAttackKnockbackMixin",
 		"legacymechanics.player.LegacyCrouchHitboxMixin",
 		"legacymechanics.food.LegacyRegenerationMixin",
+		"legacymechanics.sword.LegacySwordUseMixin",
+		"legacymechanics.sword.LegacySwordShieldMixin",
+		"legacymechanics.sword.LegacySwordDamageMixin",
 		"legacymechanics.boat.LegacyBoatRulesMixin",
 		"legacymechanics.boat.LegacyBoatDriverMixin",
 		"legacymechanics.boat.LegacyBoatEntityMixin"

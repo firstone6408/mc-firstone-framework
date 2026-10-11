@@ -3,6 +3,8 @@ package io.github.firstone.framework.features.legacymechanics;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.boat.BoatPushPayload;
 import io.github.firstone.framework.common.config.ConfigManager;
+import io.github.firstone.framework.common.sword.SwordBlockingPayload;
+import io.github.firstone.framework.features.legacymechanics.sword.LegacySwordBlocking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 /**
@@ -15,7 +17,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
  *
  * <p>Each part has its own folder, here and in {@code mixin/legacymechanics/}: {@code knockback/} (knockback of hits
  * and attacks), {@code player/} (the hitbox of crouching players, mixin only), {@code food/} (natural
- * regeneration) and {@code boat/} (boat breaking and coasting).</p>
+ * regeneration), {@code sword/} (sword blocking) and {@code boat/} (boat breaking and coasting).</p>
  */
 public class LegacyMechanicsFeature implements Feature {
 
@@ -34,6 +36,8 @@ public class LegacyMechanicsFeature implements Feature {
     public void initialize() {
         config = ConfigManager.load(CONFIG_FILE, LegacyMechanicsConfig.class, new LegacyMechanicsConfig());
         PayloadTypeRegistry.playS2C().register(BoatPushPayload.TYPE, BoatPushPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SwordBlockingPayload.TYPE, SwordBlockingPayload.CODEC);
+        LegacySwordBlocking.registerSync();
     }
 
     /**

@@ -8,9 +8,12 @@ import io.github.firstone.framework.devtest.core.TestContext;
 import io.github.firstone.framework.devtest.core.TestResourcePack;
 import io.github.firstone.framework.devtest.core.VertexCapture;
 import io.github.firstone.framework.devtest.core.VertexCapture.Vertex;
+import io.github.firstone.framework.devtest.features.animatium.item.ItemDrawingChecks;
 import io.github.firstone.framework.devtest.mixin.ItemInHandRendererInvoker;
 import io.github.firstone.framework.features.animatium.AnimatiumConfig;
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
+import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsConfig;
+import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -24,8 +27,15 @@ import net.minecraft.world.item.Items;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static io.github.firstone.framework.devtest.features.animatium.item.ItemDrawingChecks.ELSEWHERE;
+import static io.github.firstone.framework.devtest.features.animatium.item.ItemDrawingChecks.blockCorners;
+import static io.github.firstone.framework.devtest.features.animatium.item.ItemDrawingChecks.checkAt;
+import static io.github.firstone.framework.devtest.features.animatium.item.ItemDrawingChecks.farthestCorner;
+import static io.github.firstone.framework.devtest.features.animatium.item.ItemDrawingChecks.rotate;
+import static io.github.firstone.framework.devtest.features.animatium.item.ItemDrawingChecks.samePositions;
+import static io.github.firstone.framework.devtest.features.animatium.item.ItemDrawingChecks.spriteLikeLegacy;
 
 /**
  * Tests of the 1.7.10 first-person items, part of the Animatium tests
@@ -37,12 +47,6 @@ import java.util.List;
  * a drawn vertex, and nothing may be drawn outside it.</p>
  */
 public final class FirstPersonItemTests {
-
-    /** Largest distance between an expected and a drawn position (floating point only) */
-    private static final float POSITION_TOLERANCE = 1.0E-4F;
-
-    /** A drawing counts as somewhere else when a corner is at least this far from every drawn vertex */
-    private static final float ELSEWHERE = 0.01F;
 
     private FirstPersonItemTests() {}
 
@@ -62,6 +66,8 @@ public final class FirstPersonItemTests {
                 FirstPersonItemTests::fishingRod),
             TestCase.of("First-Person Items: the bow while drawing and the eating motion follow 1.7.10",
                 FirstPersonItemTests::useAnimations),
+            TestCase.of("First-Person Items: a blocking sword takes the 1.7.10 block pose, also while swinging "
+                + "(block-hit)", FirstPersonItemTests::swordBlocking),
             TestCase.of("First-Person Items: the left hand gets the same placement mirrored",
                 FirstPersonItemTests::leftHand),
             TestCase.of("First-Person Items: shield, trident and crossbow keep their 1.21.1 look",
@@ -103,13 +109,11 @@ public final class FirstPersonItemTests {
     // ---- the 1.7.10 placement, written again ----------------------------------------------------------------------
 
     /** What the hand is doing, for the placement */
-    private record Use(boolean using, boolean eating, boolean bow, float useLeft, float useDuration) {
+    private record Use(boolean using, boolean eating, boolean bow, boolean block, float useLeft, float useDuration) {
 
-        static final Use NOTHING = new Use(false, false, false, 0.0F, 0.0F);
-    }
+        static final Use NOTHING = new Use(false, false, false, false, 0.0F, 0.0F);
 
-    private static Matrix4f rotate(Matrix4f m, float degrees, float x, float y, float z) {
-        return m.rotate((float) Math.toRadians(degrees), x, y, z);
+        static final Use BLOCKING = new Use(true, false, false, true, 0.0F, 0.0F);
     }
 
     /** 1.7.10 renderItemInFirstPerson for the right hand, up to the item ({@code renderItem}) */
@@ -134,6 +138,12 @@ public final class FirstPersonItemTests {
         rotate(m, -Mth.sin(Mth.sqrt(swing) * Mth.PI) * 20.0F, 0, 0, 1);
         rotate(m, -Mth.sin(Mth.sqrt(swing) * Mth.PI) * 80.0F, 1, 0, 0);
         m.scale(0.4F);
+        if (use.block) {
+            m.translate(-0.5F, 0.2F, 0.0F);
+            rotate(m, 30.0F, 0, 1, 0);
+            rotate(m, -80.0F, 1, 0, 0);
+            rotate(m, 60.0F, 0, 1, 0);
+        }
         if (use.bow) {
             rotate(m, -18.0F, 0, 0, 1);
             rotate(m, -12.0F, 0, 1, 0);
@@ -159,100 +169,22 @@ public final class FirstPersonItemTests {
         return m;
     }
 
-    /** 1.7.10 renderItem for a flat item: the matrix the sprite (0..1, 0..1, -1/16..0) is drawn with */
-    private static Matrix4f legacyFlat(Matrix4f hand) {
-        Matrix4f m = new Matrix4f(hand);
-        m.translate(0.0F, -0.3F, 0.0F);
-        m.scale(1.5F);
-        rotate(m, 50.0F, 0, 1, 0);
-        rotate(m, 335.0F, 0, 0, 1);
-        m.translate(-0.9375F, -0.0625F, 0.0F);
-        return m;
-    }
-
     /** 1.7.10 renderBlockAsItem for a plain block: the matrix the cube around its center is drawn with */
     private static Matrix4f legacyBlock(Matrix4f hand) {
         return rotate(new Matrix4f(hand), 90.0F, 0, 1, 0);
     }
 
-    private static List<Vector3f> corners(Matrix4f m, float x0, float x1, float y0, float y1, float z0, float z1) {
-        List<Vector3f> corners = new ArrayList<>();
-        for (float x : new float[] {x0, x1}) {
-            for (float y : new float[] {y0, y1}) {
-                for (float z : new float[] {z0, z1}) {
-                    corners.add(m.transformPosition(x, y, z, new Vector3f()));
-                }
-            }
-        }
-        return corners;
-    }
-
+    /** The sprite's corners for the right hand */
     private static List<Vector3f> flatCorners(Matrix4f hand) {
-        return corners(legacyFlat(hand), 0.0F, 1.0F, 0.0F, 1.0F, -1.0F / 16.0F, 0.0F);
+        return ItemDrawingChecks.flatCorners(hand, 1);
     }
 
-    private static List<Vector3f> blockCorners(Matrix4f hand) {
-        return corners(legacyBlock(hand), -0.5F, 0.5F, -0.5F, 0.5F, -0.5F, 0.5F);
-    }
-
-    private static List<Vector3f> mirrored(List<Vector3f> points) {
-        List<Vector3f> mirrored = new ArrayList<>();
-        for (Vector3f p : points) {
-            mirrored.add(new Vector3f(-p.x, p.y, p.z));
-        }
-        return mirrored;
+    /** The placement of the left hand: the right hand's mirrored across x */
+    private static Matrix4f mirrored(Matrix4f hand) {
+        return new Matrix4f().scale(-1.0F, 1.0F, 1.0F).mul(hand).scale(-1.0F, 1.0F, 1.0F);
     }
 
     // ---- comparisons ----------------------------------------------------------------------------------------------
-
-    /** Largest distance from an expected point to the nearest drawn vertex */
-    private static double farthestCorner(List<Vertex> drawn, List<Vector3f> expected) {
-        double farthest = 0.0;
-        for (Vector3f corner : expected) {
-            double nearest = Double.MAX_VALUE;
-            for (Vertex vertex : drawn) {
-                nearest = Math.min(nearest, vertex.position().distance(corner));
-            }
-            farthest = Math.max(farthest, nearest);
-        }
-        return farthest;
-    }
-
-    /** Largest distance of a drawn vertex outside the box around the expected points */
-    private static double outsideBox(List<Vertex> drawn, List<Vector3f> expected) {
-        Vector3f min = new Vector3f(Float.MAX_VALUE);
-        Vector3f max = new Vector3f(-Float.MAX_VALUE);
-        expected.forEach(p -> {
-            min.min(p);
-            max.max(p);
-        });
-        double outside = 0.0;
-        for (Vertex vertex : drawn) {
-            Vector3f p = vertex.position();
-            outside = Math.max(outside, Math.max(Math.max(min.x - p.x, p.x - max.x),
-                Math.max(Math.max(min.y - p.y, p.y - max.y), Math.max(min.z - p.z, p.z - max.z))));
-        }
-        return outside;
-    }
-
-    private static void checkAt(TestContext t, String name, List<Vertex> drawn, List<Vector3f> expected) {
-        t.require(!drawn.isEmpty(), "Nothing was drawn for: " + name);
-        t.check(name + ": farthest 1.7.10 corner from the drawing", farthestCorner(drawn, expected))
-            .atMost(POSITION_TOLERANCE);
-        t.check(name + ": drawn outside the 1.7.10 shape", outsideBox(drawn, expected)).atMost(POSITION_TOLERANCE);
-    }
-
-    private static boolean samePositions(List<Vertex> a, List<Vertex> b) {
-        if (a.size() != b.size()) {
-            return false;
-        }
-        for (int i = 0; i < a.size(); i++) {
-            if (a.get(i).position().distance(b.get(i).position()) > POSITION_TOLERANCE) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     // ---- tests ----------------------------------------------------------------------------------------------------
 
@@ -263,17 +195,8 @@ public final class FirstPersonItemTests {
             hold(t, stack);
             List<Vertex> drawn = draw(t);
             checkAt(t, "on, " + name, drawn, flatCorners(hand));
-            // 1.7.10 drew the sprite's right edge (u max) at x = 0 and its bottom (v max) at y = 0; only the big front
-            // and back faces count (the edge strips reach a little further into the texture)
-            Vector3f origin = legacyFlat(hand).transformPosition(0.0F, 0.0F, 0.0F, new Vector3f());
-            Vector3f faceNormal = legacyFlat(hand).transformDirection(0.0F, 0.0F, 1.0F, new Vector3f()).normalize();
-            List<Vertex> faces = drawn.stream()
-                .filter(v -> Math.abs(new Vector3f(v.normal()).normalize().dot(faceNormal)) > 0.99F).toList();
-            float maxU = (float) faces.stream().mapToDouble(vertex -> vertex.u()).max().orElse(0.0);
-            float maxV = (float) faces.stream().mapToDouble(vertex -> vertex.v()).max().orElse(0.0);
-            boolean mirrored = faces.stream().anyMatch(v -> v.position().distance(origin) < POSITION_TOLERANCE
-                && Math.abs(v.u() - maxU) < 1.0E-6F && Math.abs(v.v() - maxV) < 1.0E-6F);
-            t.check("on, " + name + ": sprite mirrored left to right like 1.7.10", mirrored).isTrue();
+            t.check("on, " + name + ": sprite mirrored left to right like 1.7.10", spriteLikeLegacy(drawn, hand, 1))
+                .isTrue();
         }
         config().legacyFirstPersonItems = false;
         t.check("off, Diamond Sword: farthest 1.7.10 corner (somewhere else, 1.21.1)",
@@ -283,10 +206,10 @@ public final class FirstPersonItemTests {
     private static void block(TestContext t) {
         Matrix4f hand = legacyHand(0.0F, 0.0F, Use.NOTHING, false);
         hold(t, new ItemStack(Items.COBBLESTONE));
-        checkAt(t, "on, Cobblestone", draw(t), blockCorners(hand));
+        checkAt(t, "on, Cobblestone", draw(t), blockCorners(legacyBlock(hand)));
         hold(t, new ItemStack(Items.FURNACE));
         List<Vertex> drawn = draw(t);
-        checkAt(t, "on, Furnace", drawn, blockCorners(hand));
+        checkAt(t, "on, Furnace", drawn, blockCorners(legacyBlock(hand)));
         TextureAtlasSprite front = t.onClientThread(() -> t.mc().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS)
             .getSprite(ResourceLocation.withDefaultNamespace("block/furnace_front")));
         List<Vertex> frontFace = drawn.stream().filter(v -> v.u() >= front.getU0() && v.u() <= front.getU1()
@@ -328,7 +251,7 @@ public final class FirstPersonItemTests {
             LocalPlayer player = t.player();
             t.require(player.isUsingItem(), "The item is not being used");
             // drawn at partial tick 1: the use time left is the remaining ticks
-            return new Use(true, !bow, bow, player.getUseItemRemainingTicks(),
+            return new Use(true, !bow, bow, false, player.getUseItemRemainingTicks(),
                 player.getUseItem().getUseDuration(player));
         });
         List<Vertex> drawn = draw(t);
@@ -350,14 +273,69 @@ public final class FirstPersonItemTests {
         }
     }
 
-    private static void leftHand(TestContext t) {
+    private static void swordBlocking(TestContext t) {
+        // sword blocking is a Legacy Mechanics setting: on for this test, then as it was
+        LegacyMechanicsConfig mechanics = LegacyMechanicsFeature.getConfig();
+        boolean blocking = mechanics.legacySwordBlocking;
+        mechanics.legacySwordBlocking = true;
+        try {
+            hold(t, new ItemStack(Items.DIAMOND_SWORD));
+            t.ticks(3);
+            t.hold(t.mc().options.keyUse);
+            t.ticks(8);
+            t.require(t.onClientThread(() -> t.player().isUsingItem()), "The sword is not blocking");
+            checkAt(t, "on, blocking", draw(t), flatCorners(legacyHand(0.0F, 0.0F, Use.BLOCKING, false)));
+            checkAt(t, "on, blocking while swinging 0.4", draw(t, InteractionHand.MAIN_HAND, 0.4F, 0.0F),
+                flatCorners(legacyHand(0.4F, 0.0F, Use.BLOCKING, false)));
+            t.release(t.mc().options.keyUse);
+            t.ticks(5);
+        } finally {
+            mechanics.legacySwordBlocking = blocking;
+        }
+    }
+
+    private static void holdOffHand(TestContext t, ItemStack stack) {
         t.holdItem(ItemStack.EMPTY);
-        t.withServerPlayer(player -> player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.APPLE)));
+        t.withServerPlayer(player -> player.setItemInHand(InteractionHand.OFF_HAND, stack.copy()));
         t.ticks(3);
-        checkAt(t, "on, off hand (left)", draw(t, InteractionHand.OFF_HAND, 0.0F, 0.0F),
-            mirrored(flatCorners(legacyHand(0.0F, 0.0F, Use.NOTHING, false))));
-        checkAt(t, "on, off hand (left), swing 0.6", draw(t, InteractionHand.OFF_HAND, 0.6F, 0.0F),
-            mirrored(flatCorners(legacyHand(0.6F, 0.0F, Use.NOTHING, false))));
+    }
+
+    /** Checks the left hand: the mirror image of the right hand's 1.7.10 placement, texture included */
+    private static void checkLeft(TestContext t, String name, List<Vertex> drawn, Matrix4f hand) {
+        checkAt(t, name, drawn, ItemDrawingChecks.flatCorners(mirrored(hand), -1));
+        t.check(name + ": the texture is the mirror image of the right hand's",
+            spriteLikeLegacy(drawn, mirrored(hand), -1)).isTrue();
+    }
+
+    private static void leftHand(TestContext t) {
+        for (ItemStack stack : List.of(new ItemStack(Items.DIAMOND_SWORD), new ItemStack(Items.APPLE),
+            new ItemStack(Items.BOW))) {
+            holdOffHand(t, stack);
+            String name = "on, off hand (left), " + stack.getHoverName().getString();
+            checkLeft(t, name, draw(t, InteractionHand.OFF_HAND, 0.0F, 0.0F),
+                legacyHand(0.0F, 0.0F, Use.NOTHING, false));
+            checkLeft(t, name + ", swing 0.6", draw(t, InteractionHand.OFF_HAND, 0.6F, 0.0F),
+                legacyHand(0.6F, 0.0F, Use.NOTHING, false));
+        }
+        holdOffHand(t, new ItemStack(Items.FISHING_ROD));
+        checkLeft(t, "on, off hand (left), Fishing Rod", draw(t, InteractionHand.OFF_HAND, 0.0F, 0.0F),
+            legacyHand(0.0F, 0.0F, Use.NOTHING, true));
+        for (boolean bow : new boolean[] {true, false}) {
+            holdOffHand(t, new ItemStack(bow ? Items.BOW : Items.COOKED_BEEF));
+            t.hold(t.mc().options.keyUse);
+            t.ticks(bow ? 30 : 12);
+            Use use = t.onClientThread(() -> {
+                LocalPlayer player = t.player();
+                t.require(player.isUsingItem() && player.getUsedItemHand() == InteractionHand.OFF_HAND,
+                    "The off-hand item is not being used");
+                return new Use(true, !bow, bow, false, player.getUseItemRemainingTicks(),
+                    player.getUseItem().getUseDuration(player));
+            });
+            checkLeft(t, bow ? "on, off hand (left), bow drawn" : "on, off hand (left), eating",
+                draw(t, InteractionHand.OFF_HAND, 0.0F, 0.0F), legacyHand(0.0F, 0.0F, use, false));
+            t.release(t.mc().options.keyUse);
+            t.ticks(5);
+        }
     }
 
     private static void newerItems(TestContext t) {
