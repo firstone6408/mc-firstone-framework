@@ -5,6 +5,7 @@
 	"client": [
 		"ContainerScreenAccessor",
 		"HandRendererAccessor",
+		"MobAccessor",
 		"SoundBufferAccessor",
 		"SoundEngineAccessor",
 		"SoundManagerAccessor"

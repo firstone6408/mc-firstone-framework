@@ -9,6 +9,7 @@ import io.github.firstone.framework.devtest.core.TestCase;
 import io.github.firstone.framework.devtest.core.TestContext;
 import io.github.firstone.framework.devtest.core.TestSite;
 import io.github.firstone.framework.devtest.mixin.HandRendererAccessor;
+import io.github.firstone.framework.devtest.mixin.MobAccessor;
 import io.github.firstone.framework.features.animatium.AnimatiumConfig;
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
 import io.github.firstone.framework.features.combattweaks.CombatTweaksFeature;
@@ -24,6 +25,7 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -36,6 +38,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Zombie;
@@ -44,6 +47,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +103,10 @@ public final class AnimatiumTests implements FeatureTests {
             TestCase.of("Mob Physics: the client moves mobs with their velocity; off: it holds it", this::mobPhysics),
             TestCase.of("Body Rotation: the player's body follows the head like 1.7.10 (75 degrees)",
                 this::bodyRotation),
+            TestCase.of("Body Rotation: no mob's head turns further from its body than 75 degrees or than in 1.21.1",
+                this::mobHeadLimit),
+            TestCase.of("Body Rotation: walking mobs face the way they walk, also while looking at the player",
+                this::walkingBody),
             // models
             TestCase.of("Sneak Pose: the 1.7.10 model while sneaking, also when flying; off: 1.21.1", this::sneakPose),
             TestCase.of("Zombie Arms: zombies and skeletons hold their arms straight forward", this::zombieArms),
@@ -596,6 +604,174 @@ public final class AnimatiumTests implements FeatureTests {
         List<Float> off = turnHead(t);
         t.check("off: body yaw after 1 tick (1.21.1: at most 50 degrees from the head)", (double) off.get(0))
             .near(50.0, 1.0E-3);
+    }
+
+    /** Every mob of the game except the ender dragon, which turns its own body in both versions */
+    private static List<EntityType<?>> mobTypes(TestContext t) {
+        return t.onServer(level -> {
+            List<EntityType<?>> types = new ArrayList<>();
+            for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
+                Entity entity = type.create(level);
+                if (entity instanceof Mob && !(entity instanceof EnderDragon)) {
+                    types.add(type);
+                }
+            }
+            return types;
+        });
+    }
+
+    /** Spawns a mob that stays (no AI, kept) at a spot of the grid, facing 0 */
+    private static <T extends Entity> Spawned<T> stillMob(TestContext t, EntityType<T> type, int index) {
+        return t.spawn(type, 4.5 + index % 10 * 6, 0.0, 8.5 + index / 10 * 6, 0.0F, entity -> {
+            if (entity instanceof Mob mob) {
+                mob.setNoAi(true);
+                mob.setPersistenceRequired();
+            }
+        });
+    }
+
+    /**
+     * Spawns every mob facing 0, then turns their heads to 170 degrees on the server (they look behind the way they
+     * walked); returns each mob's angle between head and body on the client a while later
+     */
+    private static List<Double> headToBody(TestContext t, List<EntityType<?>> types) {
+        t.command("difficulty easy");
+        t.teleport(30.5, 12.0, -10.0, 0.0F, 30.0F);
+        t.setFlying(true);
+        List<Spawned<?>> mobs = new ArrayList<>();
+        for (int i = 0; i < types.size(); i++) {
+            mobs.add(stillMob(t, types.get(i), i));
+        }
+        t.ticks(10);
+        t.onServer(level -> {
+            for (Spawned<?> mob : mobs) {
+                Entity entity = level.getEntity(mob.id());
+                t.require(entity != null, "A mob is gone");
+                entity.setYHeadRot(170.0F);
+            }
+            return null;
+        });
+        t.ticks(40);
+        List<Double> angles = new ArrayList<>();
+        for (Spawned<?> mob : mobs) {
+            angles.add(mob.client() instanceof LivingEntity living
+                ? (double) Math.abs(Mth.wrapDegrees(living.getYHeadRot() - living.yBodyRot)) : Double.NaN);
+        }
+        t.removeEntities();
+        t.command("difficulty peaceful");
+        return angles;
+    }
+
+    private void mobHeadLimit(TestContext t) {
+        List<EntityType<?>> types = mobTypes(t);
+        t.note("mobs", types.size());
+        config().legacyBodyRotation = false;
+        List<Double> off = headToBody(t, types);
+        config().legacyBodyRotation = true;
+        List<Double> on = headToBody(t, types);
+        for (int i = 0; i < types.size(); i++) {
+            String name = BuiltInRegistries.ENTITY_TYPE.getKey(types.get(i)).getPath();
+            t.require(!off.get(i).isNaN() && !on.get(i).isNaN(), "The " + name + " is gone");
+            // 1.7.10 kept the head within 75 degrees of the body; mobs whose body does not follow the head in 1.21.1
+            // (shulker) keep that
+            t.check("on: " + name + ": head to body (at most 75 or 1.21.1)", on.get(i))
+                .atMost(Math.max(75.0, off.get(i)) + 0.01);
+        }
+    }
+
+    /**
+     * Walks mobs 8 blocks along +z, then 8 along +x, by their own navigation (their goals and brain cleared); returns
+     * for each the mean and largest angle between its body and the way it walks on the client, and the moving ticks
+     */
+    private static List<double[]> walkAndTurn(TestContext t, List<EntityType<?>> types, boolean lookAtPlayer) {
+        t.command("difficulty easy");
+        t.teleport(36.5, 14.0, 28.5, 0.0F, 90.0F);
+        t.setFlying(true);
+        List<Spawned<?>> mobs = new ArrayList<>();
+        List<Vec3> starts = new ArrayList<>();
+        for (int i = 0; i < types.size(); i++) {
+            Vec3 start = new Vec3(4.5 + i % 5 * 16, 0.0, 4.5 + i / 5 * 16);
+            starts.add(start);
+            mobs.add(t.spawn(types.get(i), start.x, start.y, start.z, 0.0F, entity -> {
+                if (entity instanceof Mob mob) {
+                    mob.setPersistenceRequired();
+                    ((MobAccessor) mob).devtest$getGoalSelector().removeAllGoals(goal -> true);
+                    ((MobAccessor) mob).devtest$getTargetSelector().removeAllGoals(goal -> true);
+                    mob.getBrain().removeAllBehaviors();
+                    mob.getBrain().clearMemories();
+                }
+            }));
+        }
+        t.ticks(10);
+        Vec3 origin = Vec3.atLowerCornerOf(TestSite.ORIGIN);
+        Vec3 eyes = t.player().getEyePosition();
+        boolean[] turned = new boolean[mobs.size()];
+        double[][] stats = new double[mobs.size()][3];
+        for (int tick = 0; tick < 110; tick++) {
+            boolean first = tick == 0;
+            t.onServer(level -> {
+                for (int i = 0; i < mobs.size(); i++) {
+                    if (!(level.getEntity(mobs.get(i).id()) instanceof Mob mob)) {
+                        continue;
+                    }
+                    Vec3 corner = origin.add(starts.get(i)).add(0.0, 0.0, 8.0);
+                    if (first) {
+                        mob.getNavigation().moveTo(corner.x, corner.y, corner.z, 1.0);
+                    } else if (!turned[i] && mob.position().distanceToSqr(corner) < 1.0) {
+                        mob.getNavigation().moveTo(corner.x + 8.0, corner.y, corner.z, 1.0);
+                        turned[i] = true;
+                    }
+                    if (lookAtPlayer) {
+                        mob.getLookControl().setLookAt(eyes.x, eyes.y, eyes.z);
+                    }
+                }
+                return null;
+            });
+            t.tick();
+            for (int i = 0; i < mobs.size(); i++) {
+                if (mobs.get(i).client() instanceof Mob client) {
+                    double dx = client.getX() - client.xo;
+                    double dz = client.getZ() - client.zo;
+                    if (dx * dx + dz * dz > 0.0025) {
+                        double walkYaw = Mth.atan2(dz, dx) * Mth.RAD_TO_DEG - 90.0;
+                        double tilt = Math.abs(Mth.wrapDegrees(client.yBodyRot - walkYaw));
+                        stats[i][0] += tilt;
+                        stats[i][1] = Math.max(stats[i][1], tilt);
+                        stats[i][2]++;
+                    }
+                }
+            }
+        }
+        t.removeEntities();
+        t.command("difficulty peaceful");
+        List<double[]> result = new ArrayList<>();
+        for (double[] stat : stats) {
+            result.add(new double[] {stat[2] > 0 ? stat[0] / stat[2] : Double.NaN, stat[1], stat[2]});
+        }
+        return result;
+    }
+
+    private void walkingBody(TestContext t) {
+        // mobs that used the old AI in 1.7.10 and walk, and mobs with the 1.21.1 body rules to compare (slimes jump:
+        // 1.7.10 turns them towards each jump, so they are left out)
+        List<EntityType<?>> types = List.of(EntityType.ZOMBIFIED_PIGLIN, EntityType.ENDERMAN, EntityType.SPIDER,
+            EntityType.CAVE_SPIDER, EntityType.GIANT, EntityType.SILVERFISH, EntityType.ZOMBIE, EntityType.CREEPER,
+            EntityType.SKELETON);
+        for (boolean look : new boolean[] {false, true}) {
+            String scene = look ? "looking at the player" : "head free";
+            List<double[]> on = walkAndTurn(t, types, look);
+            config().legacyBodyRotation = false;
+            List<double[]> off = walkAndTurn(t, types, look);
+            config().legacyBodyRotation = true;
+            for (int i = 0; i < types.size(); i++) {
+                String name = BuiltInRegistries.ENTITY_TYPE.getKey(types.get(i)).getPath();
+                t.require(on.get(i)[2] >= 10 && off.get(i)[2] >= 10, "The " + name + " did not walk");
+                t.note(scene + ": " + name + ": largest angle, on / off", format(on.get(i)[1]) + " / "
+                    + format(off.get(i)[1]));
+                t.check(scene + ": " + name + ": mean angle between body and walk (at most 1.21.1 + 2)", on.get(i)[0])
+                    .atMost(off.get(i)[0] + 2.0);
+            }
+        }
     }
 
     // ---- models ---------------------------------------------------------------------------------------------------
