@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -683,7 +684,7 @@ public final class TestContext {
 
     /**
      * Before each test: player home in creative and flying, without items or effects, no other entities or
-     * particles, the site cleared
+     * particles, peaceful difficulty, the site cleared
      */
     void resetForTest() {
         KeyMapping.releaseAll();
@@ -703,6 +704,11 @@ public final class TestContext {
             player.getFoodData().setFoodLevel(20);
         });
         removeEntities();
+        onServer(level -> {
+            // like /difficulty peaceful, which fails when nothing changes
+            level.getServer().setDifficulty(Difficulty.PEACEFUL, true);
+            return null;
+        });
         command("gamerule doEntityDrops true", "time set noon", "weather clear");
         teleport(HOME_X, HOME_Y, HOME_Z, 0.0F, 0.0F);
         setFlying(true);

@@ -681,7 +681,11 @@ public final class AnimatiumTests implements FeatureTests {
 
     /**
      * Walks mobs 8 blocks along +z, then 8 along +x, by their own navigation (their goals and brain cleared); returns
-     * for each the mean and largest angle between its body and the way it walks on the client, and the moving ticks
+     * for each the median and largest angle between its body and the way it walks on the client, the moving ticks and
+     * 1 if it turned the corner
+     *
+     * <p>The median leaves out single ticks where a mob stepping back a little at the corner seems to walk backwards
+     * (in both versions); a body leaning while it walks shows in most ticks.</p>
      */
     private static List<double[]> walkAndTurn(TestContext t, List<EntityType<?>> types, boolean lookAtPlayer) {
         t.command("difficulty easy");
@@ -706,7 +710,10 @@ public final class AnimatiumTests implements FeatureTests {
         Vec3 origin = Vec3.atLowerCornerOf(TestSite.ORIGIN);
         Vec3 eyes = t.player().getEyePosition();
         boolean[] turned = new boolean[mobs.size()];
-        double[][] stats = new double[mobs.size()][3];
+        List<List<Double>> tilts = new ArrayList<>();
+        for (int i = 0; i < mobs.size(); i++) {
+            tilts.add(new ArrayList<>());
+        }
         for (int tick = 0; tick < 110; tick++) {
             boolean first = tick == 0;
             t.onServer(level -> {
@@ -717,7 +724,8 @@ public final class AnimatiumTests implements FeatureTests {
                     Vec3 corner = origin.add(starts.get(i)).add(0.0, 0.0, 8.0);
                     if (first) {
                         mob.getNavigation().moveTo(corner.x, corner.y, corner.z, 1.0);
-                    } else if (!turned[i] && mob.position().distanceToSqr(corner) < 1.0) {
+                    } else if (!turned[i] && mob.getNavigation().isDone()) {
+                        // reached the corner (wide mobs stop up to half their width before it)
                         mob.getNavigation().moveTo(corner.x + 8.0, corner.y, corner.z, 1.0);
                         turned[i] = true;
                     }
@@ -734,10 +742,7 @@ public final class AnimatiumTests implements FeatureTests {
                     double dz = client.getZ() - client.zo;
                     if (dx * dx + dz * dz > 0.0025) {
                         double walkYaw = Mth.atan2(dz, dx) * Mth.RAD_TO_DEG - 90.0;
-                        double tilt = Math.abs(Mth.wrapDegrees(client.yBodyRot - walkYaw));
-                        stats[i][0] += tilt;
-                        stats[i][1] = Math.max(stats[i][1], tilt);
-                        stats[i][2]++;
+                        tilts.get(i).add(Math.abs(Mth.wrapDegrees(client.yBodyRot - walkYaw)));
                     }
                 }
             }
@@ -745,8 +750,11 @@ public final class AnimatiumTests implements FeatureTests {
         t.removeEntities();
         t.command("difficulty peaceful");
         List<double[]> result = new ArrayList<>();
-        for (double[] stat : stats) {
-            result.add(new double[] {stat[2] > 0 ? stat[0] / stat[2] : Double.NaN, stat[1], stat[2]});
+        for (int i = 0; i < mobs.size(); i++) {
+            List<Double> sorted = tilts.get(i).stream().sorted().toList();
+            double median = sorted.isEmpty() ? Double.NaN : sorted.get(sorted.size() / 2);
+            double largest = sorted.isEmpty() ? Double.NaN : sorted.get(sorted.size() - 1);
+            result.add(new double[] {median, largest, sorted.size(), turned[i] ? 1.0 : 0.0});
         }
         return result;
     }
@@ -766,10 +774,13 @@ public final class AnimatiumTests implements FeatureTests {
             for (int i = 0; i < types.size(); i++) {
                 String name = BuiltInRegistries.ENTITY_TYPE.getKey(types.get(i)).getPath();
                 t.require(on.get(i)[2] >= 10 && off.get(i)[2] >= 10, "The " + name + " did not walk");
+                t.require(on.get(i)[3] > 0.0 && off.get(i)[3] > 0.0, "The " + name + " did not turn the corner");
                 t.note(scene + ": " + name + ": largest angle, on / off", format(on.get(i)[1]) + " / "
                     + format(off.get(i)[1]));
-                t.check(scene + ": " + name + ": mean angle between body and walk (at most 1.21.1 + 2)", on.get(i)[0])
-                    .atMost(off.get(i)[0] + 2.0);
+                // a body leaning towards the head leans 20 to 30 degrees; 5 leaves room for the timing and for the
+                // 1.7.10 turn of old-AI bodies (a few ticks behind at corners)
+                t.check(scene + ": " + name + ": median angle between body and walk (at most 1.21.1 + 5)", on.get(i)[0])
+                    .atMost(off.get(i)[0] + 5.0);
             }
         }
     }
