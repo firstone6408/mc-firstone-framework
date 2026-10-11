@@ -65,23 +65,32 @@ public final class LegacyBodyRotation {
     /**
      * 1.7.10 {@code func_110146_f}: turns the body towards the movement direction, limited to 75° from the head
      *
+     * <p>1.7.10 measured the limit from {@code rotationYaw}, which was both the way an old-AI mob walked and where its
+     * head looked ({@code rotationYawHead = rotationYaw} every tick). In 1.21.1 those mobs turn their head by itself
+     * ({@code LookControl}), so a mob's yaw stands for the way it walks and its head for where it looks: a walking mob
+     * is measured from its yaw (else looking at the player while walking leans its body towards the head), a standing
+     * mob from its head (else a mob looking back has its head drawn on its back). A player's head follows their
+     * yaw.</p>
+     *
      * @param entity     the entity to turn
      * @param walkAmount the walk value passed through by the caller
      * @return the walk value, negated when the entity moves more than 90° away from where it looks (as in 1.7.10)
      */
     public static float turnTowardsMovement(LivingEntity entity, float walkAmount) {
-        float target = entity.yBodyRot;
         double dx = entity.getX() - entity.xo;
         double dz = entity.getZ() - entity.zo;
-        if (dx * dx + dz * dz > MOVING_THRESHOLD_SQR) {
+        boolean moving = dx * dx + dz * dz > MOVING_THRESHOLD_SQR;
+        float yaw = entity instanceof Mob && !moving ? entity.getYHeadRot() : entity.getYRot();
+        float target = entity.yBodyRot;
+        if (moving) {
             target = (float) Math.atan2(dz, dx) * 180.0F / (float) Math.PI - 90.0F;
         }
         if (entity.attackAnim > 0.0F) {
-            target = entity.getYRot();
+            target = yaw;
         }
 
         entity.yBodyRot += Mth.wrapDegrees(target - entity.yBodyRot) * 0.3F;
-        float headToBody = Mth.wrapDegrees(entity.getYRot() - entity.yBodyRot);
+        float headToBody = Mth.wrapDegrees(yaw - entity.yBodyRot);
         boolean movingBackwards = headToBody < -90.0F || headToBody >= 90.0F;
         if (headToBody < -MAX_HEAD_BODY_ANGLE) {
             headToBody = -MAX_HEAD_BODY_ANGLE;
@@ -89,7 +98,7 @@ public final class LegacyBodyRotation {
         if (headToBody >= MAX_HEAD_BODY_ANGLE) {
             headToBody = MAX_HEAD_BODY_ANGLE;
         }
-        entity.yBodyRot = entity.getYRot() - headToBody;
+        entity.yBodyRot = yaw - headToBody;
         if (headToBody * headToBody > 2500.0F) {
             entity.yBodyRot += headToBody * 0.2F;
         }
