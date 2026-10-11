@@ -59,6 +59,21 @@ public final class TestResourcePack {
         return this;
     }
 
+    /**
+     * Adds a text file to the pack (a model, a blockstate…)
+     *
+     * @param path    path inside the pack, e.g. {@code assets/minecraft/models/item/apple.json}
+     * @param content the file's text
+     * @return this pack
+     * @throws IOException if the file cannot be written
+     */
+    public TestResourcePack text(String path, String content) throws IOException {
+        Path file = this.directory.resolve(path);
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, content);
+        return this;
+    }
+
     /** Turns the pack on and waits until the resources have reloaded */
     public void enable() {
         setSelected(true);

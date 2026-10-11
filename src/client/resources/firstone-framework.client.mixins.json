@@ -12,6 +12,7 @@
 		"animatium.hand.OldItemDropReequipMixin",
 		"animatium.hand.ItemInHandRendererAccessor",
 		"animatium.hand.LegacyReequipMixin",
+		"animatium.hand.LegacyFirstPersonItemMixin",
 		"animatium.hand.OldItemUseMixin",
 		"animatium.hand.OldServerSwingMixin",
 		"animatium.entity.LegacyMobSwingMixin",
