@@ -28,6 +28,13 @@ public class AnimatiumConfig {
     public boolean legacyReequip = true;
 
     /**
+     * 1.7.10 hurt camera tilt: when the player is hurt the camera always rolls the same way, as the 1.7.10 client
+     * did not know where the hit came from (1.21.1 rolls away from the attacker). The Damage Tilt accessibility
+     * option still sets how strong it is.
+     */
+    public boolean legacyHurtTilt = true;
+
+    /**
      * 1.7.10 right-click animations: no arm swing when using an item in the air (ender pearl, egg, snowball…)
      * or right-clicking an entity, and the hand only dips when the used stack changed. Swings the server
      * sends back to the player (1.21.1 only) are ignored, as 1.7.10 never sent them.

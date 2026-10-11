@@ -3,6 +3,7 @@
 	"package": "io.github.firstone.framework.client.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
+		"animatium.camera.LegacyHurtTiltMixin",
 		"animatium.sneak.OldSneakTickMixin",
 		"animatium.sneak.OldSneakDimensionsMixin",
 		"animatium.sneak.OldSneakEyeMixin",

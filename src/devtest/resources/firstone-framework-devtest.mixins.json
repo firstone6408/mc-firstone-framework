@@ -4,8 +4,10 @@
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"ContainerScreenAccessor",
+		"GameRendererInvoker",
 		"HandRendererAccessor",
 		"MobAccessor",
+		"ServerPlayerAccessor",
 		"SoundBufferAccessor",
 		"SoundEngineAccessor",
 		"SoundManagerAccessor"

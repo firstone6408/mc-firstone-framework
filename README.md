@@ -14,7 +14,7 @@ Every feature is a separate module with its own config file and in-game settings
 
 | Feature | Side | What it does |
 |---|---|---|
-| Animatium | Client | Minecraft 1.7.10 animations and feel: sneaking, item use and drop, re-equip, entity movement, models, hurt tint |
+| Animatium | Client | Minecraft 1.7.10 animations and feel: sneaking, item use and drop, re-equip, hurt camera tilt, entity movement, models, hurt tint |
 | Appearance | Client | Custom game icon and window title, confirmation before the window's close button quits |
 | Legacy HUD | Client | Minecraft 1.7.10 HUD: no status effect icons in the top-right corner, effect list on the left of the inventory |
 | Legacy Vehicles | Client | Minecraft 1.7.10 boats: handling (with optional 1.21 ice sliding), free look and seat, flat model, water splash; paddles can be hidden |
