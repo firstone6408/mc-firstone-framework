@@ -35,6 +35,7 @@ public class LegacyVehiclesConfigScreen extends ConfigScreen {
         addToggle("ice_boating", config.iceBoating, value -> config.iceBoating = value)
             .enabledWhen(() -> config.legacyBoatHandling);
         addToggle("legacy_boat_riding", config.legacyBoatRiding, value -> config.legacyBoatRiding = value);
+        addToggle("legacy_boat_hands", config.legacyBoatHands, value -> config.legacyBoatHands = value);
         addToggle("boat_splash", config.boatSplash, value -> config.boatSplash = value);
         addToggle("legacy_boat_model", config.legacyBoatModel, value -> config.legacyBoatModel = value);
         addToggle("resource_pack_boats", config.resourcePackBoats, value -> config.resourcePackBoats = value)

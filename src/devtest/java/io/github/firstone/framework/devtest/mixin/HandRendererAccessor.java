@@ -26,4 +26,12 @@ public interface HandRendererAccessor {
      */
     @Accessor("mainHandItem")
     ItemStack devtest$getMainHandItem();
+
+    /**
+     * Returns how far the off hand item is raised: 1 when held up, 0 when fully lowered
+     *
+     * @return {@code offHandHeight}
+     */
+    @Accessor("offHandHeight")
+    float devtest$getOffHandHeight();
 }

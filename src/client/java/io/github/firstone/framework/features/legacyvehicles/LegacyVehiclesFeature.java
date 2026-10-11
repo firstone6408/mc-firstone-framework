@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
  * <ul>
  *   <li>{@link LegacyBoats} — which boats are changed, 1.7.10 handling, riding and splash</li>
  *   <li>{@link LegacyBoatModel} — the 1.7.10 boat model</li>
+ *   <li>{@code LegacyBoatHands} — hands up and clicks working while paddling</li>
  * </ul>
  *
  * <p>Boats that break when they crash are a server rule: see the Legacy Mechanics feature.</p>

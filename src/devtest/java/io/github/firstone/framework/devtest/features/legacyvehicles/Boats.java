@@ -18,12 +18,13 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 
 /**
- * Boat helpers for the Legacy Vehicles tests: spawning, driving and measuring
+ * Boat helpers for the Legacy Vehicles tests: spawning, driving and measuring (public: the tests of the feature's parts
+ * use them from their own packages)
  */
-final class Boats {
+public final class Boats {
 
     /** Height to spawn a boat at on the site's pools (their water's surface is about -0.11) */
-    static final double ON_WATER = -0.1;
+    public static final double ON_WATER = -0.1;
 
     /** Height to spawn a boat at on the site's floor (ice lanes, stone) */
     static final double ON_FLOOR = 0.0;
@@ -43,8 +44,8 @@ final class Boats {
      * @param <T>   the boat's class
      * @return the boat
      */
-    static <T extends Boat> Spawned<T> spawn(TestContext t, EntityType<T> type, Boat.Type wood, double x, double y,
-                                             double z, Consumer<T> setup) {
+    public static <T extends Boat> Spawned<T> spawn(TestContext t, EntityType<T> type, Boat.Type wood, double x,
+                                                    double y, double z, Consumer<T> setup) {
         Spawned<T> boat = t.spawn(type, x, y, z, 0.0F, entity -> {
             if (entity instanceof Boat created) {
                 created.setVariant(wood);
@@ -67,7 +68,7 @@ final class Boats {
      * @param z    z
      * @return the boat
      */
-    static Spawned<Boat> boat(TestContext t, Boat.Type wood, double x, double y, double z) {
+    public static Spawned<Boat> boat(TestContext t, Boat.Type wood, double x, double y, double z) {
         return spawn(t, EntityType.BOAT, wood, x, y, z, null);
     }
 
