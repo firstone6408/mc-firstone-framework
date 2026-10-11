@@ -14,8 +14,8 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
  * integrated server of singleplayer.</p>
  *
  * <p>Each part has its own folder, here and in {@code mixin/legacymechanics/}: {@code knockback/} (knockback of hits
- * and attacks), {@code player/} (the hitbox of crouching players, mixin only) and {@code boat/} (boat breaking and
- * coasting).</p>
+ * and attacks), {@code player/} (the hitbox of crouching players, mixin only), {@code food/} (natural
+ * regeneration) and {@code boat/} (boat breaking and coasting).</p>
  */
 public class LegacyMechanicsFeature implements Feature {
 
