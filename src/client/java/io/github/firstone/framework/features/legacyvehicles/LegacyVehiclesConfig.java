@@ -29,6 +29,12 @@ public class LegacyVehiclesConfig {
      */
     public boolean legacyBoatRiding = true;
 
+    /**
+     * 1.7.10 hands while paddling: the hand and the held item stay up, and attacking and using items still work
+     * (1.21.1 lowers both hands and blocks clicks while the boat's movement keys are held)
+     */
+    public boolean legacyBoatHands = true;
+
     /** Draw wooden boats with the flat 1.7.10 model, covered with the planks of the boat's wood */
     public boolean legacyBoatModel = true;
 

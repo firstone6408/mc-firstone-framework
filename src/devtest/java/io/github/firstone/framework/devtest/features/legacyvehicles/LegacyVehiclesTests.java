@@ -5,6 +5,7 @@ import io.github.firstone.framework.devtest.core.Spawned;
 import io.github.firstone.framework.devtest.core.TestCase;
 import io.github.firstone.framework.devtest.core.TestContext;
 import io.github.firstone.framework.devtest.core.TestSite;
+import io.github.firstone.framework.devtest.features.legacyvehicles.boat.BoatHandsTests;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsConfig;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
 import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesConfig;
@@ -72,7 +73,7 @@ public final class LegacyVehiclesTests implements FeatureTests {
 
     @Override
     public List<TestCase> tests() {
-        return List.of(
+        List<TestCase> tests = new ArrayList<>(List.of(
             // physics formulas (exact, no client/server timing)
             TestCase.of("Physics: 1.7.10 push between a boat and who stands on it", this::pushFormula),
             TestCase.of("Physics: 1.7.10 speed-up on water, tick by tick", this::speedUpCurve),
@@ -129,7 +130,10 @@ public final class LegacyVehiclesTests implements FeatureTests {
             TestCase.of("Settings: the Legacy Vehicles and Legacy Mechanics screens open", this::configScreens),
             // everything off
             TestCase.slow("All options off: plain 1.21.1 boats", this::allOff)
-        );
+        ));
+        // parts with their own test classes, in the folders of the feature's parts
+        tests.addAll(BoatHandsTests.tests());
+        return tests;
     }
 
     private static LegacyVehiclesConfig vehicles() {

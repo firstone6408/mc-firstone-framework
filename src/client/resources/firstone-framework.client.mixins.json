@@ -53,6 +53,7 @@
 		"legacyvehicles.boat.HideRaftPaddlesMixin",
 		"legacyvehicles.boat.LegacyBoatHandlingMixin",
 		"legacyvehicles.boat.LegacyBoatModelMixin",
+		"legacyvehicles.boat.LegacyBoatHandsMixin",
 		"legacyvehicles.boat.LegacyBoatRidingMixin",
 		"legacyvehicles.boat.LegacyBoatSplashMixin"
 	],
