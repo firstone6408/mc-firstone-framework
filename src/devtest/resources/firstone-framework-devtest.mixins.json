@@ -4,6 +4,9 @@
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"ContainerScreenAccessor",
+		"ExperienceOrbAccessor",
+		"EyeOfEnderAccessor",
+		"FishingHookAccessor",
 		"GameRendererInvoker",
 		"HandRendererAccessor",
 		"ItemInHandLayerInvoker",
