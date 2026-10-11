@@ -35,6 +35,13 @@ public class LegacyMechanicsConfig {
     public boolean legacyRegeneration = true;
 
     /**
+     * 1.7.10 sword blocking: holding right click with a sword blocks, taking {@code (1 + damage) / 2} before armor
+     * (not for damage that ignores armor, like fire or falling), while walking slowly. Clients with the mod see it;
+     * an item with its own use in the off hand (shield, food, bow…) is used instead.
+     */
+    public boolean legacySwordBlocking = true;
+
+    /**
      * 1.7.10 boat breaking: a wooden boat that hits a wall while faster than 0.2 blocks per tick breaks into 3 planks
      * and 2 sticks, and boats remove the snow layers they go through.
      */

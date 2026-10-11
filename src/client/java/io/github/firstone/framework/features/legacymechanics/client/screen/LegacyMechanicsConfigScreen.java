@@ -35,6 +35,7 @@ public class LegacyMechanicsConfigScreen extends ConfigScreen {
         addSection("category.players");
         addToggle("legacy_crouch_hitbox", config.legacyCrouchHitbox, value -> config.legacyCrouchHitbox = value);
         addToggle("legacy_regeneration", config.legacyRegeneration, value -> config.legacyRegeneration = value);
+        addToggle("legacy_sword_blocking", config.legacySwordBlocking, value -> config.legacySwordBlocking = value);
 
         addSection("category.boats");
         addToggle("legacy_boat_breaking", config.legacyBoatBreaking, value -> config.legacyBoatBreaking = value);

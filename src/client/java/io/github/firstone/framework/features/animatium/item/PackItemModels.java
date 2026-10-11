@@ -1,4 +1,4 @@
-package io.github.firstone.framework.features.animatium.hand;
+package io.github.firstone.framework.features.animatium.item;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
