@@ -32,6 +32,9 @@ public class AnimatiumConfigScreen extends ConfigScreen {
         addToggle("old_item_use", config.oldItemUse, value -> config.oldItemUse = value);
         addToggle("legacy_reequip", config.legacyReequip, value -> config.legacyReequip = value);
         addToggle("legacy_hurt_tilt", config.legacyHurtTilt, value -> config.legacyHurtTilt = value);
+        addToggle("legacy_first_person_items", config.legacyFirstPersonItems,
+            value -> config.legacyFirstPersonItems = value);
+        addToggle("resource_pack_items", config.resourcePackItems, value -> config.resourcePackItems = value);
 
         addSection("category.entities");
         addToggle("legacy_entity_sync", config.legacyEntitySync, value -> config.legacyEntitySync = value);

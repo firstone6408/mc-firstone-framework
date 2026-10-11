@@ -6,6 +6,7 @@
 		"ContainerScreenAccessor",
 		"GameRendererInvoker",
 		"HandRendererAccessor",
+		"ItemInHandRendererInvoker",
 		"MobAccessor",
 		"ServerPlayerAccessor",
 		"SoundBufferAccessor",

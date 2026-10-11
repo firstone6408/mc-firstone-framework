@@ -2,6 +2,7 @@ package io.github.firstone.framework.features.animatium;
 
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.config.ConfigManager;
+import io.github.firstone.framework.features.animatium.hand.PackItemModels;
 
 /**
  * Animatium — restores Minecraft 1.7.10 animations and feel on the client
@@ -11,7 +12,7 @@ import io.github.firstone.framework.common.config.ConfigManager;
  * settings through {@link #getConfig()} every time they run, so changes apply immediately.</p>
  *
  * <p>Each part has its own folder, here and in {@code client/mixin/animatium/}: {@code sneak/} (1.7.10 sneaking:
- * eyes, camera, hitbox and pose), {@code hand/} (the first-person hand: dropping, using, re-equip),
+ * eyes, camera, hitbox and pose), {@code hand/} (the first-person hand: dropping, using, re-equip, held items),
  * {@code camera/} (the hurt tilt), {@code entity/} (other entities: sync, physics, body rotation, mob swing),
  * {@code model/} (zombie arms, hurt tint) and {@code combat/} (1.9 combat effects, mixins only).</p>
  *
@@ -37,6 +38,7 @@ public class AnimatiumFeature implements Feature {
     @Override
     public void initializeClient() {
         config = ConfigManager.load(CONFIG_FILE, AnimatiumConfig.class, new AnimatiumConfig());
+        PackItemModels.registerReloadListener();
     }
 
     /**

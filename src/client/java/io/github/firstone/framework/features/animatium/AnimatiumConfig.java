@@ -35,6 +35,19 @@ public class AnimatiumConfig {
     public boolean legacyHurtTilt = true;
 
     /**
+     * 1.7.10 first-person items: held items, tools and blocks sit where 1.7.10 drew them, with the 1.7.10 bow,
+     * eating, drinking and sword blocking poses, and the fishing rod turned around. Items 1.7.10 did not have keep
+     * their 1.21.1 look.
+     */
+    public boolean legacyFirstPersonItems = true;
+
+    /**
+     * Keeps the 1.21.1 look for items whose model a resource pack or another mod changes, so the pack's look is not
+     * lost to the 1.7.10 placement
+     */
+    public boolean resourcePackItems = true;
+
+    /**
      * 1.7.10 right-click animations: no arm swing when using an item in the air (ender pearl, egg, snowball…)
      * or right-clicking an entity, and the hand only dips when the used stack changed. Swings the server
      * sends back to the player (1.21.1 only) are ignored, as 1.7.10 never sent them.
