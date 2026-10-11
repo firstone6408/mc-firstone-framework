@@ -28,6 +28,13 @@ public class LegacyMechanicsConfig {
     public boolean legacyCrouchHitbox = true;
 
     /**
+     * 1.7.10 natural regeneration: with food at 18 or more, health comes back 1 point every 4 seconds, each costing
+     * 3 exhaustion. 1.21.1 also heals every half second while food is full and saturation is left, which makes
+     * health come back much faster after eating.
+     */
+    public boolean legacyRegeneration = true;
+
+    /**
      * 1.7.10 boat breaking: a wooden boat that hits a wall while faster than 0.2 blocks per tick breaks into 3 planks
      * and 2 sticks, and boats remove the snow layers they go through.
      */

@@ -5,6 +5,7 @@ import io.github.firstone.framework.devtest.core.Spawned;
 import io.github.firstone.framework.devtest.core.TestCase;
 import io.github.firstone.framework.devtest.core.TestContext;
 import io.github.firstone.framework.devtest.core.TestSite;
+import io.github.firstone.framework.devtest.features.legacymechanics.food.RegenerationTests;
 import io.github.firstone.framework.features.combattweaks.CombatTweaksFeature;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsConfig;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
@@ -27,6 +28,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -59,7 +61,7 @@ public final class LegacyMechanicsTests implements FeatureTests {
 
     @Override
     public List<TestCase> tests() {
-        return List.of(
+        List<TestCase> tests = new ArrayList<>(List.of(
             TestCase.of("Knockback: a hit on the ground pushes 0.4 away and 0.4 up (same in 1.21.1)", this::onGround),
             TestCase.of("Knockback: a hit in the air pushes up too; off: the fall goes on", this::inAir),
             TestCase.of("Knockback: an arrow pushes away from the shooter; off: along its flight", this::arrow),
@@ -77,7 +79,10 @@ public final class LegacyMechanicsTests implements FeatureTests {
                 this::crouchHitbox),
             TestCase.of("Crouch hitbox: mobs look at a crouching player's face as when standing; off: lower",
                 this::mobsLookAtFace)
-        );
+        ));
+        // parts with their own test classes, in the folders of the feature's parts
+        tests.addAll(RegenerationTests.tests());
+        return tests;
     }
 
     private static LegacyMechanicsConfig config() {

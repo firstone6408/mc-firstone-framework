@@ -10,6 +10,7 @@
 		"legacymechanics.knockback.LegacyAttackKnockbackMixin",
 		"legacymechanics.knockback.LegacyMobAttackKnockbackMixin",
 		"legacymechanics.player.LegacyCrouchHitboxMixin",
+		"legacymechanics.food.LegacyRegenerationMixin",
 		"legacymechanics.boat.LegacyBoatRulesMixin",
 		"legacymechanics.boat.LegacyBoatDriverMixin",
 		"legacymechanics.boat.LegacyBoatEntityMixin"

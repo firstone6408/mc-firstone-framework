@@ -416,6 +416,18 @@ public final class TestContext {
     }
 
     /**
+     * Sets the world's difficulty (like {@code /difficulty}, which fails when the difficulty is already set)
+     *
+     * @param difficulty the difficulty
+     */
+    public void difficulty(Difficulty difficulty) {
+        onServer(level -> {
+            level.getServer().setDifficulty(difficulty, true);
+            return null;
+        });
+    }
+
+    /**
      * Sets the player's game mode
      *
      * @param mode the game mode
@@ -704,11 +716,7 @@ public final class TestContext {
             player.getFoodData().setFoodLevel(20);
         });
         removeEntities();
-        onServer(level -> {
-            // like /difficulty peaceful, which fails when nothing changes
-            level.getServer().setDifficulty(Difficulty.PEACEFUL, true);
-            return null;
-        });
+        difficulty(Difficulty.PEACEFUL);
         command("gamerule doEntityDrops true", "time set noon", "weather clear");
         teleport(HOME_X, HOME_Y, HOME_Z, 0.0F, 0.0F);
         setFlying(true);

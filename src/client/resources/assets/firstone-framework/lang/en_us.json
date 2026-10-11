@@ -184,6 +184,8 @@
 	"firstone-framework.legacy_mechanics.legacy_attack_knockback.tooltip": "1.7.10 extra knockback from players and mobs: sprinting always adds knockback (no full charge needed), applied as a push with 0.1 upward motion, not reduced by knockback resistance.",
 	"firstone-framework.legacy_mechanics.legacy_crouch_hitbox": "Legacy Crouch Hitbox",
 	"firstone-framework.legacy_mechanics.legacy_crouch_hitbox.tooltip": "1.7.10 sneaking on the server: crouching players keep the full 1.8-block hitbox and 1.62 eye height. Players without the mod cannot crouch into 1.5-block gaps.",
+	"firstone-framework.legacy_mechanics.legacy_regeneration": "Legacy Regeneration",
+	"firstone-framework.legacy_mechanics.legacy_regeneration.tooltip": "1.7.10 health regeneration: with food at 18 or more, health comes back 1 point every 4 seconds. The fast healing from saturation after eating (1.21.1) is gone. Works in singleplayer and on servers with this mod.",
 	"firstone-framework.legacy_mechanics.category.boats": "Boats",
 	"firstone-framework.legacy_mechanics.legacy_boat_breaking": "Legacy Boat Breaking",
 	"firstone-framework.legacy_mechanics.legacy_boat_breaking.tooltip": "1.7.10 boats: a wooden boat that hits a wall while going fast breaks into 3 planks and 2 sticks, and boats remove the snow layers they go through. Wooden boats always; chest boats and rafts with the option below.",
