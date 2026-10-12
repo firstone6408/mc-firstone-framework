@@ -12,16 +12,33 @@ import java.util.List;
  * Buffers that keep every vertex drawn into them, so a test can check where something was drawn
  *
  * <p>Hand it to the game's drawing code instead of the real buffers; afterwards {@link #vertices()} has each vertex's
- * position (already moved by the pose stack), texture coordinates and normal. Nothing reaches the screen.</p>
+ * position (already moved by the pose stack), texture coordinates, normal and color, and {@link #renderTypes()} the
+ * render types asked for. The glint's vertices are left out (they repeat the item's). Nothing reaches the screen.</p>
  */
 public final class VertexCapture implements MultiBufferSource {
 
     private final List<Vertex> vertices = new ArrayList<>();
+    private final List<String> renderTypes = new ArrayList<>();
     private final Consumer consumer = new Consumer();
+
+    /** Takes the glint's vertices, which repeat the item's own, and keeps nothing */
+    private final Consumer glint = new Consumer();
 
     @Override
     public VertexConsumer getBuffer(RenderType renderType) {
-        return this.consumer;
+        String name = renderType.toString();
+        this.renderTypes.add(name);
+        // the game joins the glint's buffer with the item's, which must be two different buffers
+        return name.contains("glint") ? this.glint : this.consumer;
+    }
+
+    /**
+     * Returns the render types asked for so far, as text (their names, like {@code glint} or {@code text}, are in it)
+     *
+     * @return the render types, in the order they were asked for
+     */
+    public List<String> renderTypes() {
+        return List.copyOf(this.renderTypes);
     }
 
     /**
@@ -41,8 +58,9 @@ public final class VertexCapture implements MultiBufferSource {
      * @param u        texture u
      * @param v        texture v
      * @param normal   its normal (already turned by the pose stack)
+     * @param color    its color, as ARGB (-1 when white or not set)
      */
-    public record Vertex(Vector3f position, float u, float v, Vector3f normal) {}
+    public record Vertex(Vector3f position, float u, float v, Vector3f normal, int color) {}
 
     /** Collects the parts of one vertex as the game sets them */
     private final class Consumer implements VertexConsumer {
@@ -51,11 +69,12 @@ public final class VertexCapture implements MultiBufferSource {
         private float u;
         private float v;
         private Vector3f normal = new Vector3f();
+        private int color = -1;
 
-        /** Keeps the vertex being built, if any */
+        /** Keeps the vertex being built, if any (the glint's buffer keeps nothing) */
         void finish() {
-            if (this.position != null) {
-                VertexCapture.this.vertices.add(new Vertex(this.position, this.u, this.v, this.normal));
+            if (this.position != null && this != VertexCapture.this.glint) {
+                VertexCapture.this.vertices.add(new Vertex(this.position, this.u, this.v, this.normal, this.color));
                 this.position = null;
             }
         }
@@ -67,11 +86,13 @@ public final class VertexCapture implements MultiBufferSource {
             this.u = 0.0F;
             this.v = 0.0F;
             this.normal = new Vector3f();
+            this.color = -1;
             return this;
         }
 
         @Override
         public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+            this.color = alpha << 24 | red << 16 | green << 8 | blue;
             return this;
         }
 

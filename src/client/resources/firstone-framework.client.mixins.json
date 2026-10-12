@@ -32,6 +32,8 @@
 		"animatium.model.LegacyZombieArmsMixin",
 		"animatium.model.ItemInHandLayerAccessor",
 		"animatium.model.LegacyThirdPersonItemMixin",
+		"animatium.item.ItemRendererAccessor",
+		"animatium.item.LegacyGroundItemMixin",
 		"animatium.model.LegacySwordBlockPoseMixin",
 		"animatium.model.LegacySkeletonArmsMixin",
 		"animatium.model.LegacyHurtExcludeItemsMixin",

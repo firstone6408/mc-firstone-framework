@@ -49,6 +49,13 @@ public class AnimatiumConfig {
     public boolean legacyThirdPersonItems = true;
 
     /**
+     * 1.7.10 items on the ground: blocks spin lower down, flat items spin with Fancy graphics and turn to the camera
+     * without spinning with Fast graphics, and stacks show the 1.7.10 number of copies. Items 1.7.10 did not have keep
+     * their 1.21.1 look.
+     */
+    public boolean legacyGroundItems = true;
+
+    /**
      * Keeps the 1.21.1 look for items whose model a resource pack or another mod changes, so the pack's look is not
      * lost to the 1.7.10 placement
      */
