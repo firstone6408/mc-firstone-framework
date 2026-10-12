@@ -47,6 +47,7 @@ public class AnimatiumConfigScreen extends ConfigScreen {
         addToggle("legacy_zombie_arms", config.legacyZombieArms, value -> config.legacyZombieArms = value);
         addToggle("legacy_mob_swing", config.legacyMobSwing, value -> config.legacyMobSwing = value);
         addToggle("legacy_hurt_tint", config.legacyHurtTint, value -> config.legacyHurtTint = value);
+        addToggle("legacy_fall_particles", config.legacyFallParticles, value -> config.legacyFallParticles = value);
 
         addSection("category.combat");
         addToggle("no_sweep_effect", config.noSweepEffect, value -> config.noSweepEffect = value);

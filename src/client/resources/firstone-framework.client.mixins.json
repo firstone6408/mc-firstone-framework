@@ -41,6 +41,7 @@
 		"animatium.model.LegacyHurtExcludeLayersMixin",
 		"animatium.model.LegacyHurtTintMixin",
 		"animatium.combat.LegacyCombatParticlesMixin",
+		"animatium.particle.LegacyFallParticlesMixin",
 		"animatium.combat.LegacyCombatSoundsMixin",
 		"appearance.quit.ConfirmQuitHoverMixin",
 		"appearance.quit.ConfirmQuitMixin",
