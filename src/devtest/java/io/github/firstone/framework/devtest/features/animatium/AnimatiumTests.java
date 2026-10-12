@@ -9,6 +9,7 @@ import io.github.firstone.framework.devtest.core.TestCase;
 import io.github.firstone.framework.devtest.core.TestContext;
 import io.github.firstone.framework.devtest.core.TestSite;
 import io.github.firstone.framework.devtest.features.animatium.camera.HurtTiltTests;
+import io.github.firstone.framework.devtest.features.animatium.entity.MobLandingTests;
 import io.github.firstone.framework.devtest.features.animatium.hand.FirstPersonItemTests;
 import io.github.firstone.framework.devtest.features.animatium.item.GroundItemTests;
 import io.github.firstone.framework.devtest.features.animatium.particle.FallParticlesTests;
@@ -128,6 +129,7 @@ public final class AnimatiumTests implements FeatureTests {
         tests.addAll(ThirdPersonItemTests.tests());
         tests.addAll(GroundItemTests.tests());
         tests.addAll(FallParticlesTests.tests());
+        tests.addAll(MobLandingTests.tests());
         return tests;
     }
 
