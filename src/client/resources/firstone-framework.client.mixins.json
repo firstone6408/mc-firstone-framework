@@ -61,6 +61,8 @@
 		"legacyvehicles.boat.LegacyBoatModelMixin",
 		"legacyvehicles.boat.LegacyBoatHandsMixin",
 		"legacyvehicles.boat.LegacyBoatRidingMixin",
+		"legacyvehicles.boat.BoatMobTurningMixin",
+		"legacyvehicles.boat.BoatMobBodyMixin",
 		"legacyvehicles.boat.LegacyBoatSplashMixin"
 	],
 	"injectors": {

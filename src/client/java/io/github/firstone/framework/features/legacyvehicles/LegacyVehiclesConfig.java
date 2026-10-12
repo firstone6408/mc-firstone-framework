@@ -30,6 +30,13 @@ public class LegacyVehiclesConfig {
     public boolean legacyBoatRiding = true;
 
     /**
+     * Mobs in boats turn their head and body as on the ground: the head as the server sends it (without shaking with
+     * "Legacy Entity Sync"), the body following it, instead of facing the boat's front with the head twisted up to 105
+     * degrees. Only how this client shows them: where they look is still the server's.
+     */
+    public boolean mobsTurnInBoats = true;
+
+    /**
      * 1.7.10 hands while paddling: the hand and the held item stay up, and attacking and using items still work
      * (1.21.1 lowers both hands and blocks clicks while the boat's movement keys are held)
      */

@@ -162,6 +162,8 @@
 	"firstone-framework.legacy_vehicles.ice_boating.tooltip": "With Legacy Handling, boats slide on ice, packed ice and blue ice as fast as in 1.21.1 and slow down gradually after leaving it, still steered like 1.7.10 (1.7.10 boats could not slide on ice).",
 	"firstone-framework.legacy_vehicles.legacy_boat_riding": "Legacy Riding",
 	"firstone-framework.legacy_vehicles.legacy_boat_riding.tooltip": "In boats, look all around freely (the boat does not turn you), and in a wooden boat sit a little lower and behind the middle when alone, like 1.7.10. Two passengers, chest boats and rafts keep the normal seats.",
+	"firstone-framework.legacy_vehicles.mobs_turn_in_boats": "Mobs Turn in Boats",
+	"firstone-framework.legacy_vehicles.mobs_turn_in_boats.tooltip": "Mobs in boats turn their head and body like when they stand on the ground (without shaking), instead of always facing the front of the boat with the head twisted far to the side. Where they look stays as the server says; works on any server.",
 	"firstone-framework.legacy_vehicles.legacy_boat_hands": "Legacy Hands",
 	"firstone-framework.legacy_vehicles.legacy_boat_hands.tooltip": "While paddling a boat, your hand and held item stay in view and you can still attack and use items, like 1.7.10.",
 	"firstone-framework.legacy_vehicles.boat_splash": "Water Splash",
