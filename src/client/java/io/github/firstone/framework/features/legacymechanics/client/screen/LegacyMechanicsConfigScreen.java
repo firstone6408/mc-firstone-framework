@@ -37,6 +37,10 @@ public class LegacyMechanicsConfigScreen extends ConfigScreen {
         addToggle("legacy_regeneration", config.legacyRegeneration, value -> config.legacyRegeneration = value);
         addToggle("legacy_sword_blocking", config.legacySwordBlocking, value -> config.legacySwordBlocking = value);
 
+        addSection("category.drops");
+        addToggle("legacy_item_drops", config.legacyItemDrops, value -> config.legacyItemDrops = value);
+        addToggle("legacy_experience", config.legacyExperience, value -> config.legacyExperience = value);
+
         addSection("category.boats");
         addToggle("legacy_boat_breaking", config.legacyBoatBreaking, value -> config.legacyBoatBreaking = value);
         addToggle("break_chest_boats_and_rafts", config.breakChestBoatsAndRafts,

@@ -20,7 +20,7 @@ Every feature is a separate module with its own config file and in-game settings
 | Legacy Vehicles | Client | Minecraft 1.7.10 boats: handling (with optional 1.21 ice sliding), free look and seat, hands kept up while paddling, flat model, water splash; paddles can be hidden |
 | Cosmetics | Client | Your own death effect, item break effect and music disc songs, from files in `config/firstone-framework/cosmetics/` |
 | Combat Tweaks | Server | Pre-1.9 combat: no attack cooldown, no sweeping attack |
-| Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback, crouch hitbox, health regeneration, sword blocking, boat breaking and coasting |
+| Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback, crouch hitbox, health regeneration, sword blocking, item drops, experience orbs, boat breaking and coasting |
 
 Client features work on any server. Server features are set in game for singleplayer; a server that has the mod
 uses its own files in `config/firstone-framework/`.
