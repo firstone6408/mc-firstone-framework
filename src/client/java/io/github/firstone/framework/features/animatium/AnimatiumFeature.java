@@ -16,8 +16,8 @@ import io.github.firstone.framework.features.animatium.hand.SwordBlockingSync;
  * eyes, camera, hitbox and pose), {@code hand/} (the first-person hand: dropping, using, re-equip, held items, the
  * server's sword blocking setting), {@code camera/} (the hurt tilt), {@code entity/} (other entities: sync, physics,
  * body rotation, mob swing), {@code model/} (zombie arms, hurt tint, third-person items and the sword blocking arm),
- * {@code item/} (the 1.7.10 item shapes both hands share, and items on the ground) and {@code combat/} (1.9 combat
- * effects, mixins only).</p>
+ * {@code item/} (the 1.7.10 item shapes both hands share, and items on the ground), {@code particle/} (the dust of
+ * a landing) and {@code combat/} (1.9 combat effects, mixins only).</p>
  *
  * <p>Every behavior is a reimplementation of the 1.7.10 code (see the JavaDoc of each mixin
  * for the 1.7.10 logic it follows).</p>

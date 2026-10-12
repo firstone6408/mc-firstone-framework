@@ -13,6 +13,8 @@
 		"ItemInHandRendererInvoker",
 		"LivingEntityRendererAccessor",
 		"MobAccessor",
+		"ParticleAccessor",
+		"ParticleEngineAccessor",
 		"ServerPlayerAccessor",
 		"SoundBufferAccessor",
 		"SoundEngineAccessor",

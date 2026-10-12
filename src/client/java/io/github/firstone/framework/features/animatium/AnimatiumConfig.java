@@ -107,6 +107,12 @@ public class AnimatiumConfig {
      */
     public boolean legacyHurtTint = true;
 
+    /**
+     * 1.7.10 fall particles: an entity landing from a fall throws the dust of the block it lands on outwards in a flat
+     * ring from the middle of the block's top (1.21.1: a puff around its feet), and the dust slides along the ground
+     */
+    public boolean legacyFallParticles = true;
+
 
     /** Hides the sweep attack particle and mutes the sweep sound (added in 1.9) */
     public boolean noSweepEffect = true;
