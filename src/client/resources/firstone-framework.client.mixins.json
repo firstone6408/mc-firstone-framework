@@ -19,6 +19,7 @@
 		"animatium.entity.LegacyEntitySyncStateMixin",
 		"animatium.entity.LegacyEntitySyncMixin",
 		"animatium.entity.LegacyMobPhysicsMixin",
+		"animatium.entity.LegacyMobLandingMixin",
 		"animatium.entity.LegacyFlyingMobPhysicsMixin",
 		"animatium.entity.LegacyMobGroundMixin",
 		"animatium.entity.LegacyPlayerBodyRotationMixin",
