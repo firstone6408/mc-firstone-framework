@@ -17,7 +17,8 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
  *
  * <p>Each part has its own folder, here and in {@code mixin/legacymechanics/}: {@code knockback/} (knockback of hits
  * and attacks), {@code player/} (the hitbox of crouching players, mixin only), {@code food/} (natural
- * regeneration), {@code sword/} (sword blocking) and {@code boat/} (boat breaking and coasting).</p>
+ * regeneration), {@code sword/} (sword blocking), {@code item/} (item drops), {@code experience/} (experience orbs),
+ * {@code physics/} (the kick out of blocks both use) and {@code boat/} (boat breaking and coasting).</p>
  */
 public class LegacyMechanicsFeature implements Feature {
 

@@ -42,6 +42,19 @@ public class LegacyMechanicsConfig {
     public boolean legacySwordBlocking = true;
 
     /**
+     * 1.7.10 item drops: items dropped by entities and players appear 0.125 lower (where 1.7.10 put them), so items
+     * dropped at an entity's feet start inside the ground and get the 1.7.10 kick out of it, which scatters them;
+     * the kick of an item out of a block is the 1.7.10 one.
+     */
+    public boolean legacyItemDrops = true;
+
+    /**
+     * 1.7.10 experience orbs (the amount stays 1.21.1's): a killed mob drops its orbs when its body disappears, orbs
+     * appear where 1.7.10 put them and scatter, sink in water, fly to the player's eyes like 1.7.10 and never merge.
+     */
+    public boolean legacyExperience = true;
+
+    /**
      * 1.7.10 boat breaking: a wooden boat that hits a wall while faster than 0.2 blocks per tick breaks into 3 planks
      * and 2 sticks, and boats remove the snow layers they go through.
      */
