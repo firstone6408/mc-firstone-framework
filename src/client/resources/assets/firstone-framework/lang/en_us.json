@@ -29,6 +29,8 @@
 	"firstone-framework.animatium.legacy_first_person_items.tooltip": "1.7.10 held items: items, tools and blocks in your hand sit where 1.7.10 drew them, with the 1.7.10 bow, eating and drinking poses, and the fishing rod turned around. Items 1.7.10 did not have (shield, trident, crossbow...) keep their normal look.",
 	"firstone-framework.animatium.legacy_third_person_items": "Legacy Third-Person Items",
 	"firstone-framework.animatium.legacy_third_person_items.tooltip": "1.7.10 held items seen from outside: players, zombies and skeletons hold items, tools, bows and blocks where 1.7.10 drew them, and a player blocking with a sword raises the arm like 1.7.10. Items 1.7.10 did not have and newer mobs keep their normal look.",
+	"firstone-framework.animatium.legacy_ground_items": "Legacy Ground Items",
+	"firstone-framework.animatium.legacy_ground_items.tooltip": "1.7.10 items on the ground: blocks spin a little lower, flat items spin with Fancy graphics and always face you without spinning with Fast graphics (no glint), and stacks show copies like 1.7.10. Items 1.7.10 did not have keep their normal look.",
 	"firstone-framework.animatium.resource_pack_items": "Resource Pack Items",
 	"firstone-framework.animatium.resource_pack_items.tooltip": "Items whose model a resource pack or another mod changes keep that look instead of the 1.7.10 placement.",
 	"firstone-framework.animatium.old_item_use": "Old Item Use",

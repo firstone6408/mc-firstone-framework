@@ -121,6 +121,20 @@ public final class LegacyItemShape {
     }
 
     /**
+     * Moves a flat 1.21.1 model onto a 1.7.10 sprite drawn from where the pose stack is
+     *
+     * <p>1.7.10 {@code renderItemIn2D} drew the sprite from (0, 0, 0) to (1, 1, -1/16), mirrored left to right; the
+     * 1.21.1 model is centered and is turned around so its back lies where the mirrored sprite had its front. Used for
+     * items lying on the ground ({@code LegacyGroundItem}), which 1.7.10 drew the same way.</p>
+     *
+     * @param poseStack the pose stack, where 1.7.10 called {@code renderItemIn2D}
+     */
+    public static void moveModelOntoSprite(PoseStack poseStack) {
+        poseStack.translate(0.5F, 0.5F, -HALF_THICKNESS);
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+    }
+
+    /**
      * Returns the inverse of a model's display values, which cancels them when the game applies them
      *
      * @param model    the model
