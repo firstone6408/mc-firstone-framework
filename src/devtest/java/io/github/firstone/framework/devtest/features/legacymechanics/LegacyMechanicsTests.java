@@ -1,5 +1,6 @@
 package io.github.firstone.framework.devtest.features.legacymechanics;
 
+import io.github.firstone.framework.devtest.core.CategoryMenuChecks;
 import io.github.firstone.framework.devtest.core.FeatureTests;
 import io.github.firstone.framework.devtest.core.Spawned;
 import io.github.firstone.framework.devtest.core.TestCase;
@@ -65,6 +66,8 @@ public final class LegacyMechanicsTests implements FeatureTests {
     @Override
     public List<TestCase> tests() {
         List<TestCase> tests = new ArrayList<>(List.of(
+            TestCase.of("Settings: every rule in one category of 2 to 7, each opens, writes and resets on its own",
+                this::settings),
             TestCase.of("Knockback: a hit on the ground pushes 0.4 away and 0.4 up (same in 1.21.1)", this::onGround),
             TestCase.of("Knockback: a hit in the air pushes up too; off: the fall goes on", this::inAir),
             TestCase.of("Knockback: an arrow pushes away from the shooter; off: along its flight", this::arrow),
@@ -89,6 +92,11 @@ public final class LegacyMechanicsTests implements FeatureTests {
         tests.addAll(ItemDropTests.tests());
         tests.addAll(ExperienceTests.tests());
         return tests;
+    }
+
+    private void settings(TestContext t) {
+        CategoryMenuChecks.check(t, "legacy_mechanics", "firstone-framework.legacy_mechanics.",
+            LegacyMechanicsFeature::getConfig, LegacyMechanicsConfig::new, "legacy_mechanics.json");
     }
 
     private static LegacyMechanicsConfig config() {

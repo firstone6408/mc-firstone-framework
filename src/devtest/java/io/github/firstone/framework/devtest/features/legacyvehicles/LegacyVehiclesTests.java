@@ -1,5 +1,6 @@
 package io.github.firstone.framework.devtest.features.legacyvehicles;
 
+import io.github.firstone.framework.devtest.core.CategoryMenuChecks;
 import io.github.firstone.framework.devtest.core.FeatureTests;
 import io.github.firstone.framework.devtest.core.Spawned;
 import io.github.firstone.framework.devtest.core.TestCase;
@@ -128,7 +129,8 @@ public final class LegacyVehiclesTests implements FeatureTests {
                 "Model: a pack with its own boat texture keeps the 1.21.1 model (Resource Pack Boats)",
                 this::resourcePackBoats),
             TestCase.of("Model: screenshots of the models, paddles and riding views", this::modelScreenshots),
-            TestCase.of("Settings: the Legacy Vehicles and Legacy Mechanics screens open", this::configScreens),
+            TestCase.of("Settings: every option in one category, each opens, writes and resets on its own; the Legacy "
+                + "Mechanics screen opens", this::configScreens),
             // everything off
             TestCase.slow("All options off: plain 1.21.1 boats", this::allOff)
         ));
@@ -871,9 +873,8 @@ public final class LegacyVehiclesTests implements FeatureTests {
     }
 
     private void configScreens(TestContext t) {
-        t.check("Legacy Vehicles screen open", t.openSettings("legacy_vehicles")).isTrue();
-        t.saveScreenshot("settings_legacy_vehicles");
-        t.closeScreen();
+        CategoryMenuChecks.check(t, "legacy_vehicles", "firstone-framework.legacy_vehicles.",
+            LegacyVehiclesFeature::getConfig, LegacyVehiclesConfig::new, "legacy_vehicles.json");
         t.check("Legacy Mechanics screen open", t.openSettings("legacy_mechanics")).isTrue();
         t.saveScreenshot("settings_legacy_mechanics");
         t.closeScreen();
