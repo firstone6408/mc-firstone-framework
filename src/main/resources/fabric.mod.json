@@ -3,7 +3,7 @@
 	"id": "firstone-framework",
 	"version": "${version}",
 	"name": "FirstOne Framework",
-	"description": "Brings back the feel of Minecraft 1.7.10 on Fabric 1.21.1: legacy animations, 1.7.10 knockback and hitboxes, pre-1.9 combat and game window tweaks. Every feature is a separate module with its own in-game settings.",
+	"description": "Brings back the feel of Minecraft 1.7.10 on Fabric 1.21.1: legacy animations, 1.7.10 knockback, hitboxes, drops and boats, pre-1.9 combat, the 1.7.10 HUD, your own cosmetic effects and game window tweaks. Every feature is a separate module with its own in-game settings.",
 	"authors": [
 		{
 			"name": "firstone6408",
@@ -42,7 +42,7 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.15.11",
+		"fabricloader": ">=0.18.4",
 		"minecraft": "~1.21.1",
 		"java": ">=21",
 		"fabric-api": "*"
