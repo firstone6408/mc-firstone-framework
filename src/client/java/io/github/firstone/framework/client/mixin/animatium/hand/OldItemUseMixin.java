@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -23,6 +24,10 @@ import org.spongepowered.asm.mixin.injection.At;
  * entity or using an item in the air (ender pearl, egg, snowball, potion…) never swings. After using an item
  * in the air, the hand re-equips only if {@code sendUseItem} reports a changed stack (count changed or a
  * different stack, e.g. a thrown pearl); starting to eat, draw a bow or block does not.</p>
+ *
+ * <p>A firework boost while gliding with an elytra (1.21.1 only) also dips the hand when it uses up a rocket: the
+ * server takes the rocket and the client only sees the new count later, so the count check alone would miss
+ * it.</p>
  *
  * <p>1.21.1 {@code Minecraft.startUseItem} swings for entities (ordinal 0), blocks (ordinal 1) and items in the
  * air (ordinal 2), and calls {@code itemUsed} after every successful use in the air (ordinal 1). This mixin
@@ -85,7 +90,10 @@ public class OldItemUseMixin {
         }
         LocalPlayer player = ((Minecraft) (Object) this).player;
         ItemStack after = player == null ? ItemStack.EMPTY : player.getItemInHand(hand);
-        boolean changed = after != this.animatium$stackBeforeUse || after.getCount() != this.animatium$countBeforeUse;
+        boolean changed = after != this.animatium$stackBeforeUse || after.getCount() != this.animatium$countBeforeUse
+            // a firework boost: only the server uses up the rocket (not in creative), so the count changes later
+            || player != null && player.isFallFlying() && after.getItem() instanceof FireworkRocketItem
+            && !player.hasInfiniteMaterials();
         this.animatium$stackBeforeUse = ItemStack.EMPTY;
         return changed;
     }
