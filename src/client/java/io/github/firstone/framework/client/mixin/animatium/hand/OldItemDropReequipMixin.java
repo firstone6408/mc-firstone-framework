@@ -1,6 +1,7 @@
 package io.github.firstone.framework.client.mixin.animatium.hand;
 
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
+import io.github.firstone.framework.features.animatium.hand.LegacyReequip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -32,10 +33,12 @@ public class OldItemDropReequipMixin {
     @Inject(method = "drop(Z)Z", at = @At("HEAD"))
     private void animatium$rememberDroppedStack(boolean fullStack, CallbackInfoReturnable<Boolean> cir) {
         this.animatium$droppedStack = ItemStack.EMPTY;
+        ItemStack selected = ((LocalPlayer) (Object) this).getInventory().getSelected();
+        // the drop key's animation is this option's, also when it is off (Legacy Re-equip leaves it alone)
+        LegacyReequip.dropKeyEmpties(selected);
         if (!AnimatiumFeature.getConfig().oldItemDrop) {
             return;
         }
-        ItemStack selected = ((LocalPlayer) (Object) this).getInventory().getSelected();
         boolean emptiesHand = !selected.isEmpty() && (fullStack || selected.getCount() == 1);
         if (emptiesHand && renderer().getMainHandItem() == selected) {
             this.animatium$droppedStack = selected.copy();

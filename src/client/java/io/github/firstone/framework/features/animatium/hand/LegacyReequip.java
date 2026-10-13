@@ -3,6 +3,7 @@ package io.github.firstone.framework.features.animatium.hand;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Decides whether the main-hand item can stay in the hand without a re-equip animation
@@ -18,10 +19,46 @@ import net.minecraft.world.item.ItemStack;
  *       item itself, so hitting never re-equipped; in 1.21.1 the server sends a new stack after every hit,
  *       which would otherwise dip the hand on every attack.</li>
  * </ul>
+ *
+ * <p>A held stack that runs out in place (picked up onto the cursor, thrown with Ctrl+Q, moved out with a
+ * shift-click, the last food eaten…) also plays the animation: 1.7.10 put {@code null} into the slot, so the
+ * renderer saw a change, lowered the old item and raised the empty hand. 1.21.1 shrinks the same stack object to 0,
+ * which the renderer still holds, so the item just vanished ({@link #emptiedInPlace}).</p>
  */
 public final class LegacyReequip {
 
+    /** The held stack the drop key is emptying: its animation belongs to "Old Item Drop", or null */
+    @Nullable
+    private static ItemStack dropKeyStack;
+
     private LegacyReequip() {}
+
+    /**
+     * Remembers the held stack the drop key is about to empty, so {@link #emptiedInPlace} leaves it to "Old Item
+     * Drop" (the drop key keeps its own rule, also when that option is off)
+     *
+     * <p>Called on the client when the drop key drops the held item.</p>
+     *
+     * @param stack the selected stack
+     */
+    public static void dropKeyEmpties(ItemStack stack) {
+        dropKeyStack = stack;
+    }
+
+    /**
+     * Tells whether the hand renderer's stack ran out in place and should be shown as it was, so it lowers before
+     * the empty hand rises
+     *
+     * <p>Called on the client by the hand renderer every tick and frame while "Legacy Re-equip" is on.</p>
+     *
+     * @param rendered     the stack the renderer shows now
+     * @param lastRendered the stack it showed at the end of the last tick
+     * @param lastLook     a copy of that stack as it looked then
+     * @return true when {@code rendered} is the same object, now empty, not emptied by the drop key
+     */
+    public static boolean emptiedInPlace(ItemStack rendered, ItemStack lastRendered, ItemStack lastLook) {
+        return rendered == lastRendered && rendered.isEmpty() && !lastLook.isEmpty() && rendered != dropKeyStack;
+    }
 
     /**
      * Checks whether {@code current} can replace the rendered stack without a re-equip animation

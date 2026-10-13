@@ -33,7 +33,7 @@
 	"firstone-framework.animatium.old_item_drop": "Old Item Drop",
 	"firstone-framework.animatium.old_item_drop.tooltip": "1.7.10 dropping: the arm never swings, and dropping the last item lowers it and raises the empty hand.",
 	"firstone-framework.animatium.legacy_reequip": "Legacy Re-equip",
-	"firstone-framework.animatium.legacy_reequip.tooltip": "1.7.10 held item: no dip after attacking, and no re-equip when only the durability of the held item changes.",
+	"firstone-framework.animatium.legacy_reequip.tooltip": "1.7.10 held item: no dip after attacking, no re-equip when only the durability of the held item changes, and a held item that runs out (picked up or moved in a screen, thrown, the last one eaten) goes down before the empty hand comes up.",
 	"firstone-framework.animatium.legacy_hurt_tilt": "Legacy Hurt Tilt",
 	"firstone-framework.animatium.legacy_hurt_tilt.tooltip": "1.7.10 hurt camera: the screen always tilts the same way when you are hurt, wherever the hit came from. The Damage Tilt accessibility option still sets how strong it is.",
 	"firstone-framework.animatium.legacy_first_person_items": "Legacy First-Person Items",

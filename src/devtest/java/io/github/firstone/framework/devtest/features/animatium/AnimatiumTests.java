@@ -21,6 +21,7 @@ import io.github.firstone.framework.features.animatium.AnimatiumConfig;
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
 import io.github.firstone.framework.features.combattweaks.CombatTweaksFeature;
 import net.minecraft.client.CameraType;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.particle.AttackSweepParticle;
@@ -49,6 +50,8 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -101,6 +104,14 @@ public final class AnimatiumTests implements FeatureTests {
                 this::reequipMining),
             TestCase.of("Re-equip: swinging a sword in the air or hitting a mob keeps it up; off: it dips",
                 this::reequipSword),
+            TestCase.of("Re-equip: the held item taken onto the cursor, thrown with Ctrl+Q or shift-clicked out of the "
+                + "inventory lowers before the empty hand rises; off: it vanishes at once",
+                this::reequipRunOutInScreen),
+            TestCase.of("Re-equip: eating the last food lowers it before the empty hand rises; off: it vanishes",
+                this::reequipLastFood),
+            TestCase.of("Re-equip: taking half of the held stack keeps the hand up (on and off)", this::reequipHalf),
+            TestCase.of("Re-equip: with Old Item Drop off the drop key still empties the hand at once (its own option)",
+                this::reequipLeavesDropKey),
             TestCase.of("Item Use: no arm swing using an item in the air; off: swing", this::useSwing),
             TestCase.of("Item Use: the hand dips only when the used stack changed", this::useDip),
             TestCase.of("Item Use: the server's echo of the player's own swing is ignored", this::serverSwingEcho),
@@ -260,6 +271,118 @@ public final class AnimatiumTests implements FeatureTests {
         config().oldItemDrop = false;
         boolean[] off = dropOnlyItem(t);
         t.check("off: the dropped item is still drawn right after", off[0]).isFalse();
+    }
+
+    /**
+     * Watches the hand after the held stack ran out: {the old item still drawn a tick later, the hand lowered below
+     * 0.1, then the empty hand fully up}
+     */
+    private static boolean[] watchRunOut(TestContext t, Item item) {
+        t.tick();
+        boolean drawn = hand(t).devtest$getMainHandItem().is(item);
+        boolean lowered = lowestHand(t, 10) < 0.1;
+        t.ticks(5);
+        boolean emptyUp = hand(t).devtest$getMainHandItem().isEmpty() && hand(t).devtest$getMainHandHeight() > 0.99;
+        return new boolean[] {drawn, lowered, emptyUp};
+    }
+
+    /** Holds 8 sticks, opens the inventory, clicks the held slot; returns what the hand did ({@link #watchRunOut}) */
+    private static boolean[] clickHeldSlot(TestContext t, int button, ClickType type) {
+        t.holdItem(new ItemStack(Items.STICK, 8));
+        t.ticks(15);
+        t.openScreen(() -> new InventoryScreen(t.player()));
+        t.ticks(5);
+        t.onClientThread(() -> {
+            // slots 36 to 44 of the inventory screen are the hotbar
+            int slot = 36 + t.player().getInventory().selected;
+            t.mc().gameMode.handleInventoryMouseClick(t.player().inventoryMenu.containerId, slot, button, type,
+                t.player());
+            return null;
+        });
+        boolean[] seen = watchRunOut(t, Items.STICK);
+        t.closeScreen();
+        t.removeEntities();
+        t.withServerPlayer(player -> player.getInventory().clearContent());
+        t.ticks(5);
+        return seen;
+    }
+
+    private void reequipRunOutInScreen(TestContext t) {
+        t.gameMode(GameType.SURVIVAL);
+        String[] names = {"taken onto the cursor", "thrown with Ctrl+Q", "shift-clicked out"};
+        int[] buttons = {0, 1, 0};
+        ClickType[] types = {ClickType.PICKUP, ClickType.THROW, ClickType.QUICK_MOVE};
+        for (boolean on : new boolean[] {true, false}) {
+            config().legacyReequip = on;
+            for (int i = 0; i < names.length; i++) {
+                boolean[] seen = clickHeldSlot(t, buttons[i], types[i]);
+                if (on) {
+                    t.check("on, " + names[i] + ": the stick still drawn a tick later", seen[0]).isTrue();
+                    t.check("on, " + names[i] + ": the hand goes down", seen[1]).isTrue();
+                    t.check("on, " + names[i] + ": then the empty hand is fully up", seen[2]).isTrue();
+                } else {
+                    t.check("off, " + names[i] + ": the stick still drawn a tick later (vanishes)", seen[0]).isFalse();
+                    t.check("off, " + names[i] + ": the hand goes down", seen[1]).isFalse();
+                }
+            }
+        }
+    }
+
+    /** Eats the only bread in the hand (hungry, survival); returns what the hand did ({@link #watchRunOut}) */
+    private static boolean[] eatLastBread(TestContext t) {
+        t.withServerPlayer(player -> player.getFoodData().setFoodLevel(10));
+        t.holdItem(new ItemStack(Items.BREAD));
+        t.ticks(15);
+        t.hold(t.mc().options.keyUse);
+        t.waitUntil("the bread is eaten", () -> t.onClientThread(() -> t.player().getMainHandItem().isEmpty()), 60);
+        boolean[] seen = watchRunOut(t, Items.BREAD);
+        t.release(t.mc().options.keyUse);
+        t.ticks(5);
+        return seen;
+    }
+
+    private void reequipLastFood(TestContext t) {
+        t.gameMode(GameType.SURVIVAL);
+        boolean[] on = eatLastBread(t);
+        t.check("on: the bread still drawn a tick later", on[0]).isTrue();
+        t.check("on: the hand goes down", on[1]).isTrue();
+        t.check("on: then the empty hand is fully up", on[2]).isTrue();
+        config().legacyReequip = false;
+        boolean[] off = eatLastBread(t);
+        t.check("off: the bread still drawn a tick later (vanishes)", off[0]).isFalse();
+    }
+
+    private void reequipHalf(TestContext t) {
+        t.gameMode(GameType.SURVIVAL);
+        for (boolean on : new boolean[] {true, false}) {
+            config().legacyReequip = on;
+            t.holdItem(new ItemStack(Items.STICK, 8));
+            t.ticks(15);
+            t.openScreen(() -> new InventoryScreen(t.player()));
+            t.ticks(5);
+            t.onClientThread(() -> {
+                int slot = 36 + t.player().getInventory().selected;
+                t.mc().gameMode.handleInventoryMouseClick(t.player().inventoryMenu.containerId, slot, 1,
+                    ClickType.PICKUP, t.player());
+                return null;
+            });
+            t.check((on ? "on" : "off") + ": lowest hand height after taking 4 of 8 sticks", lowestHand(t, 10))
+                .near(1.0, 1.0E-5);
+            t.closeScreen();
+            t.withServerPlayer(player -> player.getInventory().clearContent());
+            t.ticks(5);
+        }
+    }
+
+    private void reequipLeavesDropKey(TestContext t) {
+        config().oldItemDrop = false;
+        t.holdItem(new ItemStack(Items.STICK, 1));
+        t.ticks(15);
+        t.pressKey(t.mc().options.keyDrop.getDefaultKey().getValue());
+        boolean[] seen = watchRunOut(t, Items.STICK);
+        t.check("Legacy Re-equip on, Old Item Drop off: the stick still drawn a tick later (vanishes, 1.21.1)",
+            seen[0]).isFalse();
+        t.check("the hand goes down", seen[1]).isFalse();
     }
 
     private void reequipAttack(TestContext t) {
