@@ -1,17 +1,59 @@
 package io.github.firstone.framework.features.animatium.client.screen;
 
-import io.github.firstone.framework.client.screen.ConfigScreen;
+import io.github.firstone.framework.client.screen.CategoryMenuScreen;
+import io.github.firstone.framework.client.screen.ConfigCategory;
 import io.github.firstone.framework.features.animatium.AnimatiumConfig;
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.item.Items;
+
+import java.util.List;
+
+import static io.github.firstone.framework.client.screen.ConfigCategory.toggle;
 
 /**
- * Settings screen of the Animatium feature
+ * Settings screen of the Animatium feature: its options in categories, grouped by what they change in the game
  *
- * <p>One on/off option per 1.7.10 behavior, grouped into Animation, Players &amp; Mobs and Combat. Each change is
- * saved to {@code animatium.json} and takes effect right away.</p>
+ * <ul>
+ *   <li><b>Items</b> — where held items and items on the ground are drawn</li>
+ *   <li><b>Hand Animations</b> — how the first-person hand moves when using, dropping and switching items</li>
+ *   <li><b>Sneaking</b> — the eyes, hitbox and pose of sneaking players</li>
+ *   <li><b>Players &amp; Mobs</b> — how other entities move, turn and swing</li>
+ *   <li><b>Hits &amp; Effects</b> — the hurt camera tilt and tint, landing dust and the effects added in 1.9</li>
+ * </ul>
+ *
+ * <p>Each change is saved to {@code animatium.json} and takes effect right away.</p>
  */
-public class AnimatiumConfigScreen extends ConfigScreen {
+public class AnimatiumConfigScreen extends CategoryMenuScreen<AnimatiumConfig> {
+
+    /** The categories and their options, in the order they are shown */
+    private static final List<ConfigCategory<AnimatiumConfig>> CATEGORIES = List.of(
+        ConfigCategory.of("items", Items.IRON_SWORD, List.of(
+            toggle("legacy_first_person_items", c -> c.legacyFirstPersonItems, (c, v) -> c.legacyFirstPersonItems = v),
+            toggle("legacy_third_person_items", c -> c.legacyThirdPersonItems, (c, v) -> c.legacyThirdPersonItems = v),
+            toggle("legacy_ground_items", c -> c.legacyGroundItems, (c, v) -> c.legacyGroundItems = v),
+            toggle("resource_pack_items", c -> c.resourcePackItems, (c, v) -> c.resourcePackItems = v,
+                c -> c.legacyFirstPersonItems || c.legacyThirdPersonItems || c.legacyGroundItems))),
+        ConfigCategory.of("hand", Items.SNOWBALL, List.of(
+            toggle("old_item_use", c -> c.oldItemUse, (c, v) -> c.oldItemUse = v),
+            toggle("old_item_drop", c -> c.oldItemDrop, (c, v) -> c.oldItemDrop = v),
+            toggle("legacy_reequip", c -> c.legacyReequip, (c, v) -> c.legacyReequip = v))),
+        ConfigCategory.of("sneaking", Items.LEATHER_BOOTS, List.of(
+            toggle("old_sneak", c -> c.oldSneak, (c, v) -> c.oldSneak = v),
+            toggle("legacy_sneak_pose", c -> c.legacySneakPose, (c, v) -> c.legacySneakPose = v))),
+        ConfigCategory.of("entities", Items.ZOMBIE_HEAD, List.of(
+            toggle("legacy_entity_sync", c -> c.legacyEntitySync, (c, v) -> c.legacyEntitySync = v),
+            toggle("legacy_mob_physics", c -> c.legacyMobPhysics, (c, v) -> c.legacyMobPhysics = v),
+            toggle("legacy_body_rotation", c -> c.legacyBodyRotation, (c, v) -> c.legacyBodyRotation = v),
+            toggle("legacy_zombie_arms", c -> c.legacyZombieArms, (c, v) -> c.legacyZombieArms = v),
+            toggle("legacy_mob_swing", c -> c.legacyMobSwing, (c, v) -> c.legacyMobSwing = v))),
+        ConfigCategory.of("effects", Items.REDSTONE, List.of(
+            toggle("legacy_hurt_tilt", c -> c.legacyHurtTilt, (c, v) -> c.legacyHurtTilt = v),
+            toggle("legacy_hurt_tint", c -> c.legacyHurtTint, (c, v) -> c.legacyHurtTint = v),
+            toggle("legacy_fall_particles", c -> c.legacyFallParticles, (c, v) -> c.legacyFallParticles = v),
+            toggle("no_sweep_effect", c -> c.noSweepEffect, (c, v) -> c.noSweepEffect = v),
+            toggle("no_damage_indicator", c -> c.noDamageIndicator, (c, v) -> c.noDamageIndicator = v),
+            toggle("no_attack_sounds", c -> c.noAttackSounds, (c, v) -> c.noAttackSounds = v))));
 
     /**
      * Creates the Animatium settings screen
@@ -19,39 +61,7 @@ public class AnimatiumConfigScreen extends ConfigScreen {
      * @param parent screen to return to when this screen is closed
      */
     public AnimatiumConfigScreen(Screen parent) {
-        super(parent, "firstone-framework.animatium.", AnimatiumFeature::saveConfig, AnimatiumFeature::resetConfig);
-    }
-
-    @Override
-    protected void addOptions() {
-        AnimatiumConfig config = AnimatiumFeature.getConfig();
-
-        addSection("category.animation");
-        addToggle("old_sneak", config.oldSneak, value -> config.oldSneak = value);
-        addToggle("old_item_drop", config.oldItemDrop, value -> config.oldItemDrop = value);
-        addToggle("old_item_use", config.oldItemUse, value -> config.oldItemUse = value);
-        addToggle("legacy_reequip", config.legacyReequip, value -> config.legacyReequip = value);
-        addToggle("legacy_hurt_tilt", config.legacyHurtTilt, value -> config.legacyHurtTilt = value);
-        addToggle("legacy_first_person_items", config.legacyFirstPersonItems,
-            value -> config.legacyFirstPersonItems = value);
-        addToggle("legacy_third_person_items", config.legacyThirdPersonItems,
-            value -> config.legacyThirdPersonItems = value);
-        addToggle("legacy_ground_items", config.legacyGroundItems, value -> config.legacyGroundItems = value);
-        addToggle("resource_pack_items", config.resourcePackItems, value -> config.resourcePackItems = value);
-
-        addSection("category.entities");
-        addToggle("legacy_entity_sync", config.legacyEntitySync, value -> config.legacyEntitySync = value);
-        addToggle("legacy_mob_physics", config.legacyMobPhysics, value -> config.legacyMobPhysics = value);
-        addToggle("legacy_body_rotation", config.legacyBodyRotation, value -> config.legacyBodyRotation = value);
-        addToggle("legacy_sneak_pose", config.legacySneakPose, value -> config.legacySneakPose = value);
-        addToggle("legacy_zombie_arms", config.legacyZombieArms, value -> config.legacyZombieArms = value);
-        addToggle("legacy_mob_swing", config.legacyMobSwing, value -> config.legacyMobSwing = value);
-        addToggle("legacy_hurt_tint", config.legacyHurtTint, value -> config.legacyHurtTint = value);
-        addToggle("legacy_fall_particles", config.legacyFallParticles, value -> config.legacyFallParticles = value);
-
-        addSection("category.combat");
-        addToggle("no_sweep_effect", config.noSweepEffect, value -> config.noSweepEffect = value);
-        addToggle("no_damage_indicator", config.noDamageIndicator, value -> config.noDamageIndicator = value);
-        addToggle("no_attack_sounds", config.noAttackSounds, value -> config.noAttackSounds = value);
+        super(parent, "firstone-framework.animatium.", AnimatiumFeature::getConfig, AnimatiumConfig::new,
+            AnimatiumFeature::saveConfig, AnimatiumFeature::resetConfig, null, CATEGORIES);
     }
 }

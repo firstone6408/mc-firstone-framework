@@ -57,6 +57,7 @@ public class CosmeticsMusicDiscsScreen extends CosmeticsCategoryScreen {
         for (Path song : CosmeticsFiles.songs()) {
             files.add(song.getFileName().toString());
         }
+        addCategoryHeading();
         addStatus(files.size() > 1 ? status("songs", files.size() - 1) : null);
         addToggle("enabled", config.enabled, value -> config.enabled = value);
         addToggle("sound_3d", config.sound3d, value -> config.sound3d = value).enabledWhen(enabled);

@@ -84,7 +84,21 @@ public abstract class ConfigScreen extends Screen {
      *                    null to hide the Reset button
      */
     protected ConfigScreen(Screen parent, String keyPrefix, @Nullable Runnable saveConfig, @Nullable Runnable resetConfig) {
-        super(Component.translatable(keyPrefix + "name"));
+        this(parent, Component.translatable(keyPrefix + "name"), keyPrefix, saveConfig, resetConfig);
+    }
+
+    /**
+     * Creates a config screen with its own title (for example a category screen, titled with its feature's name)
+     *
+     * @param parent      screen to return to when this screen is closed
+     * @param title       title shown on top
+     * @param keyPrefix   translation key prefix of the options, ending with a dot
+     * @param saveConfig  saves the feature config, or null if nothing is saved
+     * @param resetConfig restores and saves the defaults of this screen's options, or null to hide the Reset button
+     */
+    protected ConfigScreen(Screen parent, Component title, String keyPrefix, @Nullable Runnable saveConfig,
+                           @Nullable Runnable resetConfig) {
+        super(title);
         this.parent = parent;
         this.keyPrefix = keyPrefix;
         this.saveConfig = saveConfig;
@@ -143,7 +157,7 @@ public abstract class ConfigScreen extends Screen {
     /**
      * Adds a category title
      *
-     * @param name key of the title, e.g. {@code "category.animation"}
+     * @param name key of the title, e.g. {@code "category.handling"}
      */
     protected void addSection(String name) {
         this.list.add(new ConfigList.SectionRow(text(name)));
@@ -354,8 +368,26 @@ public abstract class ConfigScreen extends Screen {
                 }
                 this.minecraft.setScreen(this);
             },
-            Component.translatable("firstone-framework.config.reset.title", this.title),
-            Component.translatable("firstone-framework.config.reset.message")));
+            Component.translatable("firstone-framework.config.reset.title", resetSubject()),
+            resetMessage()));
+    }
+
+    /**
+     * Returns what the Reset confirmation names ({@code Reset <subject>?})
+     *
+     * @return the screen's title, by default; a category screen names its category
+     */
+    protected Component resetSubject() {
+        return this.title;
+    }
+
+    /**
+     * Returns the message of the Reset confirmation, which tells what goes back to the defaults
+     *
+     * @return the options of this screen, by default; a category menu tells that every category is reset
+     */
+    protected Component resetMessage() {
+        return Component.translatable("firstone-framework.config.reset.message");
     }
 
     /**

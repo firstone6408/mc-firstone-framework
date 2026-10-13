@@ -81,6 +81,9 @@ src/
     │   ├── screen/
     │   │   ├── ConfigScreen.java       ← Base of every config screen (layout, Reset/Done)
     │   │   ├── ConfigList.java         ← Row types, sizes, colors, tooltip delay
+    │   │   ├── ConfigCategory.java     ← One category of on/off options (big features)
+    │   │   ├── CategoryMenuScreen.java ← A big feature's screen: one tile per category
+    │   │   ├── CategoryOptionsScreen.java ← The options of one category
     │   │   └── MainConfigScreen.java   ← Main settings GUI (feature tiles, Client / Server)
     │   └── features/                   ← Client-side feature logic
 │           └── <feature name>/
@@ -235,6 +238,45 @@ All texts come from `src/client/resources/assets/firstone-framework/lang/en_us.j
 `name` is shown on the feature's tile in `MainConfigScreen` and as the screen title, `description` appears when
 the tile is hovered; `.tooltip` keys are optional. To change how every screen looks (row width, colors, tooltip delay), edit
 the constants in `ConfigList`.
+
+### Big features: categories
+
+Keep every screen short. A feature with more than about ten options splits them into categories of 2 to 7
+options, grouped by what the player sees in the game (Animatium, Legacy Mechanics and Legacy Vehicles do this). Its
+screen extends `CategoryMenuScreen`, which shows one tile per category under a "Categories" heading, with how many of
+its options are on (updated when the player comes back). Each tile opens the category's own screen: like every
+settings screen it is titled with the feature's name and lists the options under a heading (the category's name), and
+its Reset restores only that category:
+
+```java
+public class FallingTreeConfigScreen extends CategoryMenuScreen<FallingTreeConfig> {
+
+    private static final List<ConfigCategory<FallingTreeConfig>> CATEGORIES = List.of(
+        ConfigCategory.of("felling", Items.IRON_AXE, List.of(
+            toggle("enabled", c -> c.enabled, (c, v) -> c.enabled = v),
+            toggle("drop_leaves", c -> c.dropLeaves, (c, v) -> c.dropLeaves = v, c -> c.enabled))));
+
+    public FallingTreeConfigScreen(Screen parent) {
+        super(parent, "firstone-framework.falling_tree.", FallingTreeFeature::getConfig, FallingTreeConfig::new,
+            FallingTreeFeature::saveConfig, FallingTreeFeature::resetConfig, "falling_tree.json", CATEGORIES);
+    }
+}
+```
+
+Each category needs `<prefix>category.<key>` (its name) and `<prefix>category.<key>.description` (its tile's
+tooltip); the options keep their own keys. A category with more options splits them into groups of 2 to 7, each under
+its own heading `<prefix>category.<group>` (the Boats category of Legacy Vehicles):
+
+```java
+ConfigCategory.grouped("boats", Items.OAK_BOAT, List.of(
+    group("handling", List.of(toggle(…), toggle(…))),
+    group("look", List.of(toggle(…), toggle(…)))))
+```
+
+Pass the config file name for server rules (the server notice is shown on top of the menu), or `null`. A feature
+with few options stays on one screen with `addSection` headings (Combat Tweaks). The dev tests check category menus
+with `CategoryMenuChecks.check(…)`: every option in exactly one category, the sizes, the texts and headings, the
+buttons, the tile counts after Done and each category's Reset.
 
 ---
 

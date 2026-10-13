@@ -28,6 +28,7 @@ public class CosmeticsItemBreakScreen extends CosmeticsCategoryScreen {
         CosmeticsConfig.ItemBreak config = CosmeticsFeature.getConfig().itemBreak;
         BooleanSupplier enabled = () -> config.enabled;
 
+        addCategoryHeading();
         addEffectStatus(CosmeticsFiles.ITEM_BREAK);
         addToggle("enabled", config.enabled, value -> config.enabled = value);
         addToggle("players", config.players, value -> config.players = value).enabledWhen(enabled);

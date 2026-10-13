@@ -12,7 +12,11 @@ import java.nio.file.Files;
 import java.util.Locale;
 
 /**
- * Base of the Cosmetics category screens: the file status line and the slider texts they share
+ * Base of the Cosmetics category screens: the title, the file status line and the slider texts they share
+ *
+ * <p>Like every settings screen, the title is the feature's name ("Cosmetics"); a category screen starts with a
+ * heading of its own name ({@link #addCategoryHeading()}), so the player sees which category is open, then its other
+ * sections. Its Reset asks about the category.</p>
  *
  * <p>Texts come from {@code firstone-framework.cosmetics.<category>.*}; the status texts from
  * {@code firstone-framework.cosmetics.status*}.</p>
@@ -30,10 +34,23 @@ public abstract class CosmeticsCategoryScreen extends ConfigScreen {
      * @param reset    restores the defaults of this category only (then the config is saved)
      */
     protected CosmeticsCategoryScreen(Screen parent, String category, Runnable reset) {
-        super(parent, "firstone-framework.cosmetics." + category + ".", CosmeticsFeature::saveConfig, () -> {
-            reset.run();
-            CosmeticsFeature.saveConfig();
-        });
+        super(parent, Component.translatable("firstone-framework.cosmetics.name"),
+            "firstone-framework.cosmetics." + category + ".", CosmeticsFeature::saveConfig, () -> {
+                reset.run();
+                CosmeticsFeature.saveConfig();
+            });
+    }
+
+    @Override
+    protected Component resetSubject() {
+        return text("name");
+    }
+
+    /**
+     * Adds the heading with the category's name, the first row of a category screen
+     */
+    protected void addCategoryHeading() {
+        addSection("name");
     }
 
     /**

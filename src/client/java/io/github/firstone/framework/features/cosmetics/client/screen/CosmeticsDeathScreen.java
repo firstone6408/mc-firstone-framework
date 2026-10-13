@@ -28,6 +28,7 @@ public class CosmeticsDeathScreen extends CosmeticsCategoryScreen {
         CosmeticsConfig.Death config = CosmeticsFeature.getConfig().death;
         BooleanSupplier enabled = () -> config.enabled;
 
+        addCategoryHeading();
         addEffectStatus(CosmeticsFiles.DEATH);
         addToggle("enabled", config.enabled, value -> config.enabled = value);
         addToggle("players", config.players, value -> config.players = value).enabledWhen(enabled);

@@ -1,6 +1,7 @@
 package io.github.firstone.framework.devtest.features.animatium;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import io.github.firstone.framework.devtest.core.CategoryMenuChecks;
 import io.github.firstone.framework.devtest.core.FeatureTests;
 import io.github.firstone.framework.devtest.core.Images;
 import io.github.firstone.framework.devtest.core.SoundRecorder;
@@ -87,6 +88,8 @@ public final class AnimatiumTests implements FeatureTests {
     public List<TestCase> tests() {
         List<TestCase> tests = new ArrayList<>(List.of(
             // sneak
+            TestCase.of("Settings: every option in one category of 2 to 7, each opens, writes and resets on its own",
+                this::settings),
             TestCase.of("Old Sneak: the eyes drop 0.08 with the 1.7.10 timing; off: 1.21.1 crouch", this::sneakEyes),
             TestCase.of("Old Sneak: the hitbox keeps 1.8 blocks; camera and aim use the same eyes", this::sneakHitbox),
             // first-person hand
@@ -132,6 +135,11 @@ public final class AnimatiumTests implements FeatureTests {
         tests.addAll(MobLandingTests.tests());
         return tests;
     }
+    private void settings(TestContext t) {
+        CategoryMenuChecks.check(t, "animatium", "firstone-framework.animatium.", AnimatiumFeature::getConfig,
+            AnimatiumConfig::new, "animatium.json");
+    }
+
 
     private static AnimatiumConfig config() {
         return AnimatiumFeature.getConfig();

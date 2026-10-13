@@ -183,6 +183,15 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
             this(title, null, null);
         }
 
+        /**
+         * Returns the title of this section
+         *
+         * @return the category name, as shown (bold)
+         */
+        public Component title() {
+            return this.title;
+        }
+
         @Override
         public void render(GuiGraphics graphics, int index, int top, int left, int width, int height,
                            int mouseX, int mouseY, boolean hovered, float partialTick) {
@@ -329,14 +338,29 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
     }
 
     /**
-     * One clickable tile: an item icon and a name, with a delayed tooltip
+     * One clickable tile: an item icon and a name, an optional status on the right, with a delayed tooltip
      *
      * @param icon    item drawn on the left of the tile
      * @param name    text next to the icon
      * @param tooltip text shown after hovering the tile, or {@code null}
      * @param onPress action when the tile is clicked
+     * @param status  short gray text on the right (for example how many options are on), or {@code null}
      */
-    public record Tile(ItemStack icon, Component name, @Nullable Component tooltip, Button.OnPress onPress) {}
+    public record Tile(ItemStack icon, Component name, @Nullable Component tooltip, Button.OnPress onPress,
+                       @Nullable Component status) {
+
+        /**
+         * Creates a tile without a status
+         *
+         * @param icon    item drawn on the left of the tile
+         * @param name    text next to the icon
+         * @param tooltip text shown after hovering the tile, or {@code null}
+         * @param onPress action when the tile is clicked
+         */
+        public Tile(ItemStack icon, Component name, @Nullable Component tooltip, Button.OnPress onPress) {
+            this(icon, name, tooltip, onPress, null);
+        }
+    }
 
     /** Up to two {@link Tile}s side by side, each half of the row wide (used for the features on the main screen) */
     public static class TileRow extends Row {
@@ -352,6 +376,15 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
         public TileRow(List<Tile> tiles) {
             this.tiles = List.copyOf(tiles);
             this.buttons = this.tiles.stream().map(TileRow::createButton).toList();
+        }
+
+        /**
+         * Returns the tiles of this row
+         *
+         * @return one or two tiles, left to right
+         */
+        public List<Tile> tiles() {
+            return this.tiles;
         }
 
         /** Creates the button behind a tile; its text is drawn by the row, next to the icon */
@@ -379,8 +412,14 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
                 button.render(graphics, mouseX, mouseY, partialTick);
                 graphics.renderItem(tile.icon(), x + TILE_PADDING, top + (height - 16) / 2);
                 int textX = x + TILE_PADDING + 16 + 5;
-                graphics.drawString(font, fit(font, tile.name(), x + tileWidth - TILE_PADDING - textX), textX,
-                    top + (height - font.lineHeight) / 2 + 1, TEXT_COLOR);
+                int textY = top + (height - font.lineHeight) / 2 + 1;
+                int textEnd = x + tileWidth - TILE_PADDING;
+                if (tile.status() != null) {
+                    int statusX = textEnd - font.width(tile.status());
+                    graphics.drawString(font, tile.status(), statusX, textY, MUTED_COLOR);
+                    textEnd = statusX - TILE_GAP;
+                }
+                graphics.drawString(font, fit(font, tile.name(), textEnd - textX), textX, textY, TEXT_COLOR);
             }
         }
 

@@ -1,6 +1,7 @@
 package io.github.firstone.framework.devtest.features.cosmetics;
 
 import com.mojang.blaze3d.audio.SoundBuffer;
+import io.github.firstone.framework.client.screen.ConfigList;
 import io.github.firstone.framework.devtest.core.FeatureTests;
 import io.github.firstone.framework.devtest.core.SoundRecorder;
 import io.github.firstone.framework.devtest.core.Spawned;
@@ -13,6 +14,7 @@ import io.github.firstone.framework.devtest.mixin.SoundEngineAccessor;
 import io.github.firstone.framework.devtest.mixin.SoundManagerAccessor;
 import io.github.firstone.framework.features.cosmetics.CosmeticsConfig;
 import io.github.firstone.framework.features.cosmetics.CosmeticsFeature;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.particle.BreakingItemParticle;
 import net.minecraft.client.particle.ExplodeParticle;
@@ -112,7 +114,8 @@ public final class CosmeticsTests implements FeatureTests {
             TestCase.of("Files: without frames the game's particles show; without a sound the game's sound plays",
                 this::missingFiles),
             // settings
-            TestCase.of("Settings: the main screen and the three category screens open", this::screens)
+            TestCase.of("Settings: the main screen and the three category screens open; each keeps the title "
+                + "Cosmetics and starts with a heading of its tile's name", this::screens)
         );
     }
 
@@ -734,6 +737,8 @@ public final class CosmeticsTests implements FeatureTests {
         t.check("Cosmetics screen open", t.openSettings("cosmetics")).isTrue();
         t.saveScreenshot("settings_cosmetics");
         Screen main = t.mc().screen;
+        List<String> tiles = t.onClientThread(() -> rows(main, ConfigList.TileRow.class).stream()
+            .flatMap(row -> row.tiles().stream()).map(tile -> tile.name().getString()).toList());
         int i = 0;
         for (Function<Screen, Screen> category : CosmeticsInternals.categoryScreens()) {
             Screen[] opened = new Screen[1];
@@ -743,8 +748,34 @@ public final class CosmeticsTests implements FeatureTests {
             });
             t.check("category screen " + i + " open", t.mc().screen == opened[0]).isTrue();
             t.saveScreenshot("settings_cosmetics_category_" + i);
+            String title = t.onClientThread(() -> opened[0].getTitle().getString());
+            t.check("category screen " + i + ": title is the feature's name, as on every settings screen (" + title
+                + ")", title.equals(main.getTitle().getString())).isTrue();
+            String first = t.onClientThread(() -> {
+                for (ConfigList.SectionRow heading : rows(opened[0], ConfigList.SectionRow.class)) {
+                    return heading.title().getString();
+                }
+                return "";
+            });
+            t.check("category screen " + i + ": first heading is its tile's name (" + first + ")",
+                i < tiles.size() && first.equals(tiles.get(i))).isTrue();
             i++;
         }
         t.closeScreen();
+    }
+
+    /** The rows of one kind of a config screen, top to bottom */
+    private static <R extends ConfigList.Row> List<R> rows(Screen screen, Class<R> kind) {
+        List<R> found = new ArrayList<>();
+        for (GuiEventListener child : screen.children()) {
+            if (child instanceof ConfigList list) {
+                for (ConfigList.Row row : list.children()) {
+                    if (kind.isInstance(row)) {
+                        found.add(kind.cast(row));
+                    }
+                }
+            }
+        }
+        return found;
     }
 }
