@@ -9,6 +9,7 @@
 		"animatium.sneak.OldSneakEyeMixin",
 		"animatium.sneak.OldSneakCameraMixin",
 		"animatium.hand.OldItemDropSwingMixin",
+		"animatium.hand.OldItemDropScreenSwingMixin",
 		"animatium.hand.OldItemDropReequipMixin",
 		"animatium.hand.ItemInHandRendererAccessor",
 		"animatium.hand.LegacyReequipMixin",

@@ -16,8 +16,8 @@ public class AnimatiumConfig {
     public boolean oldSneak = true;
 
     /**
-     * 1.7.10 item dropping: the arm never swings when dropping an item, and dropping the last item
-     * (or the whole stack) lowers the item and raises the empty hand.
+     * 1.7.10 item dropping: the arm never swings when dropping an item (with the drop key or out of a screen), and
+     * dropping the last item (or the whole stack) lowers the item and raises the empty hand.
      */
     public boolean oldItemDrop = true;
 
