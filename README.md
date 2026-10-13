@@ -372,7 +372,7 @@ So that a refactor (moving or renaming classes) does not touch the tests:
 ## System requirements
 
 - Minecraft 1.21.1
-- Fabric Loader 0.18.4 or newer (developed with 0.19.3)
+- Fabric Loader 0.16.0 or newer (developed with 0.19.3)
 - Fabric API (developed with 0.116.12+1.21.1)
 - Java 21
 - Optional: [Mod Menu](https://modrinth.com/mod/modmenu) to open the settings screen
