@@ -5,8 +5,11 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
 import io.github.firstone.framework.features.animatium.hand.LegacyReequip;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,6 +31,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *   <li>the attack strength used for the hand height is forced to 1, so attacking never dips the hand.</li>
  * </ul>
  *
+ * <p>A held stack that runs out in place ({@link LegacyReequip#emptiedInPlace}) is replaced, before each tick and
+ * frame, by a copy of how it looked at the end of the last tick; the vanilla animation then lowers that copy and
+ * raises the empty hand.</p>
+ *
  * <p>{@code itemUsed()} (placing a block, throwing a pearl…) is left alone: 1.7.10 also reset the hand
  * there. The off hand did not exist in 1.7.10 and keeps the vanilla behavior.</p>
  */
@@ -44,6 +51,35 @@ public class LegacyReequipMixin {
     /** Hotbar slot the rendered main-hand stack came from (-1 = unknown) */
     @Unique
     private int animatium$renderedSlot = -1;
+
+    /** The main-hand stack shown at the end of the last tick */
+    @Unique
+    private ItemStack animatium$lastRendered = ItemStack.EMPTY;
+
+    /** A copy of that stack as it looked then (EMPTY if it was empty) */
+    @Unique
+    private ItemStack animatium$lastLook = ItemStack.EMPTY;
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void animatium$showEmptiedItemOnTick(CallbackInfo ci) {
+        animatium$showEmptiedItem();
+    }
+
+    @Inject(method = "renderHandsWithItems", at = @At("HEAD"))
+    private void animatium$showEmptiedItemOnFrame(float partialTick, PoseStack poseStack,
+                                                 MultiBufferSource.BufferSource buffers, LocalPlayer player, int light,
+                                                 CallbackInfo ci) {
+        animatium$showEmptiedItem();
+    }
+
+    /** Shows a held stack that ran out in place as it looked, so the vanilla animation lowers it */
+    @Unique
+    private void animatium$showEmptiedItem() {
+        if (AnimatiumFeature.getConfig().legacyReequip
+            && LegacyReequip.emptiedInPlace(this.mainHandItem, this.animatium$lastRendered, this.animatium$lastLook)) {
+            this.mainHandItem = this.animatium$lastLook;
+        }
+    }
 
     @WrapOperation(
         method = "tick",
@@ -73,5 +109,7 @@ public class LegacyReequipMixin {
         if (this.minecraft.player != null && this.mainHandItem == this.minecraft.player.getMainHandItem()) {
             this.animatium$renderedSlot = this.minecraft.player.getInventory().selected;
         }
+        this.animatium$lastRendered = this.mainHandItem;
+        this.animatium$lastLook = this.mainHandItem.isEmpty() ? ItemStack.EMPTY : this.mainHandItem.copy();
     }
 }

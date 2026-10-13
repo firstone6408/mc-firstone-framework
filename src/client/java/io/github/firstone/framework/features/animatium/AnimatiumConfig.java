@@ -23,7 +23,8 @@ public class AnimatiumConfig {
 
     /**
      * 1.7.10 re-equip rules for the main hand: no dip after attacks (no attack cooldown in 1.7.10),
-     * and no re-equip animation when the held item only changes durability in the same slot.
+     * no re-equip animation when the held item only changes durability in the same slot, and a held item that
+     * runs out (picked up in a screen, thrown, moved, eaten) lowers before the empty hand rises.
      */
     public boolean legacyReequip = true;
 
