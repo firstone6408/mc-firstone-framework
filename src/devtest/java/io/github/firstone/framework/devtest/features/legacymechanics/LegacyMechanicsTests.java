@@ -8,6 +8,7 @@ import io.github.firstone.framework.devtest.core.TestContext;
 import io.github.firstone.framework.devtest.core.TestSite;
 import io.github.firstone.framework.devtest.features.legacymechanics.experience.ExperienceTests;
 import io.github.firstone.framework.devtest.features.legacymechanics.food.RegenerationTests;
+import io.github.firstone.framework.devtest.features.legacymechanics.item.CloseDropsTests;
 import io.github.firstone.framework.devtest.features.legacymechanics.item.ItemDropTests;
 import io.github.firstone.framework.devtest.features.legacymechanics.sword.SwordBlockingTests;
 import io.github.firstone.framework.features.combattweaks.CombatTweaksFeature;
@@ -90,6 +91,7 @@ public final class LegacyMechanicsTests implements FeatureTests {
         tests.addAll(RegenerationTests.tests());
         tests.addAll(SwordBlockingTests.tests());
         tests.addAll(ItemDropTests.tests());
+        tests.addAll(CloseDropsTests.tests());
         tests.addAll(ExperienceTests.tests());
         return tests;
     }

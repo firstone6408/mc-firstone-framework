@@ -21,6 +21,7 @@
 		"legacymechanics.item.LegacyFishingDropMixin",
 		"legacymechanics.item.LegacyEnderEyeDropMixin",
 		"legacymechanics.item.LegacyItemPushMixin",
+		"legacymechanics.item.CloseDropsMixin",
 		"legacymechanics.experience.LegacyExperienceOrbMixin",
 		"legacymechanics.experience.LegacyDeathExperienceMixin",
 		"legacymechanics.experience.LegacyFurnaceExperienceMixin",

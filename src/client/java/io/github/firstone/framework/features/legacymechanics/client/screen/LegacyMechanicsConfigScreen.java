@@ -17,7 +17,7 @@ import static io.github.firstone.framework.client.screen.ConfigCategory.toggle;
  * <ul>
  *   <li><b>Combat</b> — knockback and sword blocking</li>
  *   <li><b>Players</b> — the crouching hitbox and natural regeneration</li>
- *   <li><b>Drops</b> — item drops and experience orbs</li>
+ *   <li><b>Drops</b> — item drops, experience orbs and items thrown when a screen closes</li>
  *   <li><b>Boats</b> — boat breaking and coasting</li>
  * </ul>
  *
@@ -40,7 +40,8 @@ public class LegacyMechanicsConfigScreen extends CategoryMenuScreen<LegacyMechan
             toggle("legacy_regeneration", c -> c.legacyRegeneration, (c, v) -> c.legacyRegeneration = v))),
         ConfigCategory.of("drops", Items.EXPERIENCE_BOTTLE, List.of(
             toggle("legacy_item_drops", c -> c.legacyItemDrops, (c, v) -> c.legacyItemDrops = v),
-            toggle("legacy_experience", c -> c.legacyExperience, (c, v) -> c.legacyExperience = v))),
+            toggle("legacy_experience", c -> c.legacyExperience, (c, v) -> c.legacyExperience = v),
+            toggle("drop_items_on_close", c -> c.dropItemsOnClose, (c, v) -> c.dropItemsOnClose = v))),
         ConfigCategory.of("boats", Items.OAK_BOAT, List.of(
             toggle("legacy_boat_breaking", c -> c.legacyBoatBreaking, (c, v) -> c.legacyBoatBreaking = v),
             toggle("break_chest_boats_and_rafts", c -> c.breakChestBoatsAndRafts,
