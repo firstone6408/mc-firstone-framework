@@ -74,6 +74,9 @@ public final class ExperienceTests {
     /** Where in the world the site's coordinates start */
     private static final BlockPos ORIGIN = TestSite.ORIGIN;
 
+    /** How far around the dying zombie lying orbs are counted (they scatter up to about 3 blocks) */
+    private static final double LYING_ORBS_RADIUS = 8.0;
+
     private ExperienceTests() {}
 
     /**
@@ -123,10 +126,18 @@ public final class ExperienceTests {
     private record Orbs(int entities, int orbs, int experience) {}
 
     private static Orbs orbsNear(ServerLevel level, Vec3 at) {
+        return orbsWithin(level, at, 3.0);
+    }
+
+    /**
+     * The orbs within {@code radius} blocks of a point; used where orbs lie for a while, as 1.21.1 orbs can scatter
+     * more than 3 blocks (the player stays more than 8 blocks away, so it never pulls them)
+     */
+    private static Orbs orbsWithin(ServerLevel level, Vec3 at, double radius) {
         int entities = 0;
         int orbs = 0;
         int experience = 0;
-        for (ExperienceOrb orb : level.getEntitiesOfClass(ExperienceOrb.class, new AABB(at, at).inflate(3.0))) {
+        for (ExperienceOrb orb : level.getEntitiesOfClass(ExperienceOrb.class, new AABB(at, at).inflate(radius))) {
             int count = ((ExperienceOrbAccessor) orb).devtest$getCount();
             entities++;
             orbs += count;
@@ -267,7 +278,7 @@ public final class ExperienceTests {
             int timerAtSave = entity instanceof LivingEntity living ? living.deathTime : -1;
             CompoundTag saved = entity.saveWithoutId(new CompoundTag());
             entity.setRemoved(Entity.RemovalReason.UNLOADED_TO_CHUNK);
-            int afterUnload = orbsNear(level, at).experience;
+            int afterUnload = orbsWithin(level, at, LYING_ORBS_RADIUS).experience;
             Zombie loaded = EntityType.ZOMBIE.create(level);
             t.require(loaded != null, "Cannot create a zombie");
             loaded.load(saved);
@@ -278,7 +289,7 @@ public final class ExperienceTests {
         });
         t.waitUntil("the loaded zombie disappears", () -> t.onServer(level -> level.getEntity(unloaded[1]) == null),
             DEATH_TICKS * 2);
-        int end = t.onServer(level -> orbsNear(level, at).experience);
+        int end = t.onServer(level -> orbsWithin(level, at, LYING_ORBS_RADIUS).experience);
         t.removeEntities();
         return new int[] {(int) killed[2], unloaded[0], end, unloaded[2], unloaded[3]};
     }
