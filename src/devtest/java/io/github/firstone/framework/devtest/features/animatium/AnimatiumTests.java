@@ -117,6 +117,8 @@ public final class AnimatiumTests implements FeatureTests {
                 this::reequipLeavesDropKey),
             TestCase.of("Item Use: no arm swing using an item in the air; off: swing", this::useSwing),
             TestCase.of("Item Use: the hand dips only when the used stack changed", this::useDip),
+            TestCase.of("Item Use: a firework boost while gliding dips the hand like a used snowball, without a swing; "
+                + "creative: no dip; off: dip and swing", this::fireworkBoostDip),
             TestCase.of("Item Use: the server's echo of the player's own swing is ignored", this::serverSwingEcho),
             TestCase.of("Mob Swing: empty-handed mobs do not swing; with an item they do", this::mobSwing),
             // other entities
@@ -586,6 +588,54 @@ public final class AnimatiumTests implements FeatureTests {
         config().oldItemUse = false;
         t.ticks(10);
         t.check("off: arm swings throwing a snowball", swingsAfter(t, () -> useKey(t))).isTrue();
+    }
+
+    /**
+     * Holds rockets, glides with an elytra high above the site and boosts with the use key; returns {lowest hand
+     * height after the boost, whether the arm swung}
+     */
+    private static double[] fireworkBoost(TestContext t) {
+        t.teleport(4.5, 40.0, 4.5, 0.0F, -10.0F);
+        t.holdItem(new ItemStack(Items.FIREWORK_ROCKET, 16));
+        t.ticks(15);
+        t.setFlying(false);
+        t.withServerPlayer(player -> {
+            player.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.ELYTRA));
+            player.startFallFlying();
+        });
+        t.waitUntil("the player glides", () -> t.onClientThread(() -> t.player().isFallFlying()), 20);
+        // the hand height and the swing are watched over the same ticks (a dip is up again within 3 ticks)
+        t.player().swinging = false;
+        useKey(t);
+        double[] seen = {hand(t).devtest$getMainHandHeight(), t.player().swinging ? 1.0 : 0.0};
+        for (int i = 0; i < 8; i++) {
+            t.tick();
+            seen[0] = Math.min(seen[0], hand(t).devtest$getMainHandHeight());
+            seen[1] = t.player().swinging ? 1.0 : seen[1];
+        }
+        t.withServerPlayer(player -> {
+            player.stopFallFlying();
+            player.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+        });
+        t.removeEntities();
+        t.setFlying(true);
+        t.ticks(5);
+        return seen;
+    }
+
+    private void fireworkBoostDip(TestContext t) {
+        t.gameMode(GameType.SURVIVAL);
+        double[] on = fireworkBoost(t);
+        t.check("survival (the server uses a rocket): lowest hand height", on[0]).atMost(0.5);
+        t.check("survival: arm swings", on[1] > 0.0).isFalse();
+        t.gameMode(GameType.CREATIVE);
+        double[] creative = fireworkBoost(t);
+        t.check("creative (no rocket used, like a snowball): lowest hand height", creative[0]).near(1.0, 1.0E-5);
+        config().oldItemUse = false;
+        t.gameMode(GameType.SURVIVAL);
+        double[] off = fireworkBoost(t);
+        t.check("off: lowest hand height (1.21.1 dip)", off[0]).atMost(0.5);
+        t.check("off: arm swings (1.21.1)", off[1] > 0.0).isTrue();
     }
 
     private void useDip(TestContext t) {
