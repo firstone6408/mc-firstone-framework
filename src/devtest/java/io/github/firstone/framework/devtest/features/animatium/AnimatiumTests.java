@@ -21,6 +21,7 @@ import io.github.firstone.framework.features.animatium.AnimatiumConfig;
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
 import io.github.firstone.framework.features.combattweaks.CombatTweaksFeature;
 import net.minecraft.client.CameraType;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.particle.AttackSweepParticle;
@@ -47,8 +48,10 @@ import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -95,6 +98,8 @@ public final class AnimatiumTests implements FeatureTests {
             // first-person hand
             TestCase.of("Item Drop: no arm swing when dropping; off: swing", this::dropSwing),
             TestCase.of("Item Drop: dropping the last item lowers it before the empty hand rises", this::dropLastItem),
+            TestCase.of("Item Drop: no arm swing throwing an item out of the inventory (outside the window, Ctrl+Q, "
+                + "creative); the item is still thrown; off: swing", this::screenDropSwing),
             TestCase.of("Re-equip: no dip after an attack; off: dip (attack cooldown)", this::reequipAttack),
             TestCase.of("Re-equip: no re-equip when only durability changes in the same slot", this::reequipDurability),
             TestCase.of("Re-equip: mining a block does not lower and raise the pickaxe; off: it does",
@@ -240,6 +245,69 @@ public final class AnimatiumTests implements FeatureTests {
         t.check("on: arm swings when dropping", swingsAfter(t, () -> t.pressKey(key))).isFalse();
         config().oldItemDrop = false;
         t.check("off: arm swings when dropping", swingsAfter(t, () -> t.pressKey(key))).isTrue();
+    }
+
+    /** Item entities the server has around the player */
+    private static int thrownItems(TestContext t) {
+        return t.onServer(level -> level.getEntitiesOfClass(ItemEntity.class,
+            t.player().getBoundingBox().inflate(8.0)).size());
+    }
+
+    /**
+     * Throws sticks out of the open inventory as a player clicks: picked up and dropped outside the window, then
+     * Ctrl+Q over a slot, then a creative throw; returns {swung after each, items thrown}
+     */
+    private static boolean[] throwOutOfInventory(TestContext t) {
+        // slot 9 of the inventory screen is the first slot of the main inventory
+        t.withServerPlayer(player -> player.getInventory().setItem(9, new ItemStack(Items.STICK, 16)));
+        t.ticks(5);
+        t.openScreen(() -> new InventoryScreen(t.player()));
+        t.ticks(5);
+        int before = thrownItems(t);
+        boolean outside = swingsAfter(t, () -> t.onClientThread(() -> {
+            int id = t.player().inventoryMenu.containerId;
+            t.mc().gameMode.handleInventoryMouseClick(id, 9, 0, ClickType.PICKUP, t.player());
+            t.mc().gameMode.handleInventoryMouseClick(id, -999, 1, ClickType.PICKUP, t.player());
+            return null;
+        }));
+        boolean ctrlQ = swingsAfter(t, () -> t.onClientThread(() -> {
+            int id = t.player().inventoryMenu.containerId;
+            t.mc().gameMode.handleInventoryMouseClick(id, -999, 0, ClickType.PICKUP, t.player());
+            t.withServerPlayer(player -> player.getInventory().setItem(9, new ItemStack(Items.STICK, 16)));
+            return null;
+        }));
+        t.ticks(5);
+        boolean throwSlot = swingsAfter(t, () -> t.onClientThread(() -> {
+            t.mc().gameMode.handleInventoryMouseClick(t.player().inventoryMenu.containerId, 9, 1, ClickType.THROW,
+                t.player());
+            return null;
+        }));
+        t.closeScreen();
+        // the creative inventory throws with the same call
+        boolean creative = swingsAfter(t, () -> t.onClientThread(() -> t.player().drop(new ItemStack(Items.STICK),
+            true)));
+        t.ticks(5);
+        boolean thrown = thrownItems(t) > before;
+        t.removeEntities();
+        t.withServerPlayer(player -> player.getInventory().clearContent());
+        return new boolean[] {outside, ctrlQ, throwSlot, creative, thrown};
+    }
+
+    private void screenDropSwing(TestContext t) {
+        t.gameMode(GameType.SURVIVAL);
+        boolean[] on = throwOutOfInventory(t);
+        t.check("on: arm swings throwing one stick outside the window", on[0]).isFalse();
+        t.check("on: arm swings throwing the rest outside the window", on[1]).isFalse();
+        t.check("on: arm swings throwing a stack with Ctrl+Q over a slot", on[2]).isFalse();
+        t.check("on: arm swings throwing out of the creative inventory", on[3]).isFalse();
+        t.check("on: the sticks are thrown (the server has them)", on[4]).isTrue();
+        config().oldItemDrop = false;
+        boolean[] off = throwOutOfInventory(t);
+        t.check("off: arm swings throwing one stick outside the window", off[0]).isTrue();
+        t.check("off: arm swings throwing the rest outside the window", off[1]).isTrue();
+        t.check("off: arm swings throwing a stack with Ctrl+Q over a slot", off[2]).isTrue();
+        t.check("off: arm swings throwing out of the creative inventory", off[3]).isTrue();
+        t.check("off: the sticks are thrown (the server has them)", off[4]).isTrue();
     }
 
     /** Drops the only item in the hand; returns {drawn item still the stick right after, lowest hand height} */
