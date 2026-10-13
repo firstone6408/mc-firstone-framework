@@ -134,7 +134,8 @@ public final class MobLandingTests {
 
     /**
      * Drops one mob of each kind 2.5 blocks (no fall damage) and the player too; on the client none of them may look
-     * hurt (red) or swell (white), as the server hurts none of them
+     * hurt (red) or swell (white), as the server hurts none of them, and every mob must have landed (touched the
+     * ground on the server at least once while watched)
      */
     private static void allKinds(TestContext t) {
         t.difficulty(Difficulty.EASY);
@@ -148,8 +149,17 @@ public final class MobLandingTests {
         t.setFlying(false);
         int[] hurtTicks = new int[KINDS.length + 1];
         double swell = 0.0;
+        // whether each mob touched the ground on the server (some jump on their own, so not "at the end")
+        boolean[] landed = new boolean[KINDS.length];
         for (int tick = 0; tick < WATCH_TICKS; tick++) {
             t.tick();
+            t.onServer(level -> {
+                for (int i = 0; i < KINDS.length; i++) {
+                    Entity entity = level.getEntity(mobs.get(i).id());
+                    landed[i] |= entity != null && entity.onGround();
+                }
+                return null;
+            });
             for (int i = 0; i < KINDS.length; i++) {
                 if (mobs.get(i).client() instanceof LivingEntity mob) {
                     hurtTicks[i] += mob.hurtTime > 0 ? 1 : 0;
@@ -166,15 +176,12 @@ public final class MobLandingTests {
         }
         t.check("player: client ticks drawn hurt (red)", hurtTicks[KINDS.length]).near(0, 0);
         t.check("creeper: largest swell on the client (white)", swell).near(0.0, 0.0);
-        boolean landed = t.onServer(level -> {
-            for (Spawned<?> mob : mobs) {
-                Entity entity = level.getEntity(mob.id());
-                if (entity == null || !entity.onGround()) {
-                    return false;
-                }
+        StringBuilder notLanded = new StringBuilder();
+        for (int i = 0; i < KINDS.length; i++) {
+            if (!landed[i]) {
+                notLanded.append(notLanded.isEmpty() ? "" : ", ").append(KINDS[i].getDescription().getString());
             }
-            return true;
-        });
-        t.require(landed, "Not every mob landed");
+        }
+        t.require(notLanded.isEmpty(), "Not every mob landed: " + notLanded);
     }
 }
