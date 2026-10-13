@@ -14,13 +14,13 @@ Every feature is a separate module with its own config file and in-game settings
 
 | Feature | Side | What it does |
 |---|---|---|
-| Animatium | Client | Minecraft 1.7.10 animations and feel: sneaking, item use and drop, re-equip, first- and third-person held items, items on the ground, hurt camera tilt, landing dust, entity movement, models, hurt tint |
+| Animatium | Client | Minecraft 1.7.10 animations and feel: sneaking, item use and drop, re-equip, first- and third-person held items, items on the ground, hurt camera tilt, hurt tint, landing dust, attack effects, entity movement and models |
 | Appearance | Client | Custom game icon and window title, confirmation before the window's close button quits |
 | Legacy HUD | Client | Minecraft 1.7.10 HUD: no status effect icons in the top-right corner, effect list on the left of the inventory |
 | Legacy Vehicles | Client | Minecraft 1.7.10 boats: handling (with optional 1.21 ice sliding), free look and seat, mobs turning in boats, hands kept up while paddling, flat model, water splash; paddles can be hidden |
 | Cosmetics | Client | Your own death effect, item break effect and music disc songs, from files in `config/firstone-framework/cosmetics/` |
 | Combat Tweaks | Server | Pre-1.9 combat: no attack cooldown, no sweeping attack |
-| Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback, crouch hitbox, health regeneration, sword blocking, item drops, experience orbs, boat breaking and coasting |
+| Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback, crouch hitbox, health regeneration, sword blocking, item drops, experience orbs, items thrown out when a screen closes, boat breaking and coasting |
 
 Client features work on any server. Server features are set in game for singleplayer; a server that has the mod
 uses its own files in `config/firstone-framework/`.
@@ -61,33 +61,40 @@ time is over, as in the game.
 
 ```
 src/
-├── main/java/io/github/firstone/framework/
-│   ├── FirstOneFramework.java          ← Main entrypoint (initializes the framework)
+├── main/java/io/github/firstone/framework/        ← Common and server code (runs on both sides)
+│   ├── FirstOneFramework.java          ← Main entrypoint: registers features with server behavior
+│   ├── FirstOneFrameworkDedicatedServer.java ← Dedicated-server-only entrypoint
 │   ├── common/
 │   │   ├── Feature.java                ← Core interface every feature must implement
 │   │   ├── FeatureRegistry.java        ← Feature registry
-│   │   └── config/
-│   │       └── ConfigManager.java      ← Loads/saves config JSON
-│   ├── server/                         ← Server-only logic (command, data, etc.)
-│   └── features/                       ← Feature modules
-│       └── <feature name>/
-│           ├── <Name>Feature.java      ← implement Feature interface
-│           └── config/
-│               └── <Name>Config.java   ← POJO config of that feature
+│   │   ├── config/
+│   │   │   └── ConfigManager.java      ← Loads/saves config JSON
+│   │   └── <topic>/                    ← Code shared by several features (e.g. boat, sword)
+│   ├── features/                       ← Features with server behavior (e.g. legacymechanics)
+│   │   └── <feature name>/
+│   │       ├── <Name>Feature.java      ← Implements the Feature interface
+│   │       ├── <Name>Config.java       ← POJO config of that feature
+│   │       └── <part>/                 ← One folder per part of the feature
+│   └── mixin/<feature name>/           ← The feature's mixins (firstone-framework.mixins.json)
 │
-└── client/java/io/github/firstone/framework/
-    ├── client/
-    │   ├── FirstOneFrameworkClient.java ← Client entrypoint
-    │   ├── screen/
-    │   │   ├── ConfigScreen.java       ← Base of every config screen (layout, Reset/Done)
-    │   │   ├── ConfigList.java         ← Row types, sizes, colors, tooltip delay
-    │   │   ├── ConfigCategory.java     ← One category of on/off options (big features)
-    │   │   ├── CategoryMenuScreen.java ← A big feature's screen: one tile per category
-    │   │   ├── CategoryOptionsScreen.java ← The options of one category
-    │   │   └── MainConfigScreen.java   ← Main settings GUI (feature tiles, Client / Server)
-    │   └── features/                   ← Client-side feature logic
-│           └── <feature name>/
-│               └── <Name>ConfigScreen.java
+├── client/java/io/github/firstone/framework/      ← Client-only code
+│   ├── client/
+│   │   ├── FirstOneFrameworkClient.java ← Client entrypoint: registers client-only features and every screen
+│   │   ├── FeatureScreenRegistry.java  ← Settings screens shown as tiles in MainConfigScreen
+│   │   ├── ModMenuApiImpl.java         ← Opens the settings from Mod Menu
+│   │   ├── screen/
+│   │   │   ├── ConfigScreen.java       ← Base of every config screen (layout, Reset/Done)
+│   │   │   ├── ConfigList.java         ← Row types, sizes, colors, tooltip delay
+│   │   │   ├── ConfigCategory.java     ← One category of on/off options (big features)
+│   │   │   ├── CategoryMenuScreen.java ← A big feature's screen: one tile per category
+│   │   │   ├── CategoryOptionsScreen.java ← The options of one category
+│   │   │   └── MainConfigScreen.java   ← Main settings GUI (feature tiles, Client / Server)
+│   │   └── mixin/<feature name>/       ← Client mixins (firstone-framework.client.mixins.json)
+│   └── features/
+│       └── <feature name>/
+│           ├── <Name>Feature.java, <Name>Config.java, <part>/ ← Client-only features (e.g. animatium)
+│           └── client/screen/
+│               └── <Name>ConfigScreen.java ← The feature's settings screen (every feature has one)
 │
 └── devtest/java/io/github/firstone/framework/devtest/   ← In-game tests (development only, never in the jar)
     ├── DevTests.java                   ← List of every feature's tests
@@ -105,7 +112,9 @@ src/
 
 ### Step 1: Create the feature folder
 
-Create a folder in `src/main/java/.../features/<feature name>/`
+Create a folder in `src/main/java/.../features/<feature name>/` for a feature with server behavior (game rules,
+commands), or in `src/client/java/.../features/<feature name>/` for a client-only feature (animations, rendering,
+HUD). Its settings screen always goes in `src/client/java/.../features/<feature name>/client/screen/`.
 
 ### Step 2: Implement the Feature interface
 
@@ -122,24 +131,20 @@ public class FallingTreeFeature implements Feature {
     @Override
     public void initialize() {
         config = ConfigManager.load("falling_tree.json", FallingTreeConfig.class, new FallingTreeConfig());
-        // Register shared events, registries and server logic (e.g. commands)
-    }
-
-    @Override
-    public void initializeClient() {
-        // Register key bindings or renderers (client only)
-    }
-
-    @Override
-    public void initializeDedicatedServer() {
-        // Dedicated-server-only setup (not called in singleplayer)
+        // Register shared events, registries and server logic (e.g. commands); runs in singleplayer too
     }
 }
 ```
 
+The three lifecycle methods do nothing by default; a feature overrides only the one of the environment it works
+in: `initialize()` for a feature with server behavior, `initializeClient()` for a client-only feature, and
+`initializeDedicatedServer()` only for setup a dedicated server needs (it is not called in singleplayer). The
+full rules are in the JavaDoc of `Feature`.
+
 ### Step 3: Register the feature
 
-Add it in the `onInitialize()` method of `FirstOneFramework.java`:
+A feature with server behavior is registered in the `onInitialize()` method of `FirstOneFramework.java`, a
+client-only feature in `FirstOneFrameworkClient.java`:
 
 ```java
 FeatureRegistry.register(new FallingTreeFeature());
@@ -367,7 +372,7 @@ So that a refactor (moving or renaming classes) does not touch the tests:
 ## System requirements
 
 - Minecraft 1.21.1
-- Fabric Loader 0.15.11 or newer (developed with 0.19.3)
+- Fabric Loader 0.18.4 or newer (developed with 0.19.3)
 - Fabric API (developed with 0.116.12+1.21.1)
 - Java 21
 - Optional: [Mod Menu](https://modrinth.com/mod/modmenu) to open the settings screen
