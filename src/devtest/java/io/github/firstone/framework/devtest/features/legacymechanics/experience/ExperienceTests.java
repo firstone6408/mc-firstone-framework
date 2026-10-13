@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.monster.Zombie;
@@ -73,6 +74,9 @@ public final class ExperienceTests {
     /** Where in the world the site's coordinates start */
     private static final BlockPos ORIGIN = TestSite.ORIGIN;
 
+    /** How far around the dying zombie lying orbs are counted (they scatter up to about 3 blocks) */
+    private static final double LYING_ORBS_RADIUS = 8.0;
+
     private ExperienceTests() {}
 
     /**
@@ -122,10 +126,18 @@ public final class ExperienceTests {
     private record Orbs(int entities, int orbs, int experience) {}
 
     private static Orbs orbsNear(ServerLevel level, Vec3 at) {
+        return orbsWithin(level, at, 3.0);
+    }
+
+    /**
+     * The orbs within {@code radius} blocks of a point; used where orbs lie for a while, as 1.21.1 orbs can scatter
+     * more than 3 blocks (the player stays more than 8 blocks away, so it never pulls them)
+     */
+    private static Orbs orbsWithin(ServerLevel level, Vec3 at, double radius) {
         int entities = 0;
         int orbs = 0;
         int experience = 0;
-        for (ExperienceOrb orb : level.getEntitiesOfClass(ExperienceOrb.class, new AABB(at, at).inflate(3.0))) {
+        for (ExperienceOrb orb : level.getEntitiesOfClass(ExperienceOrb.class, new AABB(at, at).inflate(radius))) {
             int count = ((ExperienceOrbAccessor) orb).devtest$getCount();
             entities++;
             orbs += count;
@@ -253,7 +265,7 @@ public final class ExperienceTests {
     /**
      * Kills a zombie, then 5 ticks later saves it and removes it the way an unloading chunk does, loads the save
      * into a new zombie and waits until that one is gone; returns {experience at death, after the unload, at the
-     * end, the loaded zombie's death timer}
+     * end, the death timer when it was saved, the loaded zombie's death timer}
      */
     private static int[] killSaveAndLoad(TestContext t) {
         Spawned<Zombie> zombie = zombie(t);
@@ -263,22 +275,23 @@ public final class ExperienceTests {
         int[] unloaded = t.onServer(level -> {
             Entity entity = level.getEntity(zombie.id());
             t.require(entity != null, "The body is already gone");
+            int timerAtSave = entity instanceof LivingEntity living ? living.deathTime : -1;
             CompoundTag saved = entity.saveWithoutId(new CompoundTag());
             entity.setRemoved(Entity.RemovalReason.UNLOADED_TO_CHUNK);
-            int afterUnload = orbsNear(level, at).experience;
+            int afterUnload = orbsWithin(level, at, LYING_ORBS_RADIUS).experience;
             Zombie loaded = EntityType.ZOMBIE.create(level);
             t.require(loaded != null, "Cannot create a zombie");
             loaded.load(saved);
             // the unloaded zombie still owns its UUID in this world
             loaded.setUUID(UUID.randomUUID());
             t.require(level.addFreshEntity(loaded), "The loaded zombie was not added");
-            return new int[] {afterUnload, loaded.getId(), loaded.deathTime};
+            return new int[] {afterUnload, loaded.getId(), timerAtSave, loaded.deathTime};
         });
         t.waitUntil("the loaded zombie disappears", () -> t.onServer(level -> level.getEntity(unloaded[1]) == null),
             DEATH_TICKS * 2);
-        int end = t.onServer(level -> orbsNear(level, at).experience);
+        int end = t.onServer(level -> orbsWithin(level, at, LYING_ORBS_RADIUS).experience);
         t.removeEntities();
-        return new int[] {(int) killed[2], unloaded[0], end, unloaded[2]};
+        return new int[] {(int) killed[2], unloaded[0], end, unloaded[2], unloaded[3]};
     }
 
     private static void savedWhileDying(TestContext t) {
@@ -286,8 +299,9 @@ public final class ExperienceTests {
         t.check("on: experience at the moment of death", on[0]).near(0, 0);
         t.check("on: none dropped by the unload", on[1]).near(0, 0);
         t.check("on: dropped when the loaded body disappears (none lost)", on[2]).near(ZOMBIE_EXPERIENCE, 0);
-        t.check("on: the loaded zombie goes on dying (saved death timer, 5 or more)", on[3])
-            .between(5, DEATH_TICKS - 1);
+        // the timer is compared with itself at the save, not with the ticks waited (the server may tick once less)
+        t.check("on: the zombie was dying when saved (death timer above 0)", on[3]).between(1, DEATH_TICKS - 1);
+        t.check("on: the loaded zombie goes on dying (the saved death timer, " + on[3] + ")", on[4]).near(on[3], 0);
         config().legacyExperience = false;
         int[] off = killSaveAndLoad(t);
         t.check("off: experience at the moment of death (1.21.1)", off[0]).near(ZOMBIE_EXPERIENCE, 0);

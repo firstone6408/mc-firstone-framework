@@ -246,7 +246,8 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
          * @param tooltip    text shown after hovering the row, or {@code null} for none
          * @param control    widget on the right (its x/y are set by the row), or {@code null} for a text-only row
          */
-        public OptionRow(Component label, int labelColor, @Nullable Component tooltip, @Nullable AbstractWidget control) {
+        public OptionRow(Component label, int labelColor, @Nullable Component tooltip,
+                         @Nullable AbstractWidget control) {
             this.label = label;
             this.labelColor = labelColor;
             this.control = control;
@@ -295,7 +296,8 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
             if (this.control != null) {
                 this.control.active = active;
                 this.control.setAlpha(active ? 1.0F : DISABLED_ALPHA);
-                this.control.setPosition(right - this.control.getWidth(), top + (height - this.control.getHeight()) / 2);
+                this.control.setPosition(right - this.control.getWidth(),
+                    top + (height - this.control.getHeight()) / 2);
                 this.control.render(graphics, mouseX, mouseY, partialTick);
                 labelRight = this.control.getX() - 6;
             }
@@ -305,7 +307,8 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
                 active ? this.labelColor : MUTED_COLOR);
 
             boolean focused = this.control != null && this.control.isFocused();
-            this.tooltip.refreshTooltipForNextRenderPass(hovered, focused, new ScreenRectangle(left, top, width, height));
+            this.tooltip.refreshTooltipForNextRenderPass(hovered, focused,
+                new ScreenRectangle(left, top, width, height));
         }
 
         /**

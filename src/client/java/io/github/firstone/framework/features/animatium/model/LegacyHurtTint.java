@@ -138,7 +138,8 @@ public final class LegacyHurtTint {
      */
     private static int color(LivingEntity entity) {
         Level level = entity.level();
-        BlockPos pos = BlockPos.containing(entity.getX(), entity.getBoundingBox().minY + entity.getBbHeight() * 0.66, entity.getZ());
+        BlockPos pos = BlockPos.containing(entity.getX(), entity.getBoundingBox().minY + entity.getBbHeight() * 0.66,
+            entity.getZ());
         float brightness = level.isLoaded(pos)
             ? LightTexture.getBrightness(level.dimensionType(), level.getMaxLocalRawBrightness(pos))
             : 0.0F;
@@ -217,7 +218,8 @@ public final class LegacyHurtTint {
                 }
                 for (int i = start; i < start + 4 * FLOATS; i += FLOATS) {
                     out.addVertex(this.data[i], this.data[i + 1], this.data[i + 2], color, 0.0F, 0.0F,
-                        OverlayTexture.NO_OVERLAY, LightTexture.FULL_BRIGHT, this.data[i + 3], this.data[i + 4], this.data[i + 5]);
+                        OverlayTexture.NO_OVERLAY, LightTexture.FULL_BRIGHT, this.data[i + 3], this.data[i + 4],
+                        this.data[i + 5]);
                 }
             }
         }

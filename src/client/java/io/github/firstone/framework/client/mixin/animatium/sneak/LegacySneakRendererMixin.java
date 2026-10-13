@@ -13,7 +13,8 @@ import org.spongepowered.asm.mixin.injection.At;
  * Decides when and how low a player is drawn sneaking, like 1.7.10 ({@link LegacySneakPose})
  *
  * <ul>
- *   <li>{@code setModelProperties}: the model is crouched whenever 1.7.10 would draw it sneaking (also while flying).</li>
+ *   <li>{@code setModelProperties}: the model is crouched whenever 1.7.10 would draw it sneaking (also while
+ *       flying).</li>
  *   <li>{@code getRenderOffset}: other players are lowered 0.125 block; the local player by its 1.7.10 eye offset.</li>
  * </ul>
  */

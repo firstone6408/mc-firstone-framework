@@ -42,7 +42,8 @@ public final class ConfigManager {
      * Loads a config from a JSON file
      *
      * <p>If the config file does not exist, a new file is created from the given default value.
-     * If the file cannot be read or is not valid JSON, the error is logged and the default value is returned (and written to the file)</p>
+     * If the file cannot be read or is not valid JSON, the error is logged and the default value is returned (and
+     * written to the file)</p>
      *
      * @param <T>          config type
      * @param filename     config file name, e.g. "falling_tree.json"

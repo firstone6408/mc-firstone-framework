@@ -61,7 +61,8 @@ public class OldItemUseMixin {
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;useItem(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;")
     )
-    private InteractionResult animatium$rememberStackBeforeUse(MultiPlayerGameMode gameMode, Player player, InteractionHand hand,
+    private InteractionResult animatium$rememberStackBeforeUse(MultiPlayerGameMode gameMode, Player player,
+                                                              InteractionHand hand,
                                                               Operation<InteractionResult> original) {
         ItemStack held = player.getItemInHand(hand);
         this.animatium$stackBeforeUse = held;

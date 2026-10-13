@@ -15,12 +15,14 @@ import org.spongepowered.asm.mixin.injection.At;
  * <ul>
  *   <li>{@code handleMoveEntity}: both {@code lerpTo} calls (move and rotate-only) go through
  *       {@link LegacyEntitySync#filterMove}; an update 1.7.10 would not have sent is dropped.</li>
- *   <li>{@code handleTeleportEntity}: 1.21.1 teleports that 1.7.10 would have sent as a normal move (for example when an
- *       entity leaves or touches the ground) get the move rules; real teleports are quantized and raised by 1/64 block.</li>
+ *   <li>{@code handleTeleportEntity}: 1.21.1 teleports that 1.7.10 would have sent as a normal move (for example
+ *       when an entity leaves or touches the ground) get the move rules; real teleports are quantized and raised by
+ *       1/64 block.</li>
  *   <li>{@code handleRotateMob}: small head turns are dropped and the head yaw is set directly instead of being
  *       smoothed over 3 ticks.</li>
  *   <li>{@code handleSetEntityMotion}: velocity changes of 0.02 or less are dropped
- *       ({@link LegacyEntitySync#acceptVelocity}); the velocity of the local player and its vehicle is always applied.</li>
+ *       ({@link LegacyEntitySync#acceptVelocity}); the velocity of the local player and its vehicle is always
+ *       applied.</li>
  * </ul>
  *
  * <p>Vanilla only calls these for entities that are not controlled by the local player, so the player's own
@@ -49,8 +51,8 @@ public class LegacyEntitySyncMixin {
         method = "handleTeleportEntity",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;lerpTo(DDDFFI)V")
     )
-    private void animatium$legacyTeleport(Entity entity, double x, double y, double z, float yaw, float pitch, int steps,
-                                          Operation<Void> original) {
+    private void animatium$legacyTeleport(Entity entity, double x, double y, double z, float yaw, float pitch,
+                                          int steps, Operation<Void> original) {
         if (!AnimatiumFeature.getConfig().legacyEntitySync) {
             original.call(entity, x, y, z, yaw, pitch, steps);
             return;

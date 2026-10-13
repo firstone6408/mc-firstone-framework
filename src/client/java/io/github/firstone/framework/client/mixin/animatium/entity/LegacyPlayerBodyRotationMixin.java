@@ -21,7 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class LegacyPlayerBodyRotationMixin {
 
     @Inject(method = "tickHeadTurn", at = @At("HEAD"), cancellable = true)
-    private void animatium$legacyPlayerBodyTurn(float movementYaw, float walkAmount, CallbackInfoReturnable<Float> cir) {
+    private void animatium$legacyPlayerBodyTurn(float movementYaw, float walkAmount,
+                                                CallbackInfoReturnable<Float> cir) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof Player && self.level().isClientSide() && AnimatiumFeature.getConfig().legacyBodyRotation) {
             cir.setReturnValue(LegacyBodyRotation.turnTowardsMovement(self, walkAmount));

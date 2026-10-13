@@ -32,8 +32,8 @@ public class LegacySneakModelMixin {
     @Shadow @Final public ModelPart leftLeg;
 
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
-    private void animatium$legacySneakPose(LivingEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks,
-                                           float headYaw, float headPitch, CallbackInfo ci) {
+    private void animatium$legacySneakPose(LivingEntity entity, float limbSwing, float limbSwingAmount,
+                                           float ageInTicks, float headYaw, float headPitch, CallbackInfo ci) {
         if (!this.crouching || !LegacySneakPose.enabled()) {
             return;
         }

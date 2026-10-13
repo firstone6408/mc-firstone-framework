@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Mixin that intercepts {@link Window#setTitle(String)} every time Minecraft tries to set the window title
  *
  * <p>Instead of waiting for a tick event (which makes the title flicker), this mixin intercepts every call
- * and applies the custom title immediately, so the title does not flicker when changing screens or opening containers</p>
+ * and applies the custom title immediately, so the title does not flicker when changing screens or opening
+ * containers</p>
  *
  * <p>If {@code windowTitle} is empty, Minecraft's own title is used as normal</p>
  */
