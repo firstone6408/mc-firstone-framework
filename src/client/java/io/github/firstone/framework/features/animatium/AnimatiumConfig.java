@@ -103,8 +103,9 @@ public class AnimatiumConfig {
     public boolean legacyMobSwing = true;
 
     /**
-     * 1.7.10 hurt tint: hurt and dying entities, armor included, get the 1.7.10 red pass (40 % red at block
-     * brightness, not darkened by night) instead of the darker 1.21.1 tint
+     * 1.7.10 hurt tint: hurt and dying entities, armor included, get the 1.7.10 red pass (40 % red at the block
+     * brightness, which includes night, but not darkened a second time by the lightmap) instead of the darker 1.21.1
+     * tint
      */
     public boolean legacyHurtTint = true;
 

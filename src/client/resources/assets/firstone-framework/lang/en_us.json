@@ -63,7 +63,7 @@
 	"firstone-framework.animatium.legacy_mob_physics": "Legacy Mob Physics",
 	"firstone-framework.animatium.legacy_mob_physics.tooltip": "1.7.10 client physics: mobs are also moved by your client with their own velocity, so getting hit, knocked back or pushed looks jerky like 1.7.10 instead of gliding smoothly. Works on any server.",
 	"firstone-framework.animatium.legacy_hurt_tint": "Legacy Hurt Tint",
-	"firstone-framework.animatium.legacy_hurt_tint.tooltip": "1.7.10 hurt color: hurt and dying entities, armor included, get the bright 1.7.10 red (40% red at block brightness, not darkened by night). Held items and blocks stay untinted, as in 1.7.10.",
+	"firstone-framework.animatium.legacy_hurt_tint.tooltip": "1.7.10 hurt color: hurt and dying entities, armor included, get the bright 1.7.10 red (40% red at the block brightness, which follows day and night, without the extra darkening of 1.21.1). Held items and blocks stay untinted, as in 1.7.10.",
 	"firstone-framework.animatium.legacy_fall_particles": "Legacy Fall Particles",
 	"firstone-framework.animatium.legacy_fall_particles.tooltip": "1.7.10 landing dust: when you, another player or a mob lands from a fall, the dust of the block flies out in a flat ring from the middle of the block and slides along the ground, instead of the 1.21.1 puff around the feet. Works on any server.",
 	"firstone-framework.animatium.legacy_mob_swing": "Legacy Mob Swing",

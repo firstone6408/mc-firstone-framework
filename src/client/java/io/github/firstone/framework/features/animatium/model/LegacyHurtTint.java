@@ -25,8 +25,9 @@ import java.util.Map;
  *
  * <p>1.7.10 {@code RendererLivingEntity.doRender} drew the model and every render pass (armor, wool…) a second time:
  * texture and lightmap off, color {@code (brightness, 0, 0, 0.4)}, alpha blending, depth test EQUAL (only where the
- * model was drawn), directional lighting on, where {@code brightness} is the block brightness at the entity. Without
- * the lightmap the red stays bright at night. Held items, carried blocks, skulls and the cape were drawn outside that
+ * model was drawn), directional lighting on, where {@code brightness} is the block brightness at the entity (night
+ * included). Without the lightmap the red is not darkened a second time, so at night it is brighter than the 1.21.1
+ * tint. Held items, carried blocks, skulls and the cape were drawn outside that
  * pass and stayed untinted. 1.21.1 instead mixes about 30 % red into each model before the lightmap darkens it.</p>
  *
  * <p>How it is reproduced (render thread only):</p>
