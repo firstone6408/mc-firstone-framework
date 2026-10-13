@@ -11,7 +11,8 @@ import net.minecraft.world.phys.Vec3;
  * X/Z, see {@link #encodeHorizontal}) and only sent a move when an axis changed by at least 4 units (0.125 block)
  * or every 60 ticks. Rotations (1/256 of a turn) were sent only when they changed by at least 4 units (5.6°), and
  * the head yaw was applied directly on the client, without smoothing. Teleports (moves of 4 blocks or more) were
- * always applied, 1/64 block higher. 1.21.1 sends far smaller changes and smooths the head, which is why modern movement looks smoother.</p>
+ * always applied, 1/64 block higher. 1.21.1 sends far smaller changes and smooths the head, which is why modern
+ * movement looks smoother.</p>
  *
  * <p>The client receives the same samples as in 1.7.10 (the server still sends at the same tick rate), so applying
  * these rules to every received update reproduces the 1.7.10 stepping. The state lives on each entity
@@ -22,7 +23,10 @@ public final class LegacyEntitySync {
     /** Minimum change, in 1/32 block or 1/256 turn units, for an update to be applied (1.7.10 {@code >= 4}) */
     private static final int MIN_CHANGE = 4;
 
-    /** A position change smaller than {@link #MIN_CHANGE} is still applied after this many ticks (1.7.10 {@code % 60}) */
+    /**
+     * A position change smaller than {@link #MIN_CHANGE} is still applied after this many ticks (1.7.10
+     * {@code % 60})
+     */
     private static final int FORCED_SYNC_TICKS = 60;
 
     /**
@@ -117,7 +121,8 @@ public final class LegacyEntitySync {
             state.yaw = eYaw;
             state.pitch = ePitch;
         }
-        return new Target(state.x / 32.0, state.y / 32.0, state.z / 32.0, decodeAngle(state.yaw), decodeAngle(state.pitch));
+        return new Target(state.x / 32.0, state.y / 32.0, state.z / 32.0, decodeAngle(state.yaw),
+            decodeAngle(state.pitch));
     }
 
     /**

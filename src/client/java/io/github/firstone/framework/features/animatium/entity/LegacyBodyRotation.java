@@ -141,7 +141,8 @@ public final class LegacyBodyRotation {
     }
 
     /**
-     * 1.7.10 {@code computeAngleWithBound}: moves {@code angle} so it is at most {@code bound} degrees from {@code reference}
+     * 1.7.10 {@code computeAngleWithBound}: moves {@code angle} so it is at most {@code bound} degrees from
+     * {@code reference}
      */
     private static float boundAngle(float reference, float angle, float bound) {
         float difference = Mth.wrapDegrees(reference - angle);

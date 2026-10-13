@@ -19,8 +19,8 @@ public class LegacySneakCapeMixin {
         method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;FFFFFF)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;isCrouching()Z")
     )
-    private boolean animatium$legacySneakCape(boolean crouching, PoseStack poseStack, MultiBufferSource buffers, int light,
-                                              AbstractClientPlayer player) {
+    private boolean animatium$legacySneakCape(boolean crouching, PoseStack poseStack, MultiBufferSource buffers,
+                                              int light, AbstractClientPlayer player) {
         return LegacySneakPose.enabled() ? LegacySneakPose.isSneaking(player) : crouching;
     }
 }

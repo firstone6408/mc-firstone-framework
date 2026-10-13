@@ -30,7 +30,8 @@ import java.util.function.Function;
  * <pre>{@code
  * public class FallingTreeConfigScreen extends ConfigScreen {
  *     public FallingTreeConfigScreen(Screen parent) {
- *         super(parent, "firstone-framework.falling_tree.", FallingTreeFeature::saveConfig, FallingTreeFeature::resetConfig);
+ *         super(parent, "firstone-framework.falling_tree.", FallingTreeFeature::saveConfig,
+ *             FallingTreeFeature::resetConfig);
  *     }
  *
  *     protected void addOptions() {
@@ -83,7 +84,8 @@ public abstract class ConfigScreen extends Screen {
      * @param resetConfig restores and saves the default config (e.g. {@code AnimatiumFeature::resetConfig}), or
      *                    null to hide the Reset button
      */
-    protected ConfigScreen(Screen parent, String keyPrefix, @Nullable Runnable saveConfig, @Nullable Runnable resetConfig) {
+    protected ConfigScreen(Screen parent, String keyPrefix, @Nullable Runnable saveConfig,
+                           @Nullable Runnable resetConfig) {
         this(parent, Component.translatable(keyPrefix + "name"), keyPrefix, saveConfig, resetConfig);
     }
 
@@ -132,10 +134,11 @@ public abstract class ConfigScreen extends Screen {
 
         LinearLayout footer = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
         if (this.resetConfig != null) {
-            footer.addChild(Button.builder(Component.translatable("firstone-framework.config.reset"), button -> confirmReset())
-                .width(FOOTER_BUTTON_WIDTH).build());
+            footer.addChild(Button.builder(Component.translatable("firstone-framework.config.reset"),
+                button -> confirmReset()).width(FOOTER_BUTTON_WIDTH).build());
         }
-        footer.addChild(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).width(FOOTER_BUTTON_WIDTH).build());
+        footer.addChild(Button.builder(CommonComponents.GUI_DONE, button -> onClose())
+            .width(FOOTER_BUTTON_WIDTH).build());
 
         this.layout.visitWidgets(this::addRenderableWidget);
         repositionElements();
@@ -214,7 +217,8 @@ public abstract class ConfigScreen extends Screen {
      * @return the row
      */
     protected ConfigList.OptionRow addText(String name, String value, int maxLength, Consumer<String> setter) {
-        EditBox box = new EditBox(this.font, 0, 0, ConfigList.WIDE_CONTROL_WIDTH, ConfigList.CONTROL_HEIGHT, text(name));
+        EditBox box = new EditBox(this.font, 0, 0, ConfigList.WIDE_CONTROL_WIDTH, ConfigList.CONTROL_HEIGHT,
+            text(name));
         box.setMaxLength(maxLength);
         box.setValue(value);
         Component hint = optionalText(name + ".hint");
@@ -250,7 +254,8 @@ public abstract class ConfigScreen extends Screen {
     /**
      * Adds a row with a button that runs an action (for example opening a folder)
      *
-     * @param name   option key (label {@code <name>}, button text {@code <name>.button}, tooltip {@code <name>.tooltip})
+     * @param name   option key (label {@code <name>}, button text {@code <name>.button}, tooltip
+     *               {@code <name>.tooltip})
      * @param action what the button does
      * @return the row
      */

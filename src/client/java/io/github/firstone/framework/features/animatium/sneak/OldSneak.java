@@ -48,7 +48,8 @@ public final class OldSneak {
             offset = 0.0F;
         }
         offsetO = offset;
-        if (!AnimatiumFeature.getConfig().oldSneak || player.isPassenger() || player.isSpectator() || player.isSleeping()) {
+        if (!AnimatiumFeature.getConfig().oldSneak || player.isPassenger() || player.isSpectator()
+            || player.isSleeping()) {
             offset = 0.0F;
             offsetO = 0.0F;
             return;

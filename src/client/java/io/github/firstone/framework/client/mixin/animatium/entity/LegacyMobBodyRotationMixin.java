@@ -18,9 +18,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Turns mobs' bodies with the 1.7.10 rules ({@link LegacyBodyRotation}) on the client
  *
  * <ul>
- *   <li>Mobs that used the old AI in 1.7.10 ({@link LegacyBodyRotation#usesOldAi}): body follows movement like a player.</li>
- *   <li>Other mobs with the standard {@link BodyRotationControl}: the 1.7.10 body helper, with the mob's own head limit.</li>
- *   <li>Mobs with their own body control (shulker, phantom, camel) keep it; an armadillo keeps still while rolled up.</li>
+ *   <li>Mobs that used the old AI in 1.7.10 ({@link LegacyBodyRotation#usesOldAi}): body follows movement like a
+ *       player.</li>
+ *   <li>Other mobs with the standard {@link BodyRotationControl}: the 1.7.10 body helper, with the mob's own head
+ *       limit.</li>
+ *   <li>Mobs with their own body control (shulker, phantom, camel) keep it; an armadillo keeps still while rolled
+ *       up.</li>
  *   <li>The ender dragon sets its body yaw itself (in both versions) and is left alone.</li>
  * </ul>
  *
@@ -39,7 +42,8 @@ public class LegacyMobBodyRotationMixin {
     @Inject(method = "tickHeadTurn", at = @At("HEAD"), cancellable = true)
     private void animatium$legacyMobBodyTurn(float movementYaw, float walkAmount, CallbackInfoReturnable<Float> cir) {
         Mob self = (Mob) (Object) this;
-        if (!self.level().isClientSide() || !AnimatiumFeature.getConfig().legacyBodyRotation || self instanceof EnderDragon) {
+        if (!self.level().isClientSide() || !AnimatiumFeature.getConfig().legacyBodyRotation
+            || self instanceof EnderDragon) {
             return;
         }
         if (LegacyBodyRotation.usesOldAi(self)) {

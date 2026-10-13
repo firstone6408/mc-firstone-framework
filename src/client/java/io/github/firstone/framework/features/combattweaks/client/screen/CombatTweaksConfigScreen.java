@@ -33,7 +33,8 @@ public class CombatTweaksConfigScreen extends ConfigScreen {
         addToggle("no_attack_cooldown", config.noAttackCooldown, value -> config.noAttackCooldown = value);
 
         addSection("category.sweeping");
-        addToggle("disable_sweeping_attack", config.disableSweepingAttack, value -> config.disableSweepingAttack = value);
+        addToggle("disable_sweeping_attack", config.disableSweepingAttack,
+            value -> config.disableSweepingAttack = value);
         addToggle("sweeping_edge_required", config.sweepingEdgeRequired, value -> config.sweepingEdgeRequired = value)
             .enabledWhen(() -> config.disableSweepingAttack);
     }
