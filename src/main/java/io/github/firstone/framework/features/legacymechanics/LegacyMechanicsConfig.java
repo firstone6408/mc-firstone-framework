@@ -55,6 +55,13 @@ public class LegacyMechanicsConfig {
     public boolean legacyExperience = true;
 
     /**
+     * 1.7.10 closing of screens: the items left in the crafting grid, the enchanting table, the anvil, a villager's
+     * trade slots (and the newer work blocks) and the item on the cursor are thrown out in front of the player when
+     * the screen closes, instead of going back into the inventory.
+     */
+    public boolean dropItemsOnClose = true;
+
+    /**
      * 1.7.10 boat breaking: a wooden boat that hits a wall while faster than 0.2 blocks per tick breaks into 3 planks
      * and 2 sticks, and boats remove the snow layers they go through.
      */
