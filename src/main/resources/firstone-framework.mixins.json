@@ -3,8 +3,31 @@
 	"package": "io.github.firstone.framework.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"boat.BoatAccessor",
 		"combattweaks.NoAttackCooldownMixin",
-		"combattweaks.SweepingAttackMixin"
+		"combattweaks.SweepingAttackMixin",
+		"legacymechanics.knockback.LegacyKnockbackMixin",
+		"legacymechanics.knockback.LegacyAttackKnockbackMixin",
+		"legacymechanics.knockback.LegacyMobAttackKnockbackMixin",
+		"legacymechanics.player.LegacyCrouchHitboxMixin",
+		"legacymechanics.food.LegacyRegenerationMixin",
+		"legacymechanics.sword.LegacySwordUseMixin",
+		"legacymechanics.sword.LegacySwordShieldMixin",
+		"legacymechanics.sword.LegacySwordDamageMixin",
+		"legacymechanics.item.LegacyEntityDropMixin",
+		"legacymechanics.item.LegacyHangingDropMixin",
+		"legacymechanics.item.LegacyPlayerDropMixin",
+		"legacymechanics.item.LegacyMooshroomDropMixin",
+		"legacymechanics.item.LegacyFishingDropMixin",
+		"legacymechanics.item.LegacyEnderEyeDropMixin",
+		"legacymechanics.item.LegacyItemPushMixin",
+		"legacymechanics.item.CloseDropsMixin",
+		"legacymechanics.experience.LegacyExperienceOrbMixin",
+		"legacymechanics.experience.LegacyDeathExperienceMixin",
+		"legacymechanics.experience.LegacyFurnaceExperienceMixin",
+		"legacymechanics.boat.LegacyBoatRulesMixin",
+		"legacymechanics.boat.LegacyBoatDriverMixin",
+		"legacymechanics.boat.LegacyBoatEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

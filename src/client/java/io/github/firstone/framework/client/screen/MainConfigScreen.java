@@ -1,40 +1,31 @@
 package io.github.firstone.framework.client.screen;
 
 import io.github.firstone.framework.client.FeatureScreenRegistry;
+import io.github.firstone.framework.client.FeatureScreenRegistry.Side;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.FeatureRegistry;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /**
- * Main settings screen of FirstOne Framework
+ * Main settings screen of FirstOne Framework: the features as tiles, grouped into Client and Server
  *
- * <p>Lists every feature registered in {@link FeatureRegistry};
- * the player can pick a feature to open that feature's settings screen</p>
+ * <p>Each group starts with a section title that says where its settings apply (hover it for details). Each tile
+ * shows the icon and name registered in {@link FeatureScreenRegistry}; hovering it shows the feature's description
+ * ({@code firstone-framework.<id>.description}) and clicking it opens the feature's screen. Features are listed in
+ * ID order; features without a registered screen are not shown.</p>
  *
- * <p>How to open this screen:</p>
+ * <p>How to open this screen (Mod Menu does this through {@code ModMenuApiImpl}):</p>
  * <pre>{@code
  * Minecraft.getInstance().setScreen(new MainConfigScreen(currentScreen));
  * }</pre>
  */
-public class MainConfigScreen extends Screen {
-
-    private static final int TITLE_Y = 15;
-    private static final int BUTTON_WIDTH = 200;
-    private static final int BUTTON_HEIGHT = 20;
-    private static final int BUTTON_SPACING = 24;
-    private static final int CLOSE_BUTTON_WIDTH = 100;
-
-    /** Previous screen to return to when this screen is closed */
-    private final Screen parent;
-
-    /** All registered features */
-    private final List<Feature> features;
+public class MainConfigScreen extends ConfigScreen {
 
     /**
      * Creates the framework's main settings screen
@@ -42,71 +33,69 @@ public class MainConfigScreen extends Screen {
      * @param parent screen to return to when this screen is closed; may be {@code null}
      */
     public MainConfigScreen(Screen parent) {
-        super(Component.literal("FirstOne Framework"));
-        this.parent = parent;
-        this.features = FeatureRegistry.getAll();
+        super(parent, "firstone-framework.", null, null);
     }
 
     @Override
-    protected void init() {
-        int startY = (this.height / 2) - (features.size() * BUTTON_SPACING / 2) - BUTTON_SPACING;
+    protected int rowHeight() {
+        return ConfigList.TILE_ROW_HEIGHT;
+    }
 
-        for (int i = 0; i < features.size(); i++) {
-            Feature feature = features.get(i);
-            int buttonY = startY + (i * BUTTON_SPACING);
-
-            Button.Builder builder = Button.builder(
-                Component.literal(feature.getDisplayName()),
-                btn -> onFeatureButtonClick(feature)
-            ).pos((this.width - BUTTON_WIDTH) / 2, buttonY).size(BUTTON_WIDTH, BUTTON_HEIGHT);
-
-            String description = feature.getDescription();
-            if (description != null) {
-                builder.tooltip(Tooltip.create(Component.literal(description)));
-            }
-
-            this.addRenderableWidget(builder.build());
+    @Override
+    protected void addOptions() {
+        List<Feature> features = new ArrayList<>(FeatureRegistry.getAll());
+        features.sort(Comparator.comparing(feature -> feature.getId()));
+        boolean empty = true;
+        for (Side side : Side.values()) {
+            empty &= !addGroup(side, features);
         }
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Done"),
-            btn -> this.onClose()
-        ).pos((this.width - CLOSE_BUTTON_WIDTH) / 2, this.height - 30).size(CLOSE_BUTTON_WIDTH, BUTTON_HEIGHT).build());
+        if (empty) {
+            addNotice("no_features");
+        }
     }
 
     /**
-     * Handles a click on a feature's button
+     * Adds the section title and the tiles of one side, two tiles per row
      *
-     * <p>Looks up the feature's config screen in {@link FeatureScreenRegistry} and opens it.
-     * Does nothing if the feature has no registered screen</p>
+     * @param side     the group to add
+     * @param features every feature, in display order
+     * @return true if the group had at least one feature (otherwise nothing is added)
+     */
+    private boolean addGroup(Side side, List<Feature> features) {
+        List<ConfigList.Tile> tiles = new ArrayList<>();
+        for (Feature feature : features) {
+            FeatureScreenRegistry.Entry entry = FeatureScreenRegistry.get(feature.getId());
+            if (entry != null && entry.side() == side) {
+                tiles.add(new ConfigList.Tile(
+                    new ItemStack(entry.icon()),
+                    text(feature.getId() + ".name"),
+                    text(feature.getId() + ".description"),
+                    button -> openFeatureScreen(feature)));
+            }
+        }
+        if (tiles.isEmpty()) {
+            return false;
+        }
+
+        String key = "side." + side.name().toLowerCase(Locale.ROOT);
+        addRow(new ConfigList.SectionRow(text(key), text(key + ".note"), text(key + ".tooltip")));
+        for (int i = 0; i < tiles.size(); i += 2) {
+            addRow(new ConfigList.TileRow(tiles.subList(i, Math.min(i + 2, tiles.size()))));
+        }
+        return true;
+    }
+
+    /**
+     * Opens the config screen of a feature
+     *
+     * <p>Does nothing if no screen is registered for the feature.</p>
      *
      * @param feature the selected feature
      */
-    protected void onFeatureButtonClick(Feature feature) {
-        Screen configScreen = FeatureScreenRegistry.createScreen(feature.getId(), this);
-        if (configScreen != null) {
-            this.minecraft.setScreen(configScreen);
+    protected void openFeatureScreen(Feature feature) {
+        Screen screen = FeatureScreenRegistry.createScreen(feature.getId(), this);
+        if (screen != null) {
+            this.minecraft.setScreen(screen);
         }
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, TITLE_Y, 0xFFFFFF);
-
-        if (features.isEmpty()) {
-            graphics.drawCenteredString(
-                this.font,
-                Component.literal("No features registered"),
-                this.width / 2,
-                this.height / 2,
-                0xAAAAAA
-            );
-        }
-    }
-
-    @Override
-    public void onClose() {
-        this.minecraft.setScreen(parent);
     }
 }

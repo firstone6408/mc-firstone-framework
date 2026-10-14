@@ -29,16 +29,6 @@ public class CombatTweaksFeature implements Feature {
     }
 
     @Override
-    public String getDisplayName() {
-        return "Combat Tweaks — Legacy Combat";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Restores pre-1.9 combat mechanics\nIncludes: No Attack Cooldown, Disable Sweeping Attack, Sweeping Edge Required";
-    }
-
-    @Override
     public void initialize() {
         config = ConfigManager.load(CONFIG_FILE, CombatTweaksConfig.class, new CombatTweaksConfig());
     }
@@ -61,5 +51,15 @@ public class CombatTweaksFeature implements Feature {
      */
     public static void saveConfig() {
         ConfigManager.save(CONFIG_FILE, config);
+    }
+
+    /**
+     * Restores the default settings and saves them to the config file
+     *
+     * <p>Called by the Reset button of the config screen.</p>
+     */
+    public static void resetConfig() {
+        config = new CombatTweaksConfig();
+        saveConfig();
     }
 }

@@ -1,0 +1,27 @@
+{
+	"required": true,
+	"package": "io.github.firstone.framework.devtest.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ContainerScreenAccessor",
+		"ExperienceOrbAccessor",
+		"EyeOfEnderAccessor",
+		"FishingHookAccessor",
+		"GameRendererInvoker",
+		"ItemEntityAccessor",
+		"HandRendererAccessor",
+		"ItemInHandLayerInvoker",
+		"ItemInHandRendererInvoker",
+		"LivingEntityRendererAccessor",
+		"MobAccessor",
+		"ParticleAccessor",
+		"ParticleEngineAccessor",
+		"ServerPlayerAccessor",
+		"SoundBufferAccessor",
+		"SoundEngineAccessor",
+		"SoundManagerAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

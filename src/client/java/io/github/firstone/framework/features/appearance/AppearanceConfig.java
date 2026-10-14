@@ -23,4 +23,11 @@ public class AppearanceConfig {
      * <p>Empty ("") = use Minecraft's default title</p>
      */
     public String windowTitle = "";
+
+    /**
+     * Ask "Quit the game?" when the window's close button (X) is pressed, with Cancel as the default answer
+     *
+     * <p>Prevents closing the game by accident. The in-game "Quit Game" button never asks.</p>
+     */
+    public boolean confirmQuit = true;
 }

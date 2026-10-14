@@ -3,6 +3,7 @@ package io.github.firstone.framework;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.FeatureRegistry;
 import io.github.firstone.framework.features.combattweaks.CombatTweaksFeature;
+import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +14,11 @@ import java.util.List;
  * Main entrypoint of FirstOne Framework
  *
  * <p>Responsible for initializing the framework and calling {@link Feature#initialize()}
- * for every registered feature; runs on both client and server</p>
+ * for every registered feature; runs in every environment (physical client and dedicated server)</p>
  *
- * <p>Features are registered by calling {@code FeatureRegistry.register()} in
- * {@link #onInitialize()} before the initialization loop runs</p>
+ * <p>Register here only features that change game logic decided by the server, by calling
+ * {@code FeatureRegistry.register()} in {@link #onInitialize()} before the initialization loop runs.
+ * Client-only features are registered in {@code FirstOneFrameworkClient} instead</p>
  */
 public class FirstOneFramework implements ModInitializer {
 
@@ -31,6 +33,7 @@ public class FirstOneFramework implements ModInitializer {
         LOGGER.info("FirstOne Framework initializing...");
 
         FeatureRegistry.register(new CombatTweaksFeature());
+        FeatureRegistry.register(new LegacyMechanicsFeature());
 
         List<Feature> features = FeatureRegistry.getAll();
         for (Feature feature : features) {

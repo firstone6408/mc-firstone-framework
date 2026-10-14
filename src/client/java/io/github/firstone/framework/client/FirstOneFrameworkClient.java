@@ -1,6 +1,7 @@
 package io.github.firstone.framework.client;
 
 import io.github.firstone.framework.FirstOneFramework;
+import io.github.firstone.framework.client.FeatureScreenRegistry.Side;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.FeatureRegistry;
 import io.github.firstone.framework.features.animatium.AnimatiumFeature;
@@ -8,7 +9,15 @@ import io.github.firstone.framework.features.animatium.client.screen.AnimatiumCo
 import io.github.firstone.framework.features.appearance.AppearanceFeature;
 import io.github.firstone.framework.features.appearance.client.screen.AppearanceConfigScreen;
 import io.github.firstone.framework.features.combattweaks.client.screen.CombatTweaksConfigScreen;
+import io.github.firstone.framework.features.cosmetics.CosmeticsFeature;
+import io.github.firstone.framework.features.cosmetics.client.screen.CosmeticsConfigScreen;
+import io.github.firstone.framework.features.legacyhud.LegacyHudFeature;
+import io.github.firstone.framework.features.legacyhud.client.screen.LegacyHudConfigScreen;
+import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesFeature;
+import io.github.firstone.framework.features.legacyvehicles.client.screen.LegacyVehiclesConfigScreen;
+import io.github.firstone.framework.features.legacymechanics.client.screen.LegacyMechanicsConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.world.item.Items;
 
 /**
  * Client entrypoint of FirstOne Framework
@@ -27,10 +36,17 @@ public class FirstOneFrameworkClient implements ClientModInitializer {
         // client-only features are registered here (not through FirstOneFramework)
         FeatureRegistry.register(new AnimatiumFeature());
         FeatureRegistry.register(new AppearanceFeature());
+        FeatureRegistry.register(new LegacyHudFeature());
+        FeatureRegistry.register(new CosmeticsFeature());
+        FeatureRegistry.register(new LegacyVehiclesFeature());
 
-        FeatureScreenRegistry.register("animatium", AnimatiumConfigScreen::new);
-        FeatureScreenRegistry.register("combat_tweaks", CombatTweaksConfigScreen::new);
-        FeatureScreenRegistry.register("appearance", AppearanceConfigScreen::new);
+        FeatureScreenRegistry.register("animatium", Items.ARMOR_STAND, Side.CLIENT, AnimatiumConfigScreen::new);
+        FeatureScreenRegistry.register("appearance", Items.PAINTING, Side.CLIENT, AppearanceConfigScreen::new);
+        FeatureScreenRegistry.register("legacy_hud", Items.MAP, Side.CLIENT, LegacyHudConfigScreen::new);
+        FeatureScreenRegistry.register("cosmetics", Items.AMETHYST_SHARD, Side.CLIENT, CosmeticsConfigScreen::new);
+        FeatureScreenRegistry.register("legacy_vehicles", Items.OAK_BOAT, Side.CLIENT, LegacyVehiclesConfigScreen::new);
+        FeatureScreenRegistry.register("combat_tweaks", Items.IRON_SWORD, Side.SERVER, CombatTweaksConfigScreen::new);
+        FeatureScreenRegistry.register("legacy_mechanics", Items.CLOCK, Side.SERVER, LegacyMechanicsConfigScreen::new);
 
         for (Feature feature : FeatureRegistry.getAll()) {
             feature.initializeClient();

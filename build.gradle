@@ -58,12 +58,90 @@ java {
 	targetCompatibility = JavaVersion.VERSION_21
 }
 
+// mixins are internal implementation, not API
+javadoc {
+	exclude '**/mixin/**'
+}
+
 jar {
 	def projectName = project.name
 	inputs.property "projectName", projectName
 
-	from("LICENSE") {
+	from(["COPYING", "COPYING.LESSER"]) {
 		rename { "${it}_$projectName"}
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// In-game dev tests (src/devtest): a separate test mod for development only.
+// It is never part of the mod jar: build/remapJar only take the main and client source sets.
+// Run: meta/scripts/run_devtest.sh [feature ...]  or  ./gradlew devTest -Pfeatures=<id,id|all>
+// ---------------------------------------------------------------------------------------------------------------
+
+sourceSets {
+	devtest {
+		compileClasspath += sourceSets.client.compileClasspath + sourceSets.main.output + sourceSets.client.output
+		runtimeClasspath += sourceSets.client.runtimeClasspath + sourceSets.main.output + sourceSets.client.output
+	}
+}
+
+// build compiles the tests too (not into the jar), so a moved or renamed class breaks the build at once
+tasks.named("check") {
+	dependsOn("compileDevtestJava")
+}
+
+configurations {
+	// mods the production test run loads next to the mod and the test mod
+	devtestRuntimeMods { transitive = false }
+}
+
+dependencies {
+	devtestRuntimeMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+def devtestJar = tasks.register("devtestJar", Jar) {
+	from sourceSets.devtest.output
+	archiveClassifier = "devtest-dev"
+	destinationDirectory = layout.buildDirectory.dir("devtest")
+}
+
+def remapDevtestJar = tasks.register("remapDevtestJar", net.fabricmc.loom.task.RemapJarTask) {
+	inputFile = devtestJar.flatMap { it.archiveFile }
+	classpath.from(sourceSets.main.output, sourceSets.client.output)
+	archiveClassifier = "devtest"
+	destinationDirectory = layout.buildDirectory.dir("devtest")
+}
+
+tasks.register("devTest", net.fabricmc.loom.task.prod.ClientProductionRunTask) {
+	group = "verification"
+	description = "Runs the in-game dev tests in a production client (-Pfeatures, -Ptests, -Pskip, -Pfast)"
+	mods.from(configurations.devtestRuntimeMods, tasks.named("remapJar"), remapDevtestJar)
+	runDir = file("run/devtest")
+	def features = providers.gradleProperty("features").orElse("all")
+	def updateBaselines = providers.gradleProperty("updateBaselines").orElse("false")
+	jvmArgs.add(features.map { "-Dfirstone.devtest.features=$it" })
+	jvmArgs.add(updateBaselines.map { "-Dfirstone.devtest.updateBaselines=$it" })
+	jvmArgs.add(providers.gradleProperty("tests").orElse("").map { "-Dfirstone.devtest.tests=$it" })
+	jvmArgs.add(providers.gradleProperty("skip").orElse("").map { "-Dfirstone.devtest.skip=$it" })
+	jvmArgs.add(providers.gradleProperty("fast").orElse("false").map { "-Dfirstone.devtest.fast=$it" })
+	programArgs.addAll("--username", "DevTest")
+
+	// a test run must never be skipped as up to date
+	outputs.upToDateWhen { false }
+
+	def summary = file("run/devtest/results/summary.txt")
+	doFirst {
+		summary.delete()
+	}
+	doLast {
+		if (!summary.exists()) {
+			throw new GradleException("Dev tests did not finish: no ${summary}")
+		}
+		def text = summary.text
+		logger.lifecycle(text)
+		if (!text.startsWith("PASS")) {
+			throw new GradleException("Dev tests failed, see run/devtest/results/")
+		}
 	}
 }
 

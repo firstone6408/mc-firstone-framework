@@ -2,32 +2,32 @@ package io.github.firstone.framework.features.animatium;
 
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.config.ConfigManager;
+import io.github.firstone.framework.features.animatium.item.PackItemModels;
+import io.github.firstone.framework.features.animatium.hand.SwordBlockingSync;
 
 /**
- * Main feature class of Animatium - legacy animations like versions before 1.9
+ * Animatium — restores Minecraft 1.7.10 animations and feel on the client
  *
- * <p>This feature works on the client only. The config is loaded in {@link #initializeClient()}
- * because every mixin is in client.mixins.json and there is no server-side behavior</p>
+ * <p>Client-only feature: registered in {@code FirstOneFrameworkClient}, all setup happens in
+ * {@link #initializeClient()}. Its mixins live in {@code client/mixin/animatium/} and read the
+ * settings through {@link #getConfig()} every time they run, so changes apply immediately.</p>
  *
- * <p>Includes:</p>
- * <ul>
- *   <li>No Re-equip Animation - no hand dip after attacks or when the held item only changes durability</li>
- *   <li>Old Sneak Animation - the camera moves instantly when pressing Shift</li>
- *   <li>Old Item Drop Animation - no throwing gesture when dropping an item</li>
- *   <li>No Sweep Effect - hides the sweep particle and the sweep sound</li>
- *   <li>No Damage Indicator - hides the damage indicator particles</li>
- *   <li>No Attack Sounds - mutes the attack sounds</li>
- *   <li>Walk / Head / Body Rotation FPS - limits the animation frame rate (0 = off)</li>
- * </ul>
+ * <p>Each part has its own folder, here and in {@code client/mixin/animatium/}: {@code sneak/} (1.7.10 sneaking:
+ * eyes, camera, hitbox and pose), {@code hand/} (the first-person hand: dropping, using, re-equip, held items, the
+ * server's sword blocking setting), {@code camera/} (the hurt tilt), {@code entity/} (other entities: sync, physics,
+ * body rotation, mob swing), {@code model/} (zombie arms, hurt tint, third-person items and the sword blocking arm),
+ * {@code item/} (the 1.7.10 item shapes both hands share, and items on the ground), {@code particle/} (the dust of
+ * a landing) and {@code combat/} (1.9 combat effects, mixins only).</p>
  *
- * <p>Each setting can be toggled from Mod Menu or the config screen</p>
+ * <p>Every behavior is a reimplementation of the 1.7.10 code (see the JavaDoc of each mixin
+ * for the 1.7.10 logic it follows).</p>
  */
 public class AnimatiumFeature implements Feature {
 
-    /** Name of the config file used to store the settings */
+    /** Name of the config file */
     private static final String CONFIG_FILE = "animatium.json";
 
-    /** Current config of this feature, starts with the default values */
+    /** Current config; starts with the defaults until {@link #initializeClient()} loads the file */
     private static AnimatiumConfig config = new AnimatiumConfig();
 
     @Override
@@ -35,28 +35,20 @@ public class AnimatiumFeature implements Feature {
         return "animatium";
     }
 
-    @Override
-    public String getDisplayName() {
-        return "Animatium — Legacy Animations";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Legacy animations and combat feel from Minecraft pre-1.9\nIncludes: No Re-equip, Old Sneak, Old Item Drop, No Sweep Effect, No Damage Indicator, No Attack Sounds";
-    }
-
-    @Override
-    public void initialize() {}
-
+    /**
+     * Loads {@code animatium.json}
+     */
     @Override
     public void initializeClient() {
         config = ConfigManager.load(CONFIG_FILE, AnimatiumConfig.class, new AnimatiumConfig());
+        PackItemModels.registerReloadListener();
+        SwordBlockingSync.register();
     }
 
     /**
      * Returns the current Animatium config
      *
-     * <p>Used by the mixins and the config screen to read and change the settings</p>
+     * <p>Used by the mixins and the config screen.</p>
      *
      * @return the current config, never null
      */
@@ -65,11 +57,21 @@ public class AnimatiumFeature implements Feature {
     }
 
     /**
-     * Saves the current config to its JSON file
+     * Saves the current config to {@code animatium.json}
      *
-     * <p>Called after the player changes a setting in the config screen</p>
+     * <p>Called by the config screen after a setting changes.</p>
      */
     public static void saveConfig() {
         ConfigManager.save(CONFIG_FILE, config);
+    }
+
+    /**
+     * Restores the default settings and saves them to {@code animatium.json}
+     *
+     * <p>Called by the Reset button of the config screen.</p>
+     */
+    public static void resetConfig() {
+        config = new AnimatiumConfig();
+        saveConfig();
     }
 }

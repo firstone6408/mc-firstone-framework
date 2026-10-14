@@ -1,0 +1,23 @@
+{
+	"schemaVersion": 1,
+	"id": "firstone-framework-devtest",
+	"version": "0.0.0",
+	"name": "FirstOne Framework Dev Tests",
+	"description": "In-game tests of the FirstOne Framework features. Development only: never shipped with the mod.",
+	"license": "LGPL-3.0-only",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"io.github.firstone.framework.devtest.DevTestClient"
+		]
+	},
+	"mixins": [
+		"firstone-framework-devtest.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"minecraft": "~1.21.1",
+		"fabric-api": "*",
+		"firstone-framework": "*"
+	}
+}
