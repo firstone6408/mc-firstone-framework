@@ -8,6 +8,7 @@ import io.github.firstone.framework.devtest.features.cosmetics.CosmeticsTests;
 import io.github.firstone.framework.devtest.features.legacyhud.LegacyHudTests;
 import io.github.firstone.framework.devtest.features.legacymechanics.LegacyMechanicsTests;
 import io.github.firstone.framework.devtest.features.legacyvehicles.LegacyVehiclesTests;
+import io.github.firstone.framework.devtest.features.packmanager.PackManagerTests;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public final class DevTests {
         CosmeticsTests::new,
         AnimatiumTests::new,
         LegacyVehiclesTests::new,
+        PackManagerTests::new,
         AppearanceTests::new
     );
 

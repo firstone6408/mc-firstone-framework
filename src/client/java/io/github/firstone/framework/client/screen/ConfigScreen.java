@@ -6,9 +6,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
-import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.util.Mth;
@@ -46,10 +44,7 @@ import java.util.function.Function;
  * key prefix: {@code <prefix>name} (screen title), {@code <prefix><option>} (label) and the optional
  * {@code <prefix><option>.tooltip}. Each change is written to the config right away and saved to its file.</p>
  */
-public abstract class ConfigScreen extends Screen {
-
-    /** Width of the Reset and Done buttons */
-    private static final int FOOTER_BUTTON_WIDTH = 100;
+public abstract class ConfigScreen extends ListScreen<ConfigList> {
 
     /** Color of notice rows (yellow) */
     private static final int NOTICE_COLOR = 0xFFFFFF55;
@@ -67,12 +62,6 @@ public abstract class ConfigScreen extends Screen {
     /** Restores and saves the default config, or null to hide the Reset button */
     @Nullable
     private final Runnable resetConfig;
-
-    /** Header / list / footer layout, rebuilt by {@link #init()} */
-    private HeaderAndFooterLayout layout;
-
-    /** The option list, rebuilt by {@link #init()} */
-    private ConfigList list;
 
     /**
      * Creates a config screen
@@ -116,6 +105,16 @@ public abstract class ConfigScreen extends Screen {
     protected abstract void addOptions();
 
     /**
+     * Returns the width of the wide controls (cycle buttons, text boxes, buttons, sliders) of this screen
+     *
+     * @return {@link ConfigList#WIDE_CONTROL_WIDTH} by default; a screen with narrow rows may use less, so its
+     *         labels fit beside the controls
+     */
+    protected int controlWidth() {
+        return ConfigList.WIDE_CONTROL_WIDTH;
+    }
+
+    /**
      * Returns the height of the rows of this screen
      *
      * @return {@link ConfigList#ROW_HEIGHT} by default; the main screen uses {@link ConfigList#TILE_ROW_HEIGHT}
@@ -125,29 +124,31 @@ public abstract class ConfigScreen extends Screen {
     }
 
     @Override
-    protected void init() {
-        this.layout = new HeaderAndFooterLayout(this);
-        this.layout.addTitleHeader(this.title, this.font);
-        this.list = this.layout.addToContents(new ConfigList(
-            this.minecraft, this.width, this.layout.getContentHeight(), this.layout.getHeaderHeight(), rowHeight()));
-        addOptions();
-
-        LinearLayout footer = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
-        if (this.resetConfig != null) {
-            footer.addChild(Button.builder(Component.translatable("firstone-framework.config.reset"),
-                button -> confirmReset()).width(FOOTER_BUTTON_WIDTH).build());
-        }
-        footer.addChild(Button.builder(CommonComponents.GUI_DONE, button -> onClose())
-            .width(FOOTER_BUTTON_WIDTH).build());
-
-        this.layout.visitWidgets(this::addRenderableWidget);
-        repositionElements();
+    protected ConfigList createList(int width, int height, int top) {
+        return new ConfigList(this.minecraft, width, height, top, rowHeight());
     }
 
+    /** The options are the list's rows ({@link #addOptions}) */
     @Override
-    protected void repositionElements() {
-        this.layout.arrangeElements();
-        this.list.updateSize(this.width, this.layout);
+    protected void fillList() {
+        addOptions();
+    }
+
+    /**
+     * Adds the buttons of the bottom row: Reset (if the screen has one) and Done
+     *
+     * <p>Called every time the screen is built. A screen that works like a form (Cancel and Save) adds its own
+     * buttons instead, {@link #FOOTER_BUTTON_WIDTH} wide.</p>
+     *
+     * @param footer the bottom row
+     */
+    @Override
+    protected void addFooterButtons(LinearLayout footer) {
+        if (this.resetConfig != null) {
+            footer.addChild(footerButton(Component.translatable("firstone-framework.config.reset"),
+                FOOTER_BUTTON_WIDTH, this::confirmReset));
+        }
+        footer.addChild(footerButton(CommonComponents.GUI_DONE, FOOTER_BUTTON_WIDTH, this::onClose));
     }
 
     @Override
@@ -163,7 +164,7 @@ public abstract class ConfigScreen extends Screen {
      * @param name key of the title, e.g. {@code "category.handling"}
      */
     protected void addSection(String name) {
-        this.list.add(new ConfigList.SectionRow(text(name)));
+        list().add(new ConfigList.SectionRow(text(name)));
     }
 
     /**
@@ -202,7 +203,7 @@ public abstract class ConfigScreen extends Screen {
             .withValues(values)
             .withInitialValue(value)
             .displayOnlyValue()
-            .create(0, 0, ConfigList.WIDE_CONTROL_WIDTH, ConfigList.CONTROL_HEIGHT, text(name),
+            .create(0, 0, controlWidth(), ConfigList.CONTROL_HEIGHT, text(name),
                 (cycle, newValue) -> changed(setter, newValue));
         return addOption(name, button);
     }
@@ -217,7 +218,7 @@ public abstract class ConfigScreen extends Screen {
      * @return the row
      */
     protected ConfigList.OptionRow addText(String name, String value, int maxLength, Consumer<String> setter) {
-        EditBox box = new EditBox(this.font, 0, 0, ConfigList.WIDE_CONTROL_WIDTH, ConfigList.CONTROL_HEIGHT,
+        EditBox box = new EditBox(this.font, 0, 0, controlWidth(), ConfigList.CONTROL_HEIGHT,
             text(name));
         box.setMaxLength(maxLength);
         box.setValue(value);
@@ -245,7 +246,7 @@ public abstract class ConfigScreen extends Screen {
      */
     protected ConfigList.OptionRow addSlider(String name, double min, double max, double step, double value,
                                              DoubleFunction<Component> valueText, DoubleConsumer setter) {
-        return addOption(name, new Slider(min, max, step, value, valueText, newValue -> {
+        return addOption(name, new Slider(controlWidth(), min, max, step, value, valueText, newValue -> {
             setter.accept(newValue);
             save();
         }));
@@ -261,9 +262,20 @@ public abstract class ConfigScreen extends Screen {
      */
     protected ConfigList.OptionRow addButton(String name, Runnable action) {
         Button button = Button.builder(text(name + ".button"), pressed -> action.run())
-            .size(ConfigList.WIDE_CONTROL_WIDTH, ConfigList.CONTROL_HEIGHT)
+            .size(controlWidth(), ConfigList.CONTROL_HEIGHT)
             .build();
         return addOption(name, button);
+    }
+
+    /**
+     * Adds a button in the middle of its row, without a label: its text says what it does
+     *
+     * @param name   key of the button (text {@code <name>.button}, tooltip {@code <name>.tooltip})
+     * @param action what the button does
+     * @return the row, e.g. to call {@link ConfigList.ButtonRow#enabledWhen}
+     */
+    protected ConfigList.ButtonRow addActionButton(String name, Runnable action) {
+        return addRow(new ConfigList.ButtonRow(text(name + ".button"), optionalText(name + ".tooltip"), action));
     }
 
     /**
@@ -272,7 +284,7 @@ public abstract class ConfigScreen extends Screen {
      * @param name key of the text
      */
     protected void addNotice(String name) {
-        this.list.add(new ConfigList.OptionRow(text(name), NOTICE_COLOR, optionalText(name + ".tooltip"), null));
+        list().add(new ConfigList.OptionRow(text(name), NOTICE_COLOR, optionalText(name + ".tooltip"), null));
     }
 
     /**
@@ -281,7 +293,7 @@ public abstract class ConfigScreen extends Screen {
      * @param configFile name of the feature's config file, e.g. {@code "combat_tweaks.json"}
      */
     protected void addServerNotice(String configFile) {
-        this.list.add(new ConfigList.OptionRow(
+        list().add(new ConfigList.OptionRow(
             Component.translatable("firstone-framework.config.server_notice"), NOTICE_COLOR,
             Component.translatable("firstone-framework.config.server_notice.tooltip", configFile), null));
     }
@@ -294,14 +306,14 @@ public abstract class ConfigScreen extends Screen {
      * @return the same row
      */
     protected <R extends ConfigList.Row> R addRow(R row) {
-        return this.list.add(row);
+        return list().add(row);
     }
 
     // ─── Helpers ────────────────────────────────────────────────────────────
 
     /** Adds a row with the label and tooltip of an option and the given control */
     private ConfigList.OptionRow addOption(String name, AbstractWidget control) {
-        return this.list.add(new ConfigList.OptionRow(text(name), optionalText(name + ".tooltip"), control));
+        return list().add(new ConfigList.OptionRow(text(name), optionalText(name + ".tooltip"), control));
     }
 
     /** Writes a new value into the config and saves the file */
@@ -329,9 +341,9 @@ public abstract class ConfigScreen extends Screen {
         /** Last reported value, so dragging inside one step does not save again */
         private double current;
 
-        private Slider(double min, double max, double step, double value, DoubleFunction<Component> valueText,
-                       DoubleConsumer onChange) {
-            super(0, 0, ConfigList.WIDE_CONTROL_WIDTH, ConfigList.CONTROL_HEIGHT, Component.empty(),
+        private Slider(int width, double min, double max, double step, double value,
+                       DoubleFunction<Component> valueText, DoubleConsumer onChange) {
+            super(0, 0, width, ConfigList.CONTROL_HEIGHT, Component.empty(),
                 (Mth.clamp(value, min, max) - min) / (max - min));
             this.min = min;
             this.max = max;
@@ -365,16 +377,13 @@ public abstract class ConfigScreen extends Screen {
 
     /** Asks before restoring the defaults; on "yes" resets the config and rebuilds the list */
     private void confirmReset() {
-        this.minecraft.setScreen(new ConfirmScreen(
-            confirmed -> {
-                if (confirmed && this.resetConfig != null) {
+        Questions.ask(this, Component.translatable("firstone-framework.config.reset.title", resetSubject()),
+            resetMessage(), () -> {
+                if (this.resetConfig != null) {
                     this.resetConfig.run();
                     rebuildWidgets();
                 }
-                this.minecraft.setScreen(this);
-            },
-            Component.translatable("firstone-framework.config.reset.title", resetSubject()),
-            resetMessage()));
+            });
     }
 
     /**

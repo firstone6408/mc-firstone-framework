@@ -37,7 +37,10 @@ import java.util.function.BooleanSupplier;
  *   <li>{@link OptionRow} — label on the left, an optional control (toggle, cycle button, text box, button) on the
  *       right, and a tooltip shown after hovering the row for {@link #TOOLTIP_DELAY}</li>
  *   <li>{@link TileRow} — up to two tiles (item icon + name) side by side (main screen)</li>
+ *   <li>{@link ButtonRow} — one action button in the middle of the row, without a label (open a folder, reload…)</li>
  * </ul>
+ *
+ * <p>The colors and {@link #fit} are public, so lists of other screens can draw their texts the same way.</p>
  */
 public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
 
@@ -69,13 +72,19 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
     public static final int CONTROL_HEIGHT = 16;
 
     /** How long the mouse must rest on a row before its tooltip appears */
-    private static final Duration TOOLTIP_DELAY = Duration.ofMillis(600);
+    public static final Duration TOOLTIP_DELAY = Duration.ofMillis(600);
 
     /** Label color */
-    private static final int TEXT_COLOR = 0xFFFFFFFF;
+    public static final int TEXT_COLOR = 0xFFFFFFFF;
 
-    /** Label color of a disabled row, and the color of descriptions */
-    private static final int MUTED_COLOR = 0xFFA0A0A0;
+    /** Label color of a disabled row, and the color of descriptions and hints */
+    public static final int MUTED_COLOR = 0xFFA0A0A0;
+
+    /** Color of the second line of a list entry, as the game's pack lists draw descriptions */
+    public static final int SUBTLE_COLOR = 0xFF808080;
+
+    /** Widest action button of a {@link ButtonRow} */
+    private static final int MAX_ACTION_WIDTH = 200;
 
     /** Color of section titles (gold) */
     private static final int SECTION_COLOR = 0xFFFFAA00;
@@ -88,6 +97,9 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
 
     /** Background of the row under the mouse, so the label and its control are easy to match */
     private static final int HOVER_COLOR = 0x18FFFFFF;
+
+    /** Row width set by {@link #setFixedRowWidth}, or 0 to follow the list's width */
+    private int fixedRowWidth;
 
     /**
      * Creates an empty list
@@ -104,6 +116,27 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
     }
 
     /**
+     * Gives every row a fixed width instead of one that follows the list's width (for a list in a column of a screen,
+     * e.g. the preset form of Pack Manager)
+     *
+     * @param width row width in pixels, or 0 to follow the list's width again
+     */
+    public void setFixedRowWidth(int width) {
+        this.fixedRowWidth = width;
+    }
+
+    /**
+     * Returns the left edge of the rows; with a fixed row width the rows sit 1 pixel left of center, so their contents
+     * (labels 2 pixels from the left, controls 4 pixels from the right) are as far from both edges of the list
+     *
+     * @return x of the rows' left edge
+     */
+    @Override
+    public int getRowLeft() {
+        return this.fixedRowWidth > 0 ? getX() + (this.width - this.fixedRowWidth) / 2 + 1 : super.getRowLeft();
+    }
+
+    /**
      * Adds a row at the end of the list
      *
      * @param row the row to add
@@ -116,24 +149,25 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
     }
 
     /**
-     * Returns the row width: the screen width minus the margins, but never wider than {@value #MAX_ROW_WIDTH}
+     * Returns the row width: the screen width minus the margins, but never wider than {@value #MAX_ROW_WIDTH} (or the
+     * width given to {@link #setFixedRowWidth})
      *
      * @return width of every row in pixels
      */
     @Override
     public int getRowWidth() {
-        return Math.min(MAX_ROW_WIDTH, this.width - 2 * SIDE_MARGIN);
+        return this.fixedRowWidth > 0 ? this.fixedRowWidth : Math.min(MAX_ROW_WIDTH, this.width - 2 * SIDE_MARGIN);
     }
 
     /**
-     * Shortens a text with "..." so it fits a width
+     * Shortens a text with "..." so it fits a width; every part keeps its own style (colors of appended texts)
      *
      * @param font     font used to draw the text
      * @param text     text to fit
      * @param maxWidth available width in pixels
      * @return the text itself if it fits, otherwise the cut text followed by "..."
      */
-    static FormattedCharSequence fit(Font font, Component text, int maxWidth) {
+    public static FormattedCharSequence fit(Font font, Component text, int maxWidth) {
         if (font.width(text) <= maxWidth) {
             return text.getVisualOrderText();
         }
@@ -434,6 +468,67 @@ public class ConfigList extends ContainerObjectSelectionList<ConfigList.Row> {
         @Override
         public List<? extends NarratableEntry> narratables() {
             return this.buttons;
+        }
+    }
+
+    /**
+     * One action button in the middle of a row, without a label: its text says what it does (e.g. "Open Icons
+     * Folder"); tooltip after {@link #TOOLTIP_DELAY}
+     *
+     * <p>The button is as wide as the row's content (the space labels and controls use), at most
+     * {@value #MAX_ACTION_WIDTH} pixels, and centered in it. It can be made usable only while a condition holds.</p>
+     */
+    public static class ButtonRow extends Row {
+
+        private final Button button;
+        private BooleanSupplier enabled = () -> true;
+
+        /**
+         * Creates a button row
+         *
+         * @param text    text of the button
+         * @param tooltip text shown after hovering the button, or {@code null} for none
+         * @param action  what the button does
+         */
+        public ButtonRow(Component text, @Nullable Component tooltip, Runnable action) {
+            this.button = Button.builder(text, pressed -> action.run()).size(MAX_ACTION_WIDTH, CONTROL_HEIGHT).build();
+            if (tooltip != null) {
+                this.button.setTooltip(Tooltip.create(tooltip));
+                this.button.setTooltipDelay(TOOLTIP_DELAY);
+            }
+        }
+
+        /**
+         * Makes the button usable only while a condition is true (checked when the row is drawn)
+         *
+         * @param condition returns true while the button can be used
+         * @return this row, for chaining
+         */
+        public ButtonRow enabledWhen(BooleanSupplier condition) {
+            this.enabled = condition;
+            return this;
+        }
+
+        @Override
+        public void render(GuiGraphics graphics, int index, int top, int left, int width, int height,
+                           int mouseX, int mouseY, boolean hovered, float partialTick) {
+            // the content of a row spans left + 2 to left + width - 4 (labels and controls of OptionRow)
+            int contentWidth = width - 6;
+            this.button.setWidth(Math.min(width - 8, MAX_ACTION_WIDTH));
+            this.button.active = this.enabled.getAsBoolean();
+            this.button.setPosition(left + 2 + (contentWidth - this.button.getWidth()) / 2,
+                top + (height - this.button.getHeight()) / 2);
+            this.button.render(graphics, mouseX, mouseY, partialTick);
+        }
+
+        @Override
+        public List<? extends GuiEventListener> children() {
+            return List.of(this.button);
+        }
+
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return List.of(this.button);
         }
     }
 }
