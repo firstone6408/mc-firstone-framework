@@ -2,6 +2,7 @@ package io.github.firstone.framework.devtest.features.packmanager;
 
 import io.github.firstone.framework.client.screen.RowDrag;
 import io.github.firstone.framework.features.packmanager.PackLists;
+import io.github.firstone.framework.features.packmanager.client.screen.PresetListScreen;
 import io.github.firstone.framework.features.packmanager.preset.PackFiles;
 import io.github.firstone.framework.features.packmanager.preset.PresetStatus;
 import io.github.firstone.framework.features.packmanager.preset.PresetStore;
@@ -85,6 +86,16 @@ final class PackManagerInternals {
     static int selectedRow(AbstractSelectionList<?> list) {
         Object selected = list.getSelected();
         return list.children().indexOf(selected);
+    }
+
+    /**
+     * Returns how a preset row counts its packs ({@code PresetListScreen.packCount})
+     *
+     * @param count the number of packs
+     * @return the text, e.g. "1 pack"
+     */
+    static String packCount(int count) {
+        return PresetListScreen.packCount(count).getString();
     }
 
     /**

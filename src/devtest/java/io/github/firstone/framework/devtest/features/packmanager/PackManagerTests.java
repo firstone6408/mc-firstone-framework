@@ -170,7 +170,9 @@ public final class PackManagerTests implements FeatureTests {
             TestCase.of("Data pack screen: never asks about leaving a preset, the resource packs stay",
                 this::dataPackNeverAsks),
             TestCase.of("Drag: a drop outside the lists changes nothing, the list scrolls up near its top, a pack "
-                + "deleted while dragged is not brought back", this::dragEdgeCases)
+                + "deleted while dragged is not brought back", this::dragEdgeCases),
+            TestCase.of("Wording: a preset row counts 1 pack, N packs; Use Current names both counts",
+                this::wording)
         );
     }
 
@@ -2474,6 +2476,32 @@ public final class PackManagerTests implements FeatureTests {
             t.pressKey(GLFW.GLFW_KEY_ESCAPE);
             letGo(t, x, tallList.getY() + 4.0);
             t.check("Escape: nothing moved", selected(t, tall)).isEqualTo(tallOrder);
+        } finally {
+            restore(t, saved);
+        }
+    }
+
+    private void wording(TestContext t) throws Exception {
+        Saved saved = start(t);
+        try {
+            t.check("no packs", PackManagerInternals.packCount(0)).isEqualTo("0 packs");
+            t.check("one pack", PackManagerInternals.packCount(1)).isEqualTo("1 pack");
+            t.check("two packs", PackManagerInternals.packCount(2)).isEqualTo("2 packs");
+            List<String> ids = makePacks(t, "a", "b");
+            writePresets(t, preset("One", ids.get(0)));
+            // turning b on after a would leave the preset "One"; that question is tested on its own
+            PackManagerFeature.getConfig().askBeforeLeavingPreset = false;
+            PackSelectionScreen screen = openPackScreen(t);
+            select(t, screen, ids.get(0), ids.get(1));
+            int current = selected(t, screen).size();
+            openPresets(t);
+            t.saveScreenshot("one_pack_row");
+            rowButton(t, 0, EDIT);
+            press(t, KEY + "edit.use_current.button");
+            String question = t.onClientThread(() -> t.mc().screen.getNarrationMessage().getString());
+            t.check("Use Current names the preset's count and the current count", question.contains(
+                "Its packs (1) are replaced by the packs you use now (" + current + ")")).isTrue();
+            t.saveScreenshot("use_current_counts");
         } finally {
             restore(t, saved);
         }
