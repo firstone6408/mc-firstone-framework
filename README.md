@@ -19,6 +19,7 @@ Every feature is a separate module with its own config file and in-game settings
 | Legacy HUD | Client | Minecraft 1.7.10 HUD: no status effect icons in the top-right corner, effect list on the left of the inventory |
 | Legacy Vehicles | Client | Minecraft 1.7.10 boats: handling (with optional 1.21 ice sliding), free look and seat, mobs turning in boats, hands kept up while paddling, flat model, water splash; paddles can be hidden |
 | Cosmetics | Client | Your own death effect, item break effect and music disc songs, from files in `config/firstone-framework/cosmetics/` |
+| Pack Manager | Client | Resource pack presets (saved lists of packs, in order), dragging packs to reorder them, a search box for the pack lists |
 | Combat Tweaks | Server | Pre-1.9 combat: no attack cooldown, no sweeping attack |
 | Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback, crouch hitbox, health regeneration, sword blocking, item drops, experience orbs, items thrown out when a screen closes, boat breaking and coasting |
 
@@ -45,6 +46,15 @@ Sounds must be OGG Vorbis. With **3D Sound** on (default) they are mixed down to
 hear where they come from. The death sound can start early (before the body disappears) and the start of the item
 break sound can be skipped, so a sound's loudest part lands on the moment. A disc's song stops when the disc's own
 time is over, as in the game.
+
+### Pack presets
+
+In the Resource Packs screen, the button above the Selected list shows the preset you use (**Preset: Custom** when
+your packs match none) and opens the presets. A preset keeps a list of packs in order (the top pack wins). Applying
+one fills the Resource Packs screen with its packs, as if you had picked them yourself; **Done** then saves and loads
+them. New and changed presets are kept only when you press **Create** or **Save** in the preset form. Presets are kept in `config/firstone-framework/pack_manager/presets.json`; a pack
+whose file is gone stays in its preset (shown as missing and skipped) and works again when the file comes back; a
+zip pack replaced by another file with the same name is shown as changed until the preset is saved again.
 
 ---
 
@@ -225,9 +235,9 @@ public class FallingTreeConfigScreen extends ConfigScreen {
 }
 ```
 
-Available rows: `addSection`, `addToggle`, `addCycle`, `addText`, `addButton`, `addNotice` and
-`addServerNotice("falling_tree.json")` (for features whose rules run on the server). Each change is written to the
-config and saved right away. `resetConfig` is a static method of the feature that replaces the config with
+Available rows: `addSection`, `addToggle`, `addCycle`, `addText`, `addSlider`, `addButton` (a label with a button,
+e.g. "Icons Folder · Open Folder"), `addActionButton` (a centered button without a label, whose text says what it
+does), `addNotice` and `addServerNotice("falling_tree.json")` (for features whose rules run on the server). Each change is written to the config and saved right away. `resetConfig` is a static method of the feature that replaces the config with
 `new FallingTreeConfig()` and saves it.
 
 All texts come from `src/client/resources/assets/firstone-framework/lang/en_us.json`:
@@ -243,6 +253,11 @@ All texts come from `src/client/resources/assets/firstone-framework/lang/en_us.j
 `name` is shown on the feature's tile in `MainConfigScreen` and as the screen title, `description` appears when
 the tile is hovered; `.tooltip` keys are optional. To change how every screen looks (row width, colors, tooltip delay), edit
 the constants in `ConfigList`.
+
+Screens that are not option lists reuse the same pieces from `client/screen/`: `ListScreen` (title, one list, a row
+of buttons; `ConfigScreen` is one), `HeadedList` (a list under a gold heading, with an explanation and an empty text),
+`RowDrag` (dragging rows into another order), `Questions` (yes/no questions that come back to the screen) and the
+colors and `fit` of `ConfigList`. Pack Manager's screens are built from them.
 
 ### Big features: categories
 
