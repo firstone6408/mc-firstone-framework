@@ -8,6 +8,7 @@ import io.github.firstone.framework.devtest.features.cosmetics.CosmeticsTests;
 import io.github.firstone.framework.devtest.features.legacyhud.LegacyHudTests;
 import io.github.firstone.framework.devtest.features.legacymechanics.LegacyMechanicsTests;
 import io.github.firstone.framework.devtest.features.legacyvehicles.LegacyVehiclesTests;
+import io.github.firstone.framework.devtest.features.mobtweaks.MobTweaksTests;
 import io.github.firstone.framework.devtest.features.packmanager.PackManagerTests;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public final class DevTests {
      */
     private static final List<Supplier<FeatureTests>> ALL = List.of(
         LegacyMechanicsTests::new,
+        MobTweaksTests::new,
         CombatTweaksTests::new,
         LegacyHudTests::new,
         CosmeticsTests::new,

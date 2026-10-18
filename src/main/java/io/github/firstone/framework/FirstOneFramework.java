@@ -4,6 +4,7 @@ import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.FeatureRegistry;
 import io.github.firstone.framework.features.combattweaks.CombatTweaksFeature;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
+import io.github.firstone.framework.features.mobtweaks.MobTweaksFeature;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public class FirstOneFramework implements ModInitializer {
 
         FeatureRegistry.register(new CombatTweaksFeature());
         FeatureRegistry.register(new LegacyMechanicsFeature());
+        FeatureRegistry.register(new MobTweaksFeature());
 
         List<Feature> features = FeatureRegistry.getAll();
         for (Feature feature : features) {

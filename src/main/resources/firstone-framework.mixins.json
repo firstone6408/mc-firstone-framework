@@ -27,7 +27,10 @@
 		"legacymechanics.experience.LegacyFurnaceExperienceMixin",
 		"legacymechanics.boat.LegacyBoatRulesMixin",
 		"legacymechanics.boat.LegacyBoatDriverMixin",
-		"legacymechanics.boat.LegacyBoatEntityMixin"
+		"legacymechanics.boat.LegacyBoatEntityMixin",
+		"mobtweaks.enderman.EnderManMixin",
+		"mobtweaks.enderman.EndermanTakeBlockGoalMixin",
+		"mobtweaks.enderman.EndermanLeaveBlockGoalMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

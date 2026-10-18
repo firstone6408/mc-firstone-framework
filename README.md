@@ -22,6 +22,7 @@ Every feature is a separate module with its own config file and in-game settings
 | Pack Manager | Client | Resource pack presets (saved lists of packs, in order), dragging packs to reorder them, a search box for the pack lists |
 | Combat Tweaks | Server | Pre-1.9 combat: no attack cooldown, no sweeping attack |
 | Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback, crouch hitbox, health regeneration, sword blocking, item drops, experience orbs, items thrown out when a screen closes, boat breaking and coasting |
+| Mob Tweaks | Server | Mobs that cannot spoil the world: endermen pick up blocks only for show (the block stays in place) |
 
 Client features work on any server. Server features are set in game for singleplayer; a server that has the mod
 uses its own files in `config/firstone-framework/`.
