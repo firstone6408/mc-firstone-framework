@@ -329,6 +329,16 @@ public class PresetListScreen extends ListScreen<PresetListScreen.PresetList> {
         return packs.isEmpty() ? List.of(PackLists.UNKNOWN_ICON) : List.of(packs.getFirst().getIconTexture());
     }
 
+    /**
+     * Returns how many packs a preset has, as its row shows it: "1 pack", else "N packs"
+     *
+     * @param count the number of packs
+     * @return the text
+     */
+    public static Component packCount(int count) {
+        return Component.translatable(PREFIX + (count == 1 ? "pack" : "packs"), count);
+    }
+
     /** Returns the names of packs, separated by commas */
     private static Component names(List<PackSelectionModel.Entry> packs) {
         MutableComponent names = Component.empty();
@@ -568,7 +578,7 @@ public class PresetListScreen extends ListScreen<PresetListScreen.PresetList> {
 
         /** Returns "N packs", with how many are missing, changed or made for another version */
         private Component summary() {
-            MutableComponent summary = Component.translatable(PREFIX + "packs", this.preset.packs.size());
+            MutableComponent summary = packCount(this.preset.packs.size()).copy();
             note(summary, this.status.missing().size(), "missing", ChatFormatting.YELLOW);
             note(summary, this.status.changed().size(), "changed", ChatFormatting.GOLD);
             note(summary, this.status.incompatible().size(), "incompatible", ChatFormatting.RED);
