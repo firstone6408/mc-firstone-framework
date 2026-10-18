@@ -3,6 +3,7 @@ package io.github.firstone.framework.features.mobtweaks;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.config.ConfigManager;
 import io.github.firstone.framework.features.mobtweaks.enderman.EndermanBlocks;
+import io.github.firstone.framework.features.mobtweaks.nether.NetherMobs;
 
 /**
  * Mob Tweaks — server rules that keep mobs from spoiling the world, while they look and act as before
@@ -14,6 +15,8 @@ import io.github.firstone.framework.features.mobtweaks.enderman.EndermanBlocks;
  * <ul>
  *   <li>{@code enderman/} — Enderman Blocks Stay: an enderman picks up a block only for show; the block stays in the
  *       world ({@link EndermanBlocks})</li>
+ *   <li>{@code nether/} — Spawn Only in the Dark and Attack Only in the Dark for piglins and hoglins, so lit Nether
+ *       paths stay safe ({@link NetherMobs})</li>
  * </ul>
  */
 public class MobTweaksFeature implements Feature {
@@ -36,6 +39,7 @@ public class MobTweaksFeature implements Feature {
     public void initialize() {
         config = ConfigManager.load(CONFIG_FILE, MobTweaksConfig.class, new MobTweaksConfig());
         EndermanBlocks.register();
+        NetherMobs.register();
     }
 
     /**

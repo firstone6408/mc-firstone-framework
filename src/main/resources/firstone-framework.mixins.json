@@ -30,7 +30,11 @@
 		"legacymechanics.boat.LegacyBoatEntityMixin",
 		"mobtweaks.enderman.EnderManMixin",
 		"mobtweaks.enderman.EndermanTakeBlockGoalMixin",
-		"mobtweaks.enderman.EndermanLeaveBlockGoalMixin"
+		"mobtweaks.enderman.EndermanLeaveBlockGoalMixin",
+		"mobtweaks.nether.NetherSpawnRulesMixin",
+		"mobtweaks.nether.NetherMobMixin",
+		"mobtweaks.nether.PiglinAiMixin",
+		"mobtweaks.nether.HoglinAiMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
