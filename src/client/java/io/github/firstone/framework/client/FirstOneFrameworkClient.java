@@ -16,6 +16,7 @@ import io.github.firstone.framework.features.legacyhud.client.screen.LegacyHudCo
 import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesFeature;
 import io.github.firstone.framework.features.legacyvehicles.client.screen.LegacyVehiclesConfigScreen;
 import io.github.firstone.framework.features.legacymechanics.client.screen.LegacyMechanicsConfigScreen;
+import io.github.firstone.framework.features.mobtweaks.client.screen.MobTweaksConfigScreen;
 import io.github.firstone.framework.features.packmanager.PackManagerFeature;
 import io.github.firstone.framework.features.packmanager.client.screen.PackManagerConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
@@ -51,6 +52,7 @@ public class FirstOneFrameworkClient implements ClientModInitializer {
         FeatureScreenRegistry.register("pack_manager", Items.BOOKSHELF, Side.CLIENT, PackManagerConfigScreen::new);
         FeatureScreenRegistry.register("combat_tweaks", Items.IRON_SWORD, Side.SERVER, CombatTweaksConfigScreen::new);
         FeatureScreenRegistry.register("legacy_mechanics", Items.CLOCK, Side.SERVER, LegacyMechanicsConfigScreen::new);
+        FeatureScreenRegistry.register("mob_tweaks", Items.ZOMBIE_HEAD, Side.SERVER, MobTweaksConfigScreen::new);
 
         for (Feature feature : FeatureRegistry.getAll()) {
             feature.initializeClient();
