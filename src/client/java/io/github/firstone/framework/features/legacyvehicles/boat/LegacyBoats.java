@@ -2,7 +2,6 @@ package io.github.firstone.framework.features.legacyvehicles.boat;
 
 import io.github.firstone.framework.common.boat.BoatPushPayload;
 import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
-import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
 import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesFeature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleTypes;
@@ -75,8 +74,9 @@ public final class LegacyBoats {
      * goes on smoothly after the local player gets out, instead of following the server's positions 10 ticks late
      *
      * <p>The server must move such boats with the 1.7.10 motion too ("Legacy Boat Coasting" of Legacy Mechanics). In
-     * singleplayer that option is read directly; on a server, a boat that ends up more than {@value #RESYNC_DISTANCE}
-     * block away from the server's is moved back to it ({@link #needsResync}).</p>
+     * singleplayer that option is asked through {@link LegacyBoatPhysics#localServerCoasts()}; on a server, a boat
+     * that ends up more than {@value #RESYNC_DISTANCE} block away from the server's is moved back to it
+     * ({@link #needsResync}).</p>
      *
      * @param boat a boat on the client
      * @return true when "Legacy Handling" is on and the boat has no driver on this client and no passenger
@@ -85,8 +85,7 @@ public final class LegacyBoats {
         if (!handles(boat) || boat.isControlledByLocalInstance() || !boat.getPassengers().isEmpty()) {
             return false;
         }
-        return !Minecraft.getInstance().hasSingleplayerServer()
-            || LegacyMechanicsFeature.getConfig().legacyBoatCoasting;
+        return !Minecraft.getInstance().hasSingleplayerServer() || LegacyBoatPhysics.localServerCoasts();
     }
 
     /**

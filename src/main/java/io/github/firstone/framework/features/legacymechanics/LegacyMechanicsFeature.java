@@ -2,7 +2,9 @@ package io.github.firstone.framework.features.legacymechanics;
 
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.boat.BoatPushPayload;
+import io.github.firstone.framework.common.boat.LegacyBoatPhysics;
 import io.github.firstone.framework.common.config.ConfigManager;
+import io.github.firstone.framework.features.legacymechanics.boat.LegacyBoatRules;
 import io.github.firstone.framework.features.legacymechanics.enchanting.EnchantingRulesPayload;
 import io.github.firstone.framework.features.legacymechanics.enchanting.LegacyEnchanting;
 import io.github.firstone.framework.features.legacymechanics.sword.LegacySwordBlocking;
@@ -40,6 +42,7 @@ public class LegacyMechanicsFeature implements Feature {
     public void initialize() {
         config = ConfigManager.load(CONFIG_FILE, LegacyMechanicsConfig.class, new LegacyMechanicsConfig());
         PayloadTypeRegistry.playS2C().register(BoatPushPayload.TYPE, BoatPushPayload.CODEC);
+        LegacyBoatPhysics.setLocalServerCoasting(LegacyBoatRules::coasting);
         PayloadTypeRegistry.playS2C().register(SwordBlockingPayload.TYPE, SwordBlockingPayload.CODEC);
         LegacySwordBlocking.registerSync();
         PayloadTypeRegistry.playS2C().register(EnchantingRulesPayload.TYPE, EnchantingRulesPayload.CODEC);
