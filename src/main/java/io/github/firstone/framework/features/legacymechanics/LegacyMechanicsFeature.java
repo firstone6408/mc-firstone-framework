@@ -3,10 +3,10 @@ package io.github.firstone.framework.features.legacymechanics;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.boat.BoatPushPayload;
 import io.github.firstone.framework.common.config.ConfigManager;
-import io.github.firstone.framework.common.enchanting.EnchantingRulesPayload;
-import io.github.firstone.framework.common.sword.SwordBlockingPayload;
+import io.github.firstone.framework.features.legacymechanics.enchanting.EnchantingRulesPayload;
 import io.github.firstone.framework.features.legacymechanics.enchanting.LegacyEnchanting;
 import io.github.firstone.framework.features.legacymechanics.sword.LegacySwordBlocking;
+import io.github.firstone.framework.features.legacymechanics.sword.SwordBlockingPayload;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 /**

@@ -1,6 +1,5 @@
 package io.github.firstone.framework.features.legacymechanics.enchanting;
 
-import io.github.firstone.framework.common.enchanting.EnchantingRulesPayload;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsConfig;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;

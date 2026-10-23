@@ -1,7 +1,5 @@
-package io.github.firstone.framework.features.legacyhud;
+package io.github.firstone.framework.features.legacymechanics.enchanting;
 
-import io.github.firstone.framework.common.enchanting.EnchantingRulesPayload;
-import io.github.firstone.framework.features.legacymechanics.enchanting.LegacyEnchanting;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.ChatFormatting;
@@ -15,8 +13,7 @@ import net.minecraft.world.inventory.EnchantmentMenu;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The enchanting table screen of Legacy Mechanics' Legacy Enchanting: the Show Clues button and the levels a line
- * takes
+ * The client side of Legacy Enchanting: the Show Clues button and the levels a line takes on the enchanting table
  *
  * <p>The server decides everything ({@link LegacyEnchanting}); it tells a client with the mod its rules
  * ({@link EnchantingRulesPayload}). Every connection starts without rules, so on a server without the mod the
@@ -41,7 +38,7 @@ public final class EnchantingClues {
     private static final Object[] NO_ARGS = new Object[0];
 
     /** Prefix of this part's text keys */
-    private static final String KEY = "firstone-framework.legacy_hud.enchant_clues.";
+    private static final String KEY = "firstone-framework.legacy_mechanics.enchant_clues.";
 
     /** What the server said, or null if it said nothing (no mod); written by the network events */
     @Nullable
@@ -52,8 +49,8 @@ public final class EnchantingClues {
     /**
      * Listens to the server's enchanting rules and forgets them between connections
      *
-     * <p>Called once by {@link LegacyHudFeature#initializeClient()}. Always on: what the server rules is not a
-     * setting of the client.</p>
+     * <p>Called once by {@code LegacyMechanicsClientFeature.initializeClient()}. Always on: what the server rules is
+     * not a setting of the client.</p>
      */
     public static void register() {
         ClientPlayConnectionEvents.INIT.register((handler, client) -> rules = null);
