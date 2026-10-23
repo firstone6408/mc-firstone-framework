@@ -3,7 +3,7 @@
 	"id": "firstone-framework",
 	"version": "${version}",
 	"name": "FirstOne Framework",
-	"description": "Brings back the feel of Minecraft 1.7.10 on Fabric 1.21.1: legacy animations, 1.7.10 knockback, hitboxes, drops and boats, pre-1.9 combat, the 1.7.10 HUD, your own cosmetic effects, resource pack presets, endermen that leave blocks in place, piglins and hoglins that stay off lit Nether paths and game window tweaks. Every feature is a separate module with its own in-game settings.",
+	"description": "Brings back the feel of Minecraft 1.7.10 on Fabric 1.21.1: legacy animations, 1.7.10 knockback, hitboxes, drops, boats and enchanting, pre-1.9 combat, the 1.7.10 HUD, your own cosmetic effects, resource pack presets, endermen that leave blocks in place, piglins and hoglins that stay off lit Nether paths and game window tweaks. Every feature is a separate module with its own in-game settings.",
 	"authors": [
 		{
 			"name": "firstone6408",

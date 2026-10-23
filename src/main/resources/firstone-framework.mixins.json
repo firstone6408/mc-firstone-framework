@@ -28,6 +28,7 @@
 		"legacymechanics.boat.LegacyBoatRulesMixin",
 		"legacymechanics.boat.LegacyBoatDriverMixin",
 		"legacymechanics.boat.LegacyBoatEntityMixin",
+		"legacymechanics.enchanting.LegacyEnchantingMenuMixin",
 		"mobtweaks.enderman.EnderManMixin",
 		"mobtweaks.enderman.EndermanTakeBlockGoalMixin",
 		"mobtweaks.enderman.EndermanLeaveBlockGoalMixin",

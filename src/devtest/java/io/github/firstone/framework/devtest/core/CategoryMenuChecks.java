@@ -104,7 +104,10 @@ public final class CategoryMenuChecks {
         t.check(featureId + ": listed options the config does not have " + listed, listed.size()).near(0, 0);
     }
 
-    /** Every category has a name and a description, every group a heading, every option a label and a tooltip */
+    /**
+     * Every category has a name and a description, every group a heading, every option (on/off or slider) a label
+     * and a tooltip
+     */
     private static void checkTexts(TestContext t, String featureId, String keyPrefix, CategoryMenuScreen<Object> menu) {
         List<String> missing = new ArrayList<>();
         Language language = Language.getInstance();
@@ -121,8 +124,8 @@ public final class CategoryMenuChecks {
                     missing.add(key);
                 }
             }
-            for (ConfigCategory.Toggle<Object> toggle : category.toggles()) {
-                for (String key : List.of(toggle.key(), toggle.key() + ".tooltip")) {
+            for (ConfigCategory.Option<Object> option : category.options()) {
+                for (String key : List.of(option.key(), option.key() + ".tooltip")) {
                     if (!language.has(keyPrefix + key)) {
                         missing.add(key);
                     }
@@ -190,6 +193,8 @@ public final class CategoryMenuChecks {
         Set<String> before = t.onClientThread(() -> {
             menu.categories().forEach(other -> other.toggles().forEach(toggle -> toggle.setter().accept(config.get(),
                 !toggle.value().test(defaults.get()))));
+            menu.categories().forEach(other -> sliders(other).forEach(slider -> slider.setter().accept(config.get(),
+                notDefault(slider, defaults.get()))));
             return snapshot(menu, config.get());
         });
         t.onClientThread(() -> {
@@ -224,6 +229,27 @@ public final class CategoryMenuChecks {
             .mapToInt(other -> other.toggles().size()).sum();
         t.check(name + ": Reset put its options back to the defaults", result[0]).near(category.toggles().size(), 0);
         t.check(name + ": Reset left the other categories' options", result[1]).near(others, 0);
+        int allSliders = menu.categories().stream().mapToInt(other -> sliders(other).size()).sum();
+        if (allSliders > 0) {
+            int[] sliders = t.onClientThread(() -> {
+                int reset = 0;
+                int kept = 0;
+                for (ConfigCategory<Object> other : menu.categories()) {
+                    for (ConfigCategory.Slider<Object> slider : sliders(other)) {
+                        double now = slider.value().applyAsDouble(config.get());
+                        if (other == category) {
+                            reset += now == slider.value().applyAsDouble(defaults.get()) ? 1 : 0;
+                        } else {
+                            kept += now == notDefault(slider, defaults.get()) ? 1 : 0;
+                        }
+                    }
+                }
+                return new int[] {reset, kept};
+            });
+            int own = sliders(category).size();
+            t.check(name + ": Reset put its sliders back to the defaults", sliders[0]).near(own, 0);
+            t.check(name + ": Reset left the other categories' sliders", sliders[1]).near(allSliders - own, 0);
+        }
         t.onClientThread(() -> {
             menu.categories().forEach(other -> other.reset(config.get(), defaults.get()));
             t.mc().setScreen(menu);
@@ -298,6 +324,22 @@ public final class CategoryMenuChecks {
             t.mc().setScreen(menu);
             return null;
         });
+    }
+
+    /** The sliders of a category */
+    private static List<ConfigCategory.Slider<Object>> sliders(ConfigCategory<Object> category) {
+        List<ConfigCategory.Slider<Object>> sliders = new ArrayList<>();
+        for (ConfigCategory.Option<Object> option : category.options()) {
+            if (option instanceof ConfigCategory.Slider<Object> slider) {
+                sliders.add(slider);
+            }
+        }
+        return sliders;
+    }
+
+    /** A value of a slider that is not its default: its largest, or its smallest when that is the default */
+    private static double notDefault(ConfigCategory.Slider<Object> slider, Object defaults) {
+        return slider.value().applyAsDouble(defaults) == slider.max() ? slider.min() : slider.max();
     }
 
     /** Whether the option list of a config screen scrolls (some rows are not drawn) */

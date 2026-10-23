@@ -54,6 +54,7 @@
 		"cosmetics.musicdiscs.CosmeticMusicDiscMixin",
 		"cosmetics.death.CosmeticSelfDeathMixin",
 		"cosmetics.CosmeticsPackMixin",
+		"legacyhud.EnchantingCluesMixin",
 		"legacyhud.HideEffectIconsMixin",
 		"legacyhud.LegacyCreativePositionMixin",
 		"legacyhud.LegacyInventoryEffectsMixin",

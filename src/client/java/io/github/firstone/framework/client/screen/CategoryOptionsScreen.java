@@ -65,10 +65,15 @@ public class CategoryOptionsScreen<C> extends ConfigScreen {
         for (ConfigCategory.Group<C> group : this.category.groups()) {
             String heading = group.heading();
             addSection("category." + (heading != null ? heading : this.category.key()));
-            for (ConfigCategory.Toggle<C> toggle : group.toggles()) {
-                ConfigList.OptionRow row = addToggle(toggle.key(), toggle.value().test(current),
-                    value -> toggle.setter().accept(this.config.get(), value));
-                Predicate<C> enabledWhen = toggle.enabledWhen();
+            for (ConfigCategory.Option<C> option : group.options()) {
+                ConfigList.OptionRow row = switch (option) {
+                    case ConfigCategory.Toggle<C> toggle -> addToggle(toggle.key(), toggle.value().test(current),
+                        value -> toggle.setter().accept(this.config.get(), value));
+                    case ConfigCategory.Slider<C> slider -> addSlider(slider.key(), slider.min(), slider.max(),
+                        slider.step(), slider.value().applyAsDouble(current), slider.valueText(),
+                        value -> slider.setter().accept(this.config.get(), value));
+                };
+                Predicate<C> enabledWhen = option.enabledWhen();
                 if (enabledWhen != null) {
                     row.enabledWhen(() -> enabledWhen.test(this.config.get()));
                 }

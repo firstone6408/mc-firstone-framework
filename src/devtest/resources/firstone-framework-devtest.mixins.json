@@ -17,6 +17,7 @@
 		"PackScreenAccessor",
 		"ParticleAccessor",
 		"ParticleEngineAccessor",
+		"PlayerAccessor",
 		"ServerPlayerAccessor",
 		"SoundBufferAccessor",
 		"SoundEngineAccessor",

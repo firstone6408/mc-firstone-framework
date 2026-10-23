@@ -15,6 +15,9 @@ import io.github.firstone.framework.common.config.ConfigManager;
  *       only in the inventory)</li>
  *   <li>{@code LegacyInventoryPositionMixin}, {@code LegacyCreativePositionMixin}, {@code LegacyInventoryEffectsMixin}
  *       — effect list on the left of the inventory window ({@link LegacyInventoryEffects})</li>
+ *   <li>{@code EnchantingCluesMixin} — the enchanting table screen of Legacy Mechanics' Legacy Enchanting: the Show
+ *       Clues button and the real levels a line takes ({@link EnchantingClues}). Not a setting: it follows what
+ *       the server said, and shows nothing on a server without the mod</li>
  * </ul>
  */
 public class LegacyHudFeature implements Feature {
@@ -31,11 +34,12 @@ public class LegacyHudFeature implements Feature {
     }
 
     /**
-     * Loads {@code legacy_hud.json}
+     * Loads {@code legacy_hud.json} and listens to the server's enchanting rules ({@link EnchantingClues})
      */
     @Override
     public void initializeClient() {
         config = ConfigManager.load(CONFIG_FILE, LegacyHudConfig.class, new LegacyHudConfig());
+        EnchantingClues.register();
     }
 
     /**
