@@ -4,11 +4,14 @@ import io.github.firstone.framework.client.screen.CategoryMenuScreen;
 import io.github.firstone.framework.client.screen.ConfigCategory;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsConfig;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
+import io.github.firstone.framework.features.legacymechanics.enchanting.LegacyEnchanting;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
 
 import java.util.List;
 
+import static io.github.firstone.framework.client.screen.ConfigCategory.slider;
 import static io.github.firstone.framework.client.screen.ConfigCategory.toggle;
 
 /**
@@ -19,6 +22,7 @@ import static io.github.firstone.framework.client.screen.ConfigCategory.toggle;
  *   <li><b>Players</b> — the crouching hitbox and natural regeneration</li>
  *   <li><b>Drops</b> — item drops, experience orbs and items thrown when a screen closes</li>
  *   <li><b>Boats</b> — boat breaking and coasting</li>
+ *   <li><b>Enchanting</b> — the enchanting table's cost, rolls and paid clues</li>
  * </ul>
  *
  * <p>These are server rules: changes apply to singleplayer right away; a dedicated server uses its own
@@ -48,7 +52,18 @@ public class LegacyMechanicsConfigScreen extends CategoryMenuScreen<LegacyMechan
                 (c, v) -> c.breakChestBoatsAndRafts = v, c -> c.legacyBoatBreaking),
             toggle("boats_safe_on_ice", c -> c.boatsSafeOnIce, (c, v) -> c.boatsSafeOnIce = v,
                 c -> c.legacyBoatBreaking),
-            toggle("legacy_boat_coasting", c -> c.legacyBoatCoasting, (c, v) -> c.legacyBoatCoasting = v))));
+            toggle("legacy_boat_coasting", c -> c.legacyBoatCoasting, (c, v) -> c.legacyBoatCoasting = v))),
+        ConfigCategory.of("enchanting", Items.ENCHANTING_TABLE, List.of(
+            toggle("legacy_enchant_cost", c -> c.legacyEnchantCost, (c, v) -> c.legacyEnchantCost = v),
+            toggle("legacy_enchant_reroll", c -> c.legacyEnchantReroll, (c, v) -> c.legacyEnchantReroll = v),
+            toggle("paid_enchant_clues", c -> c.paidEnchantClues, (c, v) -> c.paidEnchantClues = v,
+                c -> c.legacyEnchantReroll),
+            slider("enchant_clue_lapis", LegacyEnchanting.MIN_CLUE_LAPIS, LegacyEnchanting.MAX_CLUE_LAPIS, 1,
+                c -> c.enchantClueLapis, (c, v) -> c.enchantClueLapis = (int) v,
+                LegacyMechanicsConfigScreen::lapis, c -> c.legacyEnchantReroll && c.paidEnchantClues),
+            slider("enchant_clue_levels", LegacyEnchanting.MIN_CLUE_LEVELS, LegacyEnchanting.MAX_CLUE_LEVELS, 1,
+                c -> c.enchantClueLevels, (c, v) -> c.enchantClueLevels = (int) v,
+                LegacyMechanicsConfigScreen::levels, c -> c.legacyEnchantReroll && c.paidEnchantClues))));
 
     /**
      * Creates the Legacy Mechanics settings screen
@@ -59,5 +74,15 @@ public class LegacyMechanicsConfigScreen extends CategoryMenuScreen<LegacyMechan
         super(parent, "firstone-framework.legacy_mechanics.", LegacyMechanicsFeature::getConfig,
             LegacyMechanicsConfig::new, LegacyMechanicsFeature::saveConfig, LegacyMechanicsFeature::resetConfig,
             CONFIG_FILE, CATEGORIES);
+    }
+
+    /** The text of the clue lapis slider: "3 Lapis Lazuli" */
+    private static Component lapis(double value) {
+        return Component.translatable("firstone-framework.legacy_mechanics.lapis_value", (int) value);
+    }
+
+    /** The text of the clue levels slider: "3 Levels" */
+    private static Component levels(double value) {
+        return Component.translatable("firstone-framework.legacy_mechanics.levels_value", (int) value);
     }
 }

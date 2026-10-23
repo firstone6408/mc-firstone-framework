@@ -3,8 +3,10 @@ package io.github.firstone.framework.features.legacymechanics;
 import io.github.firstone.framework.common.Feature;
 import io.github.firstone.framework.common.boat.BoatPushPayload;
 import io.github.firstone.framework.common.config.ConfigManager;
-import io.github.firstone.framework.common.sword.SwordBlockingPayload;
+import io.github.firstone.framework.features.legacymechanics.enchanting.EnchantingRulesPayload;
+import io.github.firstone.framework.features.legacymechanics.enchanting.LegacyEnchanting;
 import io.github.firstone.framework.features.legacymechanics.sword.LegacySwordBlocking;
+import io.github.firstone.framework.features.legacymechanics.sword.SwordBlockingPayload;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 /**
@@ -18,7 +20,8 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
  * <p>Each part has its own folder, here and in {@code mixin/legacymechanics/}: {@code knockback/} (knockback of hits
  * and attacks), {@code player/} (the hitbox of crouching players, mixin only), {@code food/} (natural
  * regeneration), {@code sword/} (sword blocking), {@code item/} (item drops), {@code experience/} (experience orbs),
- * {@code physics/} (the kick out of blocks both use) and {@code boat/} (boat breaking and coasting).</p>
+ * {@code physics/} (the kick out of blocks both use), {@code boat/} (boat breaking and coasting) and
+ * {@code enchanting/} (the enchanting table's cost, rolls and clues).</p>
  */
 public class LegacyMechanicsFeature implements Feature {
 
@@ -39,6 +42,8 @@ public class LegacyMechanicsFeature implements Feature {
         PayloadTypeRegistry.playS2C().register(BoatPushPayload.TYPE, BoatPushPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SwordBlockingPayload.TYPE, SwordBlockingPayload.CODEC);
         LegacySwordBlocking.registerSync();
+        PayloadTypeRegistry.playS2C().register(EnchantingRulesPayload.TYPE, EnchantingRulesPayload.CODEC);
+        LegacyEnchanting.registerSync();
     }
 
     /**

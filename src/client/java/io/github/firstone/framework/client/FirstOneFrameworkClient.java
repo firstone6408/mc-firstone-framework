@@ -13,9 +13,10 @@ import io.github.firstone.framework.features.cosmetics.CosmeticsFeature;
 import io.github.firstone.framework.features.cosmetics.client.screen.CosmeticsConfigScreen;
 import io.github.firstone.framework.features.legacyhud.LegacyHudFeature;
 import io.github.firstone.framework.features.legacyhud.client.screen.LegacyHudConfigScreen;
+import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsClientFeature;
+import io.github.firstone.framework.features.legacymechanics.client.screen.LegacyMechanicsConfigScreen;
 import io.github.firstone.framework.features.legacyvehicles.LegacyVehiclesFeature;
 import io.github.firstone.framework.features.legacyvehicles.client.screen.LegacyVehiclesConfigScreen;
-import io.github.firstone.framework.features.legacymechanics.client.screen.LegacyMechanicsConfigScreen;
 import io.github.firstone.framework.features.mobtweaks.client.screen.MobTweaksConfigScreen;
 import io.github.firstone.framework.features.packmanager.PackManagerFeature;
 import io.github.firstone.framework.features.packmanager.client.screen.PackManagerConfigScreen;
@@ -44,6 +45,12 @@ public class FirstOneFrameworkClient implements ClientModInitializer {
         FeatureRegistry.register(new LegacyVehiclesFeature());
         FeatureRegistry.register(new PackManagerFeature());
 
+        // client side of server features: only the setup that lets this client work with a server that has them
+        // (the features themselves live in src/main and cannot reach client code); no settings, no tile
+        FeatureRegistry.register(new LegacyMechanicsClientFeature());
+
+        // settings screens: the tile of each feature in the main settings screen (icon, client or server group) and the
+        // screen it opens; client-only and server features alike
         FeatureScreenRegistry.register("animatium", Items.ARMOR_STAND, Side.CLIENT, AnimatiumConfigScreen::new);
         FeatureScreenRegistry.register("appearance", Items.PAINTING, Side.CLIENT, AppearanceConfigScreen::new);
         FeatureScreenRegistry.register("legacy_hud", Items.MAP, Side.CLIENT, LegacyHudConfigScreen::new);

@@ -1,4 +1,4 @@
-package io.github.firstone.framework.common.sword;
+package io.github.firstone.framework.features.legacymechanics.sword;
 
 /**
  * What the server the client is playing on said about sword blocking ({@link SwordBlockingPayload})

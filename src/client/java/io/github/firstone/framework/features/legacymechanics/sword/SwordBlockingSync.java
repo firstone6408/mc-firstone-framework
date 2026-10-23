@@ -1,7 +1,5 @@
-package io.github.firstone.framework.features.animatium.hand;
+package io.github.firstone.framework.features.legacymechanics.sword;
 
-import io.github.firstone.framework.common.sword.SwordBlockingPayload;
-import io.github.firstone.framework.common.sword.SwordBlockingSupport;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
@@ -19,7 +17,7 @@ public final class SwordBlockingSync {
     /**
      * Listens to the server's sword blocking setting and forgets it between connections
      *
-     * <p>Called once by {@code AnimatiumFeature.initializeClient()}.</p>
+     * <p>Called once by {@code LegacyMechanicsClientFeature.initializeClient()}.</p>
      */
     public static void register() {
         ClientPlayConnectionEvents.INIT.register((handler, client) -> SwordBlockingSupport.setServerAllows(false));

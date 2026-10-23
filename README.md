@@ -21,7 +21,7 @@ Every feature is a separate module with its own config file and in-game settings
 | Cosmetics | Client | Your own death effect, item break effect and music disc songs, from files in `config/firstone-framework/cosmetics/` |
 | Pack Manager | Client | Resource pack presets (saved lists of packs, in order), dragging packs to reorder them, a search box for the pack lists |
 | Combat Tweaks | Server | Pre-1.9 combat: no attack cooldown, no sweeping attack |
-| Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback, crouch hitbox, health regeneration, sword blocking, item drops, experience orbs, items thrown out when a screen closes, boat breaking and coasting |
+| Legacy Mechanics | Server | Minecraft 1.7.10 knockback, attack knockback, crouch hitbox, health regeneration, sword blocking, item drops, experience orbs, items thrown out when a screen closes, boat breaking and coasting, enchanting that takes the full levels and rolls again for every item (with clues for a price) |
 | Mob Tweaks | Server | Mobs that cannot spoil the world: endermen pick up blocks only for show (the block stays in place); piglins and hoglins spawn and start attacking only in the dark, so lit Nether paths stay safe |
 
 Client features work on any server. Server features are set in game for singleplayer; a server that has the mod
@@ -80,7 +80,7 @@ src/
 │   │   ├── FeatureRegistry.java        ← Feature registry
 │   │   ├── config/
 │   │   │   └── ConfigManager.java      ← Loads/saves config JSON
-│   │   └── <topic>/                    ← Code shared by several features (e.g. boat, sword)
+│   │   └── <topic>/                    ← Code shared by several features (e.g. boat)
 │   ├── features/                       ← Features with server behavior (e.g. legacymechanics)
 │   │   └── <feature name>/
 │   │       ├── <Name>Feature.java      ← Implements the Feature interface
@@ -104,6 +104,9 @@ src/
 │   └── features/
 │       └── <feature name>/
 │           ├── <Name>Feature.java, <Name>Config.java, <part>/ ← Client-only features (e.g. animatium)
+│           ├── <Name>ClientFeature.java, <part>/ ← Client side of a server feature, if it needs one (e.g.
+│           │                                       legacymechanics: what the server sends); same folders and
+│           │                                       packages as its server side, only initializeClient()
 │           └── client/screen/
 │               └── <Name>ConfigScreen.java ← The feature's settings screen (every feature has one)
 │
@@ -125,7 +128,11 @@ src/
 
 Create a folder in `src/main/java/.../features/<feature name>/` for a feature with server behavior (game rules,
 commands), or in `src/client/java/.../features/<feature name>/` for a client-only feature (animations, rendering,
-HUD). Its settings screen always goes in `src/client/java/.../features/<feature name>/client/screen/`.
+HUD). Its settings screen always goes in `src/client/java/.../features/<feature name>/client/screen/`. A feature
+with server behavior that also needs code on the client (for example to receive what its server sends) keeps that
+code in its own client side: a `<Name>ClientFeature` in `src/client/java/.../features/<feature name>/` (its parts in
+the same part folders as on the server), registered in `FirstOneFrameworkClient` like a client-only feature but
+overriding only `initializeClient()` (id `<id>_client`, no settings and no tile), never inside another feature.
 
 ### Step 2: Implement the Feature interface
 
@@ -267,7 +274,8 @@ options, grouped by what the player sees in the game (Animatium, Legacy Mechanic
 screen extends `CategoryMenuScreen`, which shows one tile per category under a "Categories" heading, with how many of
 its options are on (updated when the player comes back). Each tile opens the category's own screen: like every
 settings screen it is titled with the feature's name and lists the options under a heading (the category's name), and
-its Reset restores only that category:
+its Reset restores only that category. Besides on/off options (`toggle`), a category can hold sliders for numbers
+(`slider`); the tile counts only the on/off options:
 
 ```java
 public class FallingTreeConfigScreen extends CategoryMenuScreen<FallingTreeConfig> {
@@ -275,7 +283,9 @@ public class FallingTreeConfigScreen extends CategoryMenuScreen<FallingTreeConfi
     private static final List<ConfigCategory<FallingTreeConfig>> CATEGORIES = List.of(
         ConfigCategory.of("felling", Items.IRON_AXE, List.of(
             toggle("enabled", c -> c.enabled, (c, v) -> c.enabled = v),
-            toggle("drop_leaves", c -> c.dropLeaves, (c, v) -> c.dropLeaves = v, c -> c.enabled))));
+            toggle("drop_leaves", c -> c.dropLeaves, (c, v) -> c.dropLeaves = v, c -> c.enabled),
+            slider("max_logs", 16, 256, 16, c -> c.maxLogs, (c, v) -> c.maxLogs = (int) v,
+                v -> Component.literal(String.valueOf((int) v)), c -> c.enabled))));
 
     public FallingTreeConfigScreen(Screen parent) {
         super(parent, "firstone-framework.falling_tree.", FallingTreeFeature::getConfig, FallingTreeConfig::new,

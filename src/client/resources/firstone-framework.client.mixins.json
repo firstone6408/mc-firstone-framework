@@ -58,6 +58,7 @@
 		"legacyhud.LegacyCreativePositionMixin",
 		"legacyhud.LegacyInventoryEffectsMixin",
 		"legacyhud.LegacyInventoryPositionMixin",
+		"legacymechanics.enchanting.EnchantingCluesMixin",
 		"legacyvehicles.boat.HideBoatPaddlesMixin",
 		"legacyvehicles.boat.HideRaftPaddlesMixin",
 		"legacyvehicles.boat.LegacyBoatHandlingMixin",

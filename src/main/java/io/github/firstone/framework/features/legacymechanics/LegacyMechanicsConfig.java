@@ -86,4 +86,33 @@ public class LegacyMechanicsConfig {
      * boats and entities they touch.
      */
     public boolean legacyBoatCoasting = true;
+
+    /**
+     * 1.7.10 enchanting cost: enchanting takes as many levels as the number on the chosen line (up to 30), where
+     * 1.21.1 takes only 1 to 3. The level needed and the lapis lazuli used (1 to 3) stay as in 1.21.1.
+     */
+    public boolean legacyEnchantCost = true;
+
+    /**
+     * 1.7.10 enchanting rolls: every item put into the enchanting table gets a new roll of levels and enchantments,
+     * and the lines show no clue. The roll itself is 1.21.1's (same chances); in 1.21.1 it stays the same until the
+     * player enchants something, and every line shows a clue.
+     */
+    public boolean legacyEnchantReroll = true;
+
+    /**
+     * Players with the mod get a Show Clues button on the enchanting table: it takes {@link #enchantClueLapis} lapis
+     * lazuli and {@link #enchantClueLevels} levels and shows the clue of every line, as in 1.21.1; pressed again, it
+     * makes a new roll and shows its clues. Players without the mod never see clues. Only used while
+     * {@link #legacyEnchantReroll} is on.
+     */
+    public boolean paidEnchantClues = true;
+
+    /**
+     * Lapis lazuli one look at the clues takes (1 to 10); the slot must hold 3 more, for the enchanting itself
+     */
+    public int enchantClueLapis = 3;
+
+    /** Levels one look at the clues takes (0 to 10) */
+    public int enchantClueLevels = 3;
 }
