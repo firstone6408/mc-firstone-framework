@@ -1,6 +1,5 @@
 package io.github.firstone.framework.features.legacymechanics.enchanting;
 
-import io.github.firstone.framework.common.enchanting.EnchantingRulesPayload;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsConfig;
 import io.github.firstone.framework.features.legacymechanics.LegacyMechanicsFeature;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -17,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
@@ -32,8 +32,8 @@ import java.util.Arrays;
  *       same item always gets the same roll. Here every item put into the table starts a new roll with a new random
  *       seed, as 1.7.10 rolled again on every item. The seed is drawn like 1.21.1 draws the player's (any whole
  *       number, all equally likely), so the chances are exactly 1.21.1's. The clues are not sent, as 1.7.10 had
- *       none, and the seed stays on the server: the client gets another random number for the enchanting runes,
- *       so it cannot work out the enchantments either.</li>
+ *       none, and the seed stays on the server: the client gets another random number, drawn from another source,
+ *       for the enchanting runes, so even a changed client cannot work out the seeds and the enchantments.</li>
  *   <li><b>Paid Clues</b>: players with the mod can press Show Clues ({@link #CLUE_BUTTON}); for
  *       {@link #clueLapis()} lapis lazuli and {@link #clueLevels()} levels the game's own clues of the roll are
  *       sent, one per line as in 1.21.1. They come from the roll the item gets, so the item gets the shown
@@ -59,6 +59,12 @@ public final class LegacyEnchanting {
     public static final int MIN_CLUE_LEVELS = 0;
     public static final int MAX_CLUE_LEVELS = 10;
 
+    /**
+     * Draws the seeds of the rolls; nothing it draws is ever sent, and it cannot be worked out from what a client
+     * sees (the runes come from another source, the levels of the lines tell only a few bits of one seed)
+     */
+    private static final SecureRandom SEEDS = new SecureRandom();
+
     /** The rules last sent to the clients ({@link #currentRules()}), to send them again only when they change */
     private static int sentRules = -1;
 
@@ -72,8 +78,8 @@ public final class LegacyEnchanting {
      */
     public static final class Roll {
 
-        /** Draws the seeds of the rolls (a source of its own, so no other randomness of the game changes) */
-        private final RandomSource random = RandomSource.create();
+        /** Draws the runes of the rolls (a source of its own, so no other randomness of the game changes) */
+        private final RandomSource runes = RandomSource.create();
 
         /** The item the roll is for (the very stack in the slot) */
         private ItemStack item = ItemStack.EMPTY;
@@ -198,9 +204,9 @@ public final class LegacyEnchanting {
 
     /** Draws the seed of a new roll and new runes for it, hiding the clues until they are paid for */
     private static void newRoll(Roll roll, DataSlot runesSeed) {
-        roll.seed = roll.random.nextInt();
+        roll.seed = SEEDS.nextInt();
         roll.clueShown = false;
-        runesSeed.set(roll.random.nextInt());
+        runesSeed.set(roll.runes.nextInt());
     }
 
     /**

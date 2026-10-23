@@ -31,7 +31,12 @@ package io.github.firstone.framework.common;
  *   <li><b>Feature that changes game logic decided by the server</b> (only when really needed) —
  *       class in {@code src/main}, registered in {@code FirstOneFramework}, overrides {@link #initialize()}.
  *       This also covers singleplayer, because the integrated server runs inside the client.
- *       Example: {@code CombatTweaksFeature}</li>
+ *       Example: {@code CombatTweaksFeature}. If it also needs code on the client (for example to receive what its
+ *       server sends), that code belongs to its own client side: a {@code <Name>ClientFeature} in the same folder of
+ *       {@code src/client}, registered in {@code FirstOneFrameworkClient}, that only overrides
+ *       {@link #initializeClient()} (its id is the feature's id + {@code _client}; it has no settings), with its parts
+ *       in the same part folders as on the server; never inside another feature.
+ *       Example: {@code LegacyMechanicsClientFeature}</li>
  *   <li><b>Setup that must exist only on a standalone dedicated server</b> — overrides
  *       {@link #initializeDedicatedServer()}. No feature needs this yet</li>
  * </ul>

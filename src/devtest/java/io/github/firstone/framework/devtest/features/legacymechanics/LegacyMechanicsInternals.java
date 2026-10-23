@@ -1,8 +1,8 @@
 package io.github.firstone.framework.devtest.features.legacymechanics;
 
-import io.github.firstone.framework.common.sword.SwordBlockingSupport;
-import io.github.firstone.framework.features.legacyhud.EnchantingClues;
+import io.github.firstone.framework.features.legacymechanics.enchanting.EnchantingClues;
 import io.github.firstone.framework.features.legacymechanics.enchanting.LegacyEnchanting;
+import io.github.firstone.framework.features.legacymechanics.sword.SwordBlockingSupport;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import org.jetbrains.annotations.Nullable;

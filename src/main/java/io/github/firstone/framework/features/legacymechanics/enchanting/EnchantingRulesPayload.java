@@ -1,4 +1,4 @@
-package io.github.firstone.framework.common.enchanting;
+package io.github.firstone.framework.features.legacymechanics.enchanting;
 
 import io.github.firstone.framework.FirstOneFramework;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,8 +10,9 @@ import net.minecraft.resources.ResourceLocation;
  * Tells a client the server's enchanting rules, so the enchanting table screen shows what the server does
  *
  * <p>Sent by Legacy Mechanics when a player joins (only when one of the rules is on) and to everyone whenever they
- * change; received by Legacy HUD, which shows the Show Clues button and the real levels an enchantment takes. A
- * server without the mod sends nothing, so the client keeps the screen as in 1.21.1.</p>
+ * change; received by the client part of Legacy Mechanics ({@code EnchantingClues}), which shows the Show Clues
+ * button and the real levels an enchantment takes. A server without the mod sends nothing, so the client keeps the
+ * screen as in 1.21.1.</p>
  *
  * @param fullCost   true if enchanting takes the levels on the line
  * @param paidClues  true if the Show Clues button works

@@ -16,7 +16,7 @@ Every feature is a separate module with its own config file and in-game settings
 |---|---|---|
 | Animatium | Client | Minecraft 1.7.10 animations and feel: sneaking, item use and drop, re-equip, first- and third-person held items, items on the ground, hurt camera tilt, hurt tint, landing dust, attack effects, entity movement and models |
 | Appearance | Client | Custom game icon and window title, confirmation before the window's close button quits |
-| Legacy HUD | Client | Minecraft 1.7.10 HUD: no status effect icons in the top-right corner, effect list on the left of the inventory; the enchanting table's Show Clues button and real level costs when the server uses Legacy Mechanics' enchanting |
+| Legacy HUD | Client | Minecraft 1.7.10 HUD: no status effect icons in the top-right corner, effect list on the left of the inventory |
 | Legacy Vehicles | Client | Minecraft 1.7.10 boats: handling (with optional 1.21 ice sliding), free look and seat, mobs turning in boats, hands kept up while paddling, flat model, water splash; paddles can be hidden |
 | Cosmetics | Client | Your own death effect, item break effect and music disc songs, from files in `config/firstone-framework/cosmetics/` |
 | Pack Manager | Client | Resource pack presets (saved lists of packs, in order), dragging packs to reorder them, a search box for the pack lists |
@@ -80,7 +80,7 @@ src/
 │   │   ├── FeatureRegistry.java        ← Feature registry
 │   │   ├── config/
 │   │   │   └── ConfigManager.java      ← Loads/saves config JSON
-│   │   └── <topic>/                    ← Code shared by several features (e.g. boat, sword)
+│   │   └── <topic>/                    ← Code shared by several features (e.g. boat)
 │   ├── features/                       ← Features with server behavior (e.g. legacymechanics)
 │   │   └── <feature name>/
 │   │       ├── <Name>Feature.java      ← Implements the Feature interface
@@ -104,6 +104,9 @@ src/
 │   └── features/
 │       └── <feature name>/
 │           ├── <Name>Feature.java, <Name>Config.java, <part>/ ← Client-only features (e.g. animatium)
+│           ├── <Name>ClientFeature.java, <part>/ ← Client side of a server feature, if it needs one (e.g.
+│           │                                       legacymechanics: what the server sends); same folders and
+│           │                                       packages as its server side, only initializeClient()
 │           └── client/screen/
 │               └── <Name>ConfigScreen.java ← The feature's settings screen (every feature has one)
 │
@@ -125,7 +128,11 @@ src/
 
 Create a folder in `src/main/java/.../features/<feature name>/` for a feature with server behavior (game rules,
 commands), or in `src/client/java/.../features/<feature name>/` for a client-only feature (animations, rendering,
-HUD). Its settings screen always goes in `src/client/java/.../features/<feature name>/client/screen/`.
+HUD). Its settings screen always goes in `src/client/java/.../features/<feature name>/client/screen/`. A feature
+with server behavior that also needs code on the client (for example to receive what its server sends) keeps that
+code in its own client side: a `<Name>ClientFeature` in `src/client/java/.../features/<feature name>/` (its parts in
+the same part folders as on the server), registered in `FirstOneFrameworkClient` like a client-only feature but
+overriding only `initializeClient()` (id `<id>_client`, no settings and no tile), never inside another feature.
 
 ### Step 2: Implement the Feature interface
 

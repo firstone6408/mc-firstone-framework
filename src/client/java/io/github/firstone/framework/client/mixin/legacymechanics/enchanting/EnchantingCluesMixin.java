@@ -1,8 +1,8 @@
-package io.github.firstone.framework.client.mixin.legacyhud;
+package io.github.firstone.framework.client.mixin.legacymechanics.enchanting;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import io.github.firstone.framework.features.legacyhud.EnchantingClues;
+import io.github.firstone.framework.features.legacymechanics.enchanting.EnchantingClues;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
@@ -30,42 +30,42 @@ public abstract class EnchantingCluesMixin extends AbstractContainerScreen<Encha
     /** The Show Clues button, or null when the server has no paid clues */
     @Unique
     @Nullable
-    private Button legacyHud$clueButton;
+    private Button legacymechanics$clueButton;
 
     /** What the button's tooltip says, to make it again only when it changes */
     @Unique
-    private int legacyHud$clueState = -1;
+    private int legacymechanics$clueState = -1;
 
     private EnchantingCluesMixin(EnchantmentMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
     }
 
     @Inject(method = "init", at = @At("TAIL"))
-    private void legacyHud$addClueButton(CallbackInfo ci) {
-        this.legacyHud$clueButton = EnchantingClues.button(this.leftPos, this.topPos, this.menu);
-        this.legacyHud$clueState = -1;
-        if (this.legacyHud$clueButton != null) {
-            addRenderableWidget(this.legacyHud$clueButton);
+    private void legacymechanics$addClueButton(CallbackInfo ci) {
+        this.legacymechanics$clueButton = EnchantingClues.button(this.leftPos, this.topPos, this.menu);
+        this.legacymechanics$clueState = -1;
+        if (this.legacymechanics$clueButton != null) {
+            addRenderableWidget(this.legacymechanics$clueButton);
         }
     }
 
     @Inject(method = "containerTick", at = @At("TAIL"))
-    private void legacyHud$updateClueButton(CallbackInfo ci) {
-        if (this.legacyHud$clueButton != null) {
-            this.legacyHud$clueState = EnchantingClues.update(this.legacyHud$clueButton, this.menu,
-                this.legacyHud$clueState);
+    private void legacymechanics$updateClueButton(CallbackInfo ci) {
+        if (this.legacymechanics$clueButton != null) {
+            this.legacymechanics$clueState = EnchantingClues.update(this.legacymechanics$clueButton, this.menu,
+                this.legacymechanics$clueState);
         }
     }
 
     @WrapOperation(method = "render", at = @At(value = "INVOKE",
         target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;"))
-    private MutableComponent legacyHud$levelOne(String key, Operation<MutableComponent> original) {
+    private MutableComponent legacymechanics$levelOne(String key, Operation<MutableComponent> original) {
         return EnchantingClues.levelsText(key, original.call(key), this.menu);
     }
 
     @WrapOperation(method = "render", at = @At(value = "INVOKE",
         target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"))
-    private MutableComponent legacyHud$levelsMany(String key, Object[] args,
+    private MutableComponent legacymechanics$levelsMany(String key, Object[] args,
                                                         Operation<MutableComponent> original) {
         return EnchantingClues.levelsText(key, args, original.call(key, args), this.menu);
     }
