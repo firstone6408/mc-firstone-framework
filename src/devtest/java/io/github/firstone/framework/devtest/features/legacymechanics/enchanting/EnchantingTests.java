@@ -126,7 +126,10 @@ public final class EnchantingTests {
             TestCase.of("Enchanting: the table broken or left while open closes it, nothing is lost or paid, a later "
                 + "press does nothing; a spectator's press does nothing", EnchantingTests::closedByWorld),
             TestCase.of("Enchant clues: absurd hand-edited prices (largest and smallest numbers) are kept in range "
-                + "on the server and the client", EnchantingTests::absurdPrices));
+                + "on the server and the client", EnchantingTests::absurdPrices),
+            TestCase.of("Enchant reroll: the seeds cannot be worked out from the runes a client sees (cracking them "
+                + "like java.util.Random finds no seed; the same attack does crack one shared source)",
+                EnchantingTests::seedsSecret));
     }
 
     private static LegacyMechanicsConfig config() {
@@ -921,6 +924,45 @@ public final class EnchantingTests {
         }
     }
 
+    private static void seedsSecret(TestContext t) {
+        place(t, SHELVES);
+        int rolls = 8;
+        int[][] seen = t.onServer(level -> {
+            FakePlayer fake = FakePlayer.get(level, new GameProfile(UUID.randomUUID(), "cracker"));
+            EnchantmentMenu table = new EnchantmentMenu(120, fake.getInventory(),
+                ContainerLevelAccess.create(level, TestSite.ORIGIN.offset(TABLE_X, 0, TABLE_Z)));
+            int[][] values = new int[rolls][2];
+            for (int i = 0; i < rolls; i++) {
+                table.getSlot(0).set(new ItemStack(Items.DIAMOND_PICKAXE));
+                Integer seed = LegacyMechanicsInternals.enchantingRollSeed(table);
+                values[i][0] = seed == null ? 0 : seed;
+                // the full number on the server; a client only gets its low 16 bits
+                values[i][1] = table.getEnchantmentSeed();
+                table.getSlot(0).set(ItemStack.EMPTY);
+            }
+            return values;
+        });
+        int cracked = 0;
+        for (int i = 0; i + 2 < rolls; i++) {
+            cracked += cracks(seen[i][1], seen[i + 1][1], seen[i + 1][0], seen[i + 2][0]) ? 1 : 0;
+        }
+        t.check("pairs of runes from which the next seeds can be worked out", cracked).near(0, 0);
+
+        // control: the same attack on one source drawing seed, runes, seed, runes... (how it was before)
+        RandomSource shared = RandomSource.create();
+        int[][] control = new int[rolls][2];
+        for (int i = 0; i < rolls; i++) {
+            control[i][0] = shared.nextInt();
+            control[i][1] = shared.nextInt();
+        }
+        int controlCracked = 0;
+        for (int i = 0; i + 2 < rolls; i++) {
+            controlCracked += cracks(control[i][1], control[i + 1][1], control[i + 1][0], control[i + 2][0]) ? 1 : 0;
+        }
+        t.check("control: the attack does work out the seeds of one shared source", controlCracked)
+            .near(rolls - 2, 0);
+    }
+
     // ---- helpers --------------------------------------------------------------------------------------------------
 
     /** What the server's table shows: the levels, clues and seed of its roll */
@@ -1045,6 +1087,40 @@ public final class EnchantingTests {
             }
             throw new IllegalStateException(item + " is not in the inventory");
         });
+    }
+
+    /** Multiplier, increment and size of {@code java.util.Random} (and the game's {@code LegacyRandomSource}) */
+    private static final long LCG_MULTIPLIER = 0x5DEECE66DL;
+    private static final long LCG_INCREMENT = 0xBL;
+    private static final long LCG_MASK = (1L << 48) - 1;
+
+    /**
+     * Tries to work out seeds from two runes the way a changed client could, if seeds and runes came from one
+     * {@code java.util.Random}-like source: the 32 bits of the first runes are 32 of its 48 bits, the other 16 are
+     * tried; the second runes (1 or 2 draws later) confirm the guess; then the next draws are compared with the seeds
+     *
+     * @return true if one of the next draws is the next seed or the one after
+     */
+    private static boolean cracks(int runes, int nextRunes, int nextSeed, int seedAfter) {
+        for (int gap = 1; gap <= 2; gap++) {
+            for (long low = 0; low < (1 << 16); low++) {
+                long state = (runes & 0xFFFFFFFFL) << 16 | low;
+                for (int i = 0; i < gap; i++) {
+                    state = state * LCG_MULTIPLIER + LCG_INCREMENT & LCG_MASK;
+                }
+                if ((int) (state >>> 16) != nextRunes) {
+                    continue;
+                }
+                for (int i = 0; i < 3; i++) {
+                    state = state * LCG_MULTIPLIER + LCG_INCREMENT & LCG_MASK;
+                    int drawn = (int) (state >>> 16);
+                    if (drawn == nextSeed || drawn == seedAfter) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /** The levels of the three lines 1.21.1 shows for a seed and a number of bookshelves */
