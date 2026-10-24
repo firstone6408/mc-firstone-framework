@@ -14,6 +14,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 /**
@@ -33,6 +34,13 @@ public final class LegacyBoatPhysics {
 
     /** Height of the 1.7.10 boat, used for floating so the boat floats as high as in 1.7.10 (1.21.1: 0.5625) */
     private static final double BOAT_HEIGHT = 0.6;
+
+    /**
+     * Whether the server running inside this game (singleplayer) moves boats without a driver the 1.7.10 way; the
+     * rule belongs to Legacy Mechanics ("Legacy Boat Coasting"), which sets it here when it starts, so Legacy
+     * Vehicles can ask without knowing Legacy Mechanics. On by default, like the option.
+     */
+    private static BooleanSupplier localServerCoasting = () -> true;
 
     /** Highest speed in blocks per tick (on slippery blocks with 1.21.1 sliding: none) */
     private static final double MAX_SPEED = 0.35;
@@ -69,6 +77,30 @@ public final class LegacyBoatPhysics {
     private static final double SLIDE_PUSH_BACKWARD = 0.005;
 
     private LegacyBoatPhysics() {}
+
+    /**
+     * Sets where the coasting rule of the server inside this game is read from
+     *
+     * <p>Called once by Legacy Mechanics when it starts (also on the physical client, where singleplayer's server
+     * runs).</p>
+     *
+     * @param rule tells, each time it is asked, whether boats without a driver move the 1.7.10 way
+     */
+    public static void setLocalServerCoasting(BooleanSupplier rule) {
+        localServerCoasting = rule;
+    }
+
+    /**
+     * Tells whether the server running inside this game (singleplayer) moves boats without a driver the 1.7.10 way
+     *
+     * <p>Used by Legacy Vehicles on the client to move such boats the same way; on a server elsewhere it is not
+     * asked.</p>
+     *
+     * @return the current "Legacy Boat Coasting" option of the server inside this game
+     */
+    public static boolean localServerCoasts() {
+        return localServerCoasting.getAsBoolean();
+    }
 
     /**
      * Tells whether a ground friction is slippery
