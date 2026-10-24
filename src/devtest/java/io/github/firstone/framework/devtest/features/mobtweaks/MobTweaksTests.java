@@ -24,6 +24,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -81,6 +82,9 @@ import java.util.function.Predicate;
  * <p>No 1.7.10 counterpart for the option; 1.7.10 lost a held block on death, which the option also does.</p>
  */
 public final class MobTweaksTests implements FeatureTests {
+
+    /** Seeds each spawn rule is asked with, the same with the option on and off */
+    private static final int SPAWN_RULE_SEEDS = 40;
 
     /** Priorities of the enderman's goals in 1.21.1 ({@code EnderMan.registerGoals}) */
     private static final int PUT_DOWN_GOAL = 10;
@@ -1773,16 +1777,24 @@ public final class MobTweaksTests implements FeatureTests {
             for (EntityType<?> type : others) {
                 for (int light : new int[] {0, 15}) {
                     for (MobSpawnType reason : new MobSpawnType[] {MobSpawnType.NATURAL, MobSpawnType.SPAWNER}) {
-                        boolean[] results = new boolean[2];
+                        String[] results = new String[2];
                         for (int index = 0; index < 2; index++) {
                             MobTweaksFeature.getConfig().netherSpawnInDark = index == 1;
                             netherBlock(t, 8, NETHER_Y + 1, 8, light > 0 ? Blocks.LIGHT.defaultBlockState()
                                 .setValue(LightBlock.LEVEL, light) : Blocks.AIR.defaultBlockState());
                             t.ticks(3);
-                            results[index] = t.onServer(level -> SpawnPlacements.checkSpawnRules(type, nether(level),
-                                reason, new BlockPos(8, NETHER_Y + 1, 8), nether(level).getRandom()));
+                            // the same random numbers on and off (some rules roll: a ghast spawns 1 time in 20),
+                            // over many seeds so both answers of a rolling rule are compared
+                            results[index] = t.onServer(level -> {
+                                StringBuilder answers = new StringBuilder();
+                                for (int seed = 0; seed < SPAWN_RULE_SEEDS; seed++) {
+                                    answers.append(SpawnPlacements.checkSpawnRules(type, nether(level), reason,
+                                        new BlockPos(8, NETHER_Y + 1, 8), RandomSource.create(seed)) ? '1' : '0');
+                                }
+                                return answers.toString();
+                            });
                         }
-                        if (results[0] != results[1]) {
+                        if (!results[0].equals(results[1])) {
                             differ.add(type.toShortString() + " " + reason + " light " + light);
                         }
                     }
