@@ -5,12 +5,15 @@ import io.github.firstone.framework.devtest.core.FeatureTests;
 import io.github.firstone.framework.devtest.core.TestCase;
 import io.github.firstone.framework.devtest.core.TestContext;
 import io.github.firstone.framework.devtest.core.WindowInfo;
+import io.github.firstone.framework.devtest.features.appearance.loading.LoadingScreenEdgeTests;
+import io.github.firstone.framework.devtest.features.appearance.loading.LoadingScreenTests;
 import io.github.firstone.framework.features.appearance.AppearanceConfig;
 import io.github.firstone.framework.features.appearance.AppearanceFeature;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +41,7 @@ public final class AppearanceTests implements FeatureTests {
 
     @Override
     public List<TestCase> tests() {
-        return List.of(
+        List<TestCase> tests = new ArrayList<>(List.of(
             TestCase.of("Window title: a custom title is shown; empty: the game's title", this::windowTitle),
             TestCase.of("Window icon: an icon from the icons folder is shown; empty or missing: the game's icon",
                 this::windowIcon),
@@ -47,7 +50,11 @@ public final class AppearanceTests implements FeatureTests {
                 this::confirmQuitEscape),
             TestCase.of("Confirm Quit: Enter and Space also cancel (Cancel is the default answer)",
                 this::confirmQuitEnterSpace)
-        );
+        ));
+        // parts with their own test classes, in the folders of the feature's parts
+        tests.addAll(LoadingScreenTests.tests());
+        tests.addAll(LoadingScreenEdgeTests.tests());
+        return tests;
     }
 
     private static AppearanceConfig config() {
