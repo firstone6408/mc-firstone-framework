@@ -3,6 +3,8 @@ package io.github.firstone.framework.client.screen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -72,6 +74,10 @@ public class CategoryOptionsScreen<C> extends ConfigScreen {
                     case ConfigCategory.Slider<C> slider -> addSlider(slider.key(), slider.min(), slider.max(),
                         slider.step(), slider.value().applyAsDouble(current), slider.valueText(),
                         value -> slider.setter().accept(this.config.get(), value));
+                    case ConfigCategory.Choice<C, ?> choice -> addChoice(choice, current);
+                    case ConfigCategory.Text<C> text -> addText(text.key(), text.value().apply(current),
+                        text.maxLength(), value -> text.setter().accept(this.config.get(), value));
+                    case ConfigCategory.Action<C> action -> addButton(action.key(), action.action());
                 };
                 Predicate<C> enabledWhen = option.enabledWhen();
                 if (enabledWhen != null) {
@@ -79,5 +85,17 @@ public class CategoryOptionsScreen<C> extends ConfigScreen {
                 }
             }
         }
+    }
+
+    /** Adds the cycling button of a list option; a value not in the list shows as the first one */
+    private <T> ConfigList.OptionRow addChoice(ConfigCategory.Choice<C, T> choice, C current) {
+        List<T> values = new ArrayList<>(choice.values().get());
+        T value = choice.value().apply(current);
+        if (values.isEmpty()) {
+            values.add(value);
+        }
+        T shown = values.contains(value) ? value : values.getFirst();
+        return addCycle(choice.key(), values, shown, choice.valueText(),
+            newValue -> choice.setter().accept(this.config.get(), newValue));
     }
 }

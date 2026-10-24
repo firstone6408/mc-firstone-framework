@@ -15,7 +15,7 @@ Every feature is a separate module with its own config file and in-game settings
 | Feature | Side | What it does |
 |---|---|---|
 | Animatium | Client | Minecraft 1.7.10 animations and feel: sneaking, item use and drop, re-equip, first- and third-person held items, items on the ground, hurt camera tilt, hurt tint, landing dust, attack effects, entity movement and models |
-| Appearance | Client | Custom game icon and window title, confirmation before the window's close button quits |
+| Appearance | Client | Custom game icon and window title, confirmation before the window's close button quits, the 1.7.10 startup screen (game logo or your own, optional progress bar), loading screens (dirt background, "Loading world", "Building terrain", "Downloading terrain", optional progress bar) and message screens without a box |
 | Legacy HUD | Client | Minecraft 1.7.10 HUD: no status effect icons in the top-right corner, effect list on the left of the inventory |
 | Legacy Vehicles | Client | Minecraft 1.7.10 boats: handling (with optional 1.21 ice sliding), free look and seat, mobs turning in boats, hands kept up while paddling, flat model, water splash; paddles can be hidden |
 | Cosmetics | Client | Your own death effect, item break effect and music disc songs, from files in `config/firstone-framework/cosmetics/` |
@@ -270,12 +270,13 @@ colors and `fit` of `ConfigList`. Pack Manager's screens are built from them.
 ### Big features: categories
 
 Keep every screen short. A feature with more than about ten options splits them into categories of 2 to 7
-options, grouped by what the player sees in the game (Animatium, Legacy Mechanics and Legacy Vehicles do this). Its
+options, grouped by what the player sees in the game (Animatium, Appearance, Legacy Mechanics and Legacy Vehicles do this). Its
 screen extends `CategoryMenuScreen`, which shows one tile per category under a "Categories" heading, with how many of
 its options are on (updated when the player comes back). Each tile opens the category's own screen: like every
 settings screen it is titled with the feature's name and lists the options under a heading (the category's name), and
 its Reset restores only that category. Besides on/off options (`toggle`), a category can hold sliders for numbers
-(`slider`); the tile counts only the on/off options:
+(`slider`), a choice from a list (`choice`), a text field (`text`) and a button that does something (`action`); the
+tile counts only the on/off options:
 
 ```java
 public class FallingTreeConfigScreen extends CategoryMenuScreen<FallingTreeConfig> {

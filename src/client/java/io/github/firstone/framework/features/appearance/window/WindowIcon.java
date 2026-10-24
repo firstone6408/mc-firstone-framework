@@ -17,10 +17,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The game window's icon: the PNG chosen from {@code config/firstone-framework/appearance/icons/}, or Minecraft's
@@ -129,16 +126,7 @@ public final class WindowIcon {
      * @return list of file names, or an empty list if none are found
      */
     public static List<String> getAvailableIcons() {
-        Path dir = getIconsDir();
-        if (!Files.exists(dir)) return Collections.emptyList();
-        try (Stream<Path> stream = Files.list(dir)) {
-            return stream
-                .filter(p -> p.getFileName().toString().toLowerCase().endsWith(".png"))
-                .map(p -> p.getFileName().toString())
-                .sorted()
-                .collect(Collectors.toList());
-        } catch (IOException e) {
-            return Collections.emptyList();
-        }
+        return AppearanceFeature.pngFiles(getIconsDir());
     }
+
 }

@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleFunction;
+import java.util.function.Function;
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -19,8 +21,9 @@ import java.util.function.ToDoubleFunction;
  * game, so no screen gets long. A category lists its options once; the menu, the category's screen
  * ({@link CategoryOptionsScreen}), the "on" count of its tile and its Reset all come from that list. Its screen shows
  * the options under a heading with the category's name, or, for a category made of groups ({@link #grouped}), under
- * one heading per group. An option is an on/off button ({@link Toggle}) or a slider for a number ({@link Slider});
- * the "on" count only counts the on/off buttons:</p>
+ * one heading per group. An option is an on/off button ({@link Toggle}), a slider for a number ({@link Slider}), a
+ * button that cycles through a list of values ({@link Choice}), a text field ({@link Text}) or a button that does
+ * something, like opening a folder ({@link Action}); the "on" count only counts the on/off buttons:</p>
  * <pre>{@code
  * ConfigCategory.of("boats", Items.OAK_BOAT, List.of(
  *     ConfigCategory.toggle("legacy_boat_breaking", c -> c.legacyBoatBreaking, (c, v) -> c.legacyBoatBreaking = v),
@@ -65,14 +68,15 @@ public record ConfigCategory<C>(String key, Item icon, List<Group<C>> groups) {
     }
 
     /**
-     * One option of a category: an on/off button ({@link Toggle}) or a slider ({@link Slider})
+     * One option of a category: an on/off button ({@link Toggle}), a slider ({@link Slider}), a list of values
+     * ({@link Choice}), a text field ({@link Text}) or a button that does something ({@link Action})
      *
      * <p>Every kind of option has a key for its texts, may depend on another option, and can be put back to its
      * default; the category's screen adds the control that fits the kind.</p>
      *
      * @param <C> the feature's config class
      */
-    public sealed interface Option<C> permits Toggle, Slider {
+    public sealed interface Option<C> permits Toggle, Slider, Choice, Text, Action {
 
         /**
          * Returns the option's key
@@ -137,6 +141,67 @@ public record ConfigCategory<C>(String key, Item icon, List<Group<C>> groups) {
         @Override
         public void reset(C config, C defaults) {
             this.setter.accept(config, this.value.applyAsDouble(defaults));
+        }
+    }
+
+    /**
+     * One option of a category whose value is one of a list, shown as a button that cycles through the list
+     *
+     * <p>The list is asked for each time the category's screen opens (for example the files of a folder); a value
+     * that is not in the list shows as the first one.</p>
+     *
+     * @param key         option key (label {@code <prefix><key>}, tooltip {@code <prefix><key>.tooltip})
+     * @param values      the values, in the order the button cycles through them
+     * @param value       reads the option from a config
+     * @param setter      writes the option into a config (and applies it, if it shows at once)
+     * @param valueText   text shown on the button for a value
+     * @param enabledWhen when the option can be changed, or null if always
+     * @param <C>         the feature's config class
+     * @param <T>         type of the values
+     */
+    public record Choice<C, T>(String key, Supplier<List<T>> values, Function<C, T> value, BiConsumer<C, T> setter,
+                               Function<T, Component> valueText, @Nullable Predicate<C> enabledWhen)
+        implements Option<C> {
+
+        @Override
+        public void reset(C config, C defaults) {
+            this.setter.accept(config, this.value.apply(defaults));
+        }
+    }
+
+    /**
+     * One text option of a category, shown as a text field (with the hint {@code <prefix><key>.hint} while empty)
+     *
+     * @param key         option key (label {@code <prefix><key>}, tooltip {@code <prefix><key>.tooltip})
+     * @param maxLength   most characters that can be typed
+     * @param value       reads the option from a config
+     * @param setter      writes the option into a config (and applies it, if it shows at once)
+     * @param enabledWhen when the option can be changed, or null if always
+     * @param <C>         the feature's config class
+     */
+    public record Text<C>(String key, int maxLength, Function<C, String> value, BiConsumer<C, String> setter,
+                          @Nullable Predicate<C> enabledWhen) implements Option<C> {
+
+        @Override
+        public void reset(C config, C defaults) {
+            this.setter.accept(config, this.value.apply(defaults));
+        }
+    }
+
+    /**
+     * A row of a category with a button that does something, for example opening a folder; it holds no value
+     *
+     * @param key         row key (label {@code <prefix><key>}, button text {@code <prefix><key>.button}, tooltip
+     *                    {@code <prefix><key>.tooltip})
+     * @param action      what the button does
+     * @param enabledWhen when the button can be pressed, or null if always
+     * @param <C>         the feature's config class
+     */
+    public record Action<C>(String key, Runnable action, @Nullable Predicate<C> enabledWhen) implements Option<C> {
+
+        @Override
+        public void reset(C config, C defaults) {
+            // nothing to put back
         }
     }
 
@@ -269,6 +334,68 @@ public record ConfigCategory<C>(String key, Item icon, List<Group<C>> groups) {
                                        ObjDoubleConsumer<C> setter, DoubleFunction<Component> valueText,
                                        Predicate<C> enabledWhen) {
         return new Slider<>(key, min, max, step, value, setter, valueText, enabledWhen);
+    }
+
+    /**
+     * Creates an option whose value is one of a list, that can always be changed
+     *
+     * @param key       option key
+     * @param values    the values, asked for each time the screen opens
+     * @param value     reads the option from a config
+     * @param setter    writes the option into a config
+     * @param valueText text shown on the button for a value
+     * @param <C>       the feature's config class
+     * @param <T>       type of the values
+     * @return the option
+     */
+    public static <C, T> Choice<C, T> choice(String key, Supplier<List<T>> values, Function<C, T> value,
+                                             BiConsumer<C, T> setter, Function<T, Component> valueText) {
+        return new Choice<>(key, values, value, setter, valueText, null);
+    }
+
+    /**
+     * Creates an option whose value is one of a list, that can only be changed while a condition holds
+     *
+     * @param key         option key
+     * @param values      the values, asked for each time the screen opens
+     * @param value       reads the option from a config
+     * @param setter      writes the option into a config
+     * @param valueText   text shown on the button for a value
+     * @param enabledWhen when the option can be changed
+     * @param <C>         the feature's config class
+     * @param <T>         type of the values
+     * @return the option
+     */
+    public static <C, T> Choice<C, T> choice(String key, Supplier<List<T>> values, Function<C, T> value,
+                                             BiConsumer<C, T> setter, Function<T, Component> valueText,
+                                             Predicate<C> enabledWhen) {
+        return new Choice<>(key, values, value, setter, valueText, enabledWhen);
+    }
+
+    /**
+     * Creates a text option, that can always be changed
+     *
+     * @param key       option key
+     * @param maxLength most characters that can be typed
+     * @param value     reads the option from a config
+     * @param setter    writes the option into a config
+     * @param <C>       the feature's config class
+     * @return the option
+     */
+    public static <C> Text<C> text(String key, int maxLength, Function<C, String> value, BiConsumer<C, String> setter) {
+        return new Text<>(key, maxLength, value, setter, null);
+    }
+
+    /**
+     * Creates a row with a button that does something, that can always be pressed
+     *
+     * @param key    row key
+     * @param action what the button does
+     * @param <C>    the feature's config class
+     * @return the row
+     */
+    public static <C> Action<C> action(String key, Runnable action) {
+        return new Action<>(key, action, null);
     }
 
     /**

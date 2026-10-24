@@ -9,6 +9,11 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
 
 /**
  * Feature that customizes the game's appearance (client only)
@@ -22,10 +27,11 @@ import java.nio.file.Files;
  *   <li>{@code window/} — the game icon ({@link WindowIcon}, set on {@code CLIENT_STARTED} once the window is
  *       ready) and the window title ({@code WindowTitleMixin}, whenever Minecraft calls {@code Window.setTitle()})</li>
  *   <li>{@code quit/} — {@link QuitConfirmation} and its mixins ask before the window's close button quits</li>
+ *   <li>{@code loading/} — the 1.7.10 startup and loading screens ({@code LegacyLoading} and its mixins)</li>
  * </ul>
  *
- * <p>Put icons (PNG) in {@code config/firstone-framework/appearance/icons/}
- * and select one from the config screen</p>
+ * <p>Put icons (PNG) in {@code config/firstone-framework/appearance/icons/} and startup logos (PNG) in
+ * {@code config/firstone-framework/appearance/logos/}, and select them from the config screen</p>
  */
 public class AppearanceFeature implements Feature {
 
@@ -72,6 +78,29 @@ public class AppearanceFeature implements Feature {
      */
     public static void saveConfig() {
         ConfigManager.save(CONFIG_FILE, config);
+    }
+
+    /**
+     * Returns the names of the PNG files in a folder, sorted by name
+     *
+     * <p>Used for the icons and the logos the player can choose from.</p>
+     *
+     * @param dir the folder
+     * @return the file names, or an empty list if there are none or the folder cannot be read
+     */
+    public static List<String> pngFiles(Path dir) {
+        if (!Files.exists(dir)) {
+            return Collections.emptyList();
+        }
+        try (Stream<Path> stream = Files.list(dir)) {
+            return stream
+                .map(path -> path.getFileName().toString())
+                .filter(name -> name.toLowerCase(Locale.ROOT).endsWith(".png"))
+                .sorted()
+                .toList();
+        } catch (IOException e) {
+            return Collections.emptyList();
+        }
     }
 
     /**

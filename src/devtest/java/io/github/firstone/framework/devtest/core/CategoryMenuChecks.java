@@ -87,7 +87,7 @@ public final class CategoryMenuChecks {
             for (ConfigCategory.Group<Object> group : category.groups()) {
                 String heading = group.heading() != null ? group.heading() : category.key();
                 t.check(featureId + ", " + heading + ": options (between " + FEWEST + " and " + MOST + ")",
-                    group.toggles().size()).between(FEWEST, MOST);
+                    group.options().size()).between(FEWEST, MOST);
             }
             for (ConfigCategory.Toggle<Object> toggle : category.toggles()) {
                 repeated += listed.add(toggle.key()) ? 0 : 1;
@@ -446,7 +446,8 @@ public final class CategoryMenuChecks {
             if (child instanceof ConfigList list) {
                 for (ConfigList.Row row : list.children()) {
                     for (GuiEventListener control : row.children()) {
-                        if (control instanceof CycleButton<?> button) {
+                        // on/off buttons only (a list option is a cycling button too)
+                        if (control instanceof CycleButton<?> button && button.getValue() instanceof Boolean) {
                             found.add(button);
                         }
                     }
